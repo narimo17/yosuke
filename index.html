@@ -1,0 +1,2770 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HR・CS Analytics Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      color: #e2e8f0;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    .dashboard {
+      min-height: 100vh;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .dashboard.loaded { opacity: 1; transform: translateY(0); }
+
+    .header {
+      background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+      padding: 2rem 3rem;
+      border-bottom: 3px solid rgba(139, 92, 246, 0.3);
+      box-shadow: 0 10px 40px rgba(124, 58, 237, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%);
+      animation: shimmer 3s infinite;
+    }
+    @keyframes shimmer { 0% { transform: translateX(-100%);} 100% { transform: translateX(100%);} }
+
+    .header-content { position: relative; z-index: 1; }
+    .title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 2px;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      font-size: 1rem;
+      color: #c7d2fe;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      padding: 1.5rem 3rem;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+      flex-wrap: wrap;
+    }
+    .tab {
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      color: #94a3b8;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      font-size: 0.95rem;
+    }
+    .tab:hover {
+      color: #e2e8f0;
+      border-color: rgba(139, 92, 246, 0.5);
+      transform: translateY(-2px);
+    }
+    .tab.active {
+      background: linear-gradient(135deg, #7c3aed 0%, #1e40af 100%);
+      border-color: #8b5cf6;
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+    }
+
+    .content { padding: 2rem 3rem; max-width: 1800px; margin: 0 auto; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .chart-container {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+      padding: 2rem;
+      border-radius: 20px;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      backdrop-filter: blur(10px);
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    .chart-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #e2e8f0;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .muted { color:#94a3b8; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+    .btn {
+      background: transparent;
+      color:#cbd5e1;
+      border:1px solid rgba(148,163,184,.25);
+      padding:8px 12px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight: 800;
+    }
+    .btn.primary {
+      background: linear-gradient(135deg,#7c3aed,#1e40af);
+      border-color:#8b5cf6;
+      color:#fff;
+    }
+    .btn:active { transform: translateY(1px); }
+
+    .pill {
+      display:inline-flex;
+      align-items:center;
+      padding:2px 10px;
+      border-radius:999px;
+      font-weight:900;
+      letter-spacing: .02em;
+      color:#fff;
+      font-size:12px;
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+    .pill.blue   { background: rgba(59,130,246,0.95); }
+    .pill.yellow { background: rgba(245,158,11,0.95); }
+    .pill.red    { background: rgba(239,68,68,0.95); }
+    .pill.gray   { background: rgba(71,85,105,0.95); }
+
+    /* ===== ① Executive summary ===== */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .kpi-card {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+      padding: 1.6rem;
+      border-radius: 20px;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      backdrop-filter: blur(10px);
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 50px rgba(139, 92, 246, 0.22);
+      border-color: rgba(139, 92, 246, 0.35);
+    }
+    .kpi-header { display:flex; align-items:center; gap: 1rem; margin-bottom: .8rem; }
+    .kpi-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display:flex; align-items:center; justify-content:center;
+      background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+      font-size: 1.3rem;
+      flex: 0 0 auto;
+    }
+    .kpi-label { font-size: .85rem; color:#94a3b8; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+    .kpi-value {
+      font-size: 2.35rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: .2rem;
+      line-height: 1.05;
+    }
+    .kpi-sub { font-size: .9rem; color:#94a3b8; font-weight: 800; display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; }
+    .kpi-trend-mini{
+      margin-top: .45rem;
+      font-size: .85rem;
+      color:#cbd5e1;
+      display:flex;
+      gap:.6rem;
+      align-items:center;
+      flex-wrap:wrap;
+      opacity: .9;
+    }
+    .deltaUp { color:#16a34a; font-weight: 900; }
+    .deltaDown { color:#ef4444; font-weight: 900; }
+    .deltaFlat { color:#94a3b8; font-weight: 900; }
+
+    .metric-switch { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; margin: .35rem 0 0.75rem; }
+    .metric-btn {
+      padding: .45rem .75rem;
+      border-radius: 12px;
+      border: 1px solid rgba(148,163,184,.22);
+      background: rgba(2,6,23,.18);
+      color:#cbd5e1;
+      cursor:pointer;
+      font-weight: 900;
+    }
+    .metric-btn.active { background: linear-gradient(135deg,#7c3aed,#1e40af); border-color:#8b5cf6; color:#fff; }
+
+    .ai-summary-grid {
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: .75rem;
+    }
+    @media (max-width: 1100px){
+      .ai-summary-grid{ grid-template-columns: 1fr; }
+      .content{ padding: 1.25rem; }
+      .header, .tabs{ padding-left: 1.25rem; padding-right: 1.25rem; }
+    }
+    .ai-card {
+      background: rgba(2,6,23,.18);
+      border: 1px solid rgba(148,163,184,.12);
+      border-radius: 16px;
+      padding: 1rem 1rem;
+    }
+    .ai-card h4 { font-size: 1rem; margin-bottom: .5rem; }
+    .ai-card ul { padding-left: 1.2rem; line-height: 1.85; color:#cbd5e1; }
+    .ai-card li { margin: .2rem 0; }
+
+    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+    @media (max-width: 1100px){ .grid2{ grid-template-columns: 1fr; } }
+
+    .panel {
+      background: rgba(2,6,23,.18);
+      border: 1px solid rgba(148,163,184,.12);
+      border-radius: 16px;
+      padding: 1rem 1rem;
+    }
+    .panel-title { font-weight: 900; margin-bottom: .75rem; color:#e2e8f0; display:flex; align-items:center; gap:.5rem; }
+    .table { width:100%; border-collapse: collapse; overflow:hidden; border-radius: 12px; border: 1px solid rgba(148,163,184,0.12); }
+    .table th, .table td {
+      padding: .7rem .8rem;
+      border-bottom: 1px solid rgba(148,163,184,0.10);
+      vertical-align: top;
+      font-size: .92rem;
+      color: #cbd5e1;
+      text-align: left;
+    }
+    .table th { background: rgba(2,6,23,.25); font-weight: 900; color: #e2e8f0; }
+    .table tr:hover td { background: rgba(124,58,237,.08); }
+    .link { color:#a5b4fc; text-decoration: underline; cursor:pointer; font-weight: 900; }
+
+    details.low {
+      margin-top: 1.25rem;
+      background: rgba(2,6,23,.12);
+      border: 1px dashed rgba(148,163,184,.18);
+      border-radius: 16px;
+      padding: .85rem 1rem;
+    }
+    details.low > summary {
+      cursor: pointer;
+      font-weight: 900;
+      color:#cbd5e1;
+      list-style: none;
+    }
+    details.low > summary::-webkit-details-marker { display:none; }
+    details.low .hint { margin-top:.25rem; color:#94a3b8; font-size:.85rem; line-height: 1.6; }
+
+    /* ===== ② Map tab ===== */
+    .map-wrap { max-width: 1200px; margin: 0 auto; }
+    .map-card { background: rgba(15,23,42,.6); border:1px solid rgba(148,163,184,.15); border-radius:16px; padding:14px; margin-top:12px; }
+    #mapContainer2 {
+      height: 600px; border-radius: 16px; overflow:hidden;
+      background: linear-gradient(135deg, #111827 0%, #0b1220 100%);
+      border:1px solid rgba(148,163,184,.15);
+      position: relative;
+    }
+    #mapContainer2 svg { width:100%; height:100%; display:block; }
+
+    #mapContainer2 svg .prefecture { cursor:pointer; transition: filter .15s ease; }
+    #mapContainer2 svg .prefecture:hover { filter: brightness(1.15); }
+
+    #mapContainer2 svg .prefecture path,
+    #mapContainer2 svg .prefecture polygon {
+      stroke: rgba(255, 255, 255, 0.22);
+      stroke-width: 0.6;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+    #mapContainer2 svg .boundary-line { opacity: 1; }
+    #mapContainer2 svg .boundary-line line,
+    #mapContainer2 svg .boundary-line path,
+    #mapContainer2 svg .boundary-line polyline,
+    #mapContainer2 svg .boundary-line polygon {
+      stroke: rgba(255, 255, 255, 0.96) !important;
+      stroke-width: 6 !important;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      filter:
+        drop-shadow(0 0 0 rgba(0, 0, 0, 0.90))
+        drop-shadow(0 0 1.2px rgba(0, 0, 0, 0.85))
+        drop-shadow(0 0 2.2px rgba(0, 0, 0, 0.70));
+    }
+    #mapContainer2 [data-code="47"] { display:none; }
+
+    textarea {
+      width:100%; background: rgba(2,6,23,.6); color:#e5e7eb;
+      border:1px solid rgba(148,163,184,.2); border-radius:12px;
+      padding:10px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      font-size:12px; line-height:1.35;
+      tab-size: 2;
+      white-space: pre;
+    }
+    .grid2txt { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    @media (max-width: 900px) { .grid2txt { grid-template-columns: 1fr; } #mapContainer2{ height:420px; } }
+
+    #prefPopup2 {
+      position:absolute;
+      display:none;
+      min-width:260px;
+      max-width:560px;
+      max-height: 420px;
+      overflow:auto;
+      background:rgba(0,0,0,0.88);
+      color:#fff;
+      border:1px solid rgba(148,163,184,0.25);
+      border-radius:12px;
+      padding:12px;
+      z-index:50;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+      backdrop-filter: blur(6px);
+    }
+    .popupSiteBtn {
+      width:100%;
+      text-align:left;
+      background:rgba(30,41,59,0.35);
+      border:1px solid rgba(148,163,184,0.15);
+      color:#fff;
+      padding:10px 10px;
+      border-radius:12px;
+      cursor:pointer;
+    }
+    .popupSiteBtn:hover { filter: brightness(1.08); }
+    .kv { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:6px; font-size:12px; color:#cbd5e1; }
+    .kv b { color:#fff; }
+
+    /* modal A (map detail) */
+    #siteDetailModal2 { position: fixed; inset: 0; display: none; z-index: 200; }
+    #siteDetailModal2.is-open { display:block; }
+    .modalBackdrop{ position:absolute; inset:0; background: rgba(2,6,23,0.78); backdrop-filter: blur(2px); }
+    .modalPanel{
+      position:absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+      width: min(1080px, calc(100vw - 28px));
+      max-height: min(86vh, 900px);
+      overflow:auto;
+      background: rgba(255,255,255,0.98);
+      color:#0f172a;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+      border: 1px solid rgba(15,23,42,0.10);
+    }
+    .modalHeader{
+      position: sticky; top: 0;
+      background: rgba(255,255,255,0.98);
+      border-bottom: 1px solid rgba(15,23,42,0.08);
+      padding: 12px 14px;
+      display:flex; align-items:center; gap:10px;
+      z-index: 5;
+    }
+    .modalTitle{ font-weight: 900; font-size: 18px; }
+    .modalHeader .muted{ color:#475569; }
+    .modalCloseBtn{
+      margin-left:auto;
+      background:#0f172a;
+      border-color:#0f172a;
+      color:#fff;
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor:pointer;
+      font-weight: 900;
+    }
+    .modalBody{ padding: 12px 14px 14px 14px; }
+    .selectBar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom: 10px; }
+    select {
+      background: #fff;
+      border: 1px solid rgba(15,23,42,0.14);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font: inherit;
+      min-width: 280px;
+    }
+    @media (max-width: 560px) { select { min-width: 100%; } }
+
+    .kpiGrid {
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:12px;
+      margin: 10px 0 12px 0;
+    }
+    @media (max-width: 1100px) { .kpiGrid{ grid-template-columns: repeat(2,1fr);} }
+    @media (max-width: 560px) { .kpiGrid{ grid-template-columns: 1fr;} }
+
+    .kpiCard{
+      border: 1px solid rgba(15,23,42,0.10);
+      border-radius: 14px;
+      background: #fff;
+      padding: 12px;
+    }
+    .kpiLabel{ font-size: 12px; color:#475569; font-weight:800; }
+    .kpiValue{ font-size: 22px; font-weight: 900; margin-top: 6px; }
+    .kpiDelta{ margin-top: 6px; font-size: 12px; font-weight: 800; }
+
+    .detailGrid{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 900px){ .detailGrid{ grid-template-columns: 1fr; } }
+
+    .panelW{
+      border: 1px solid rgba(15,23,42,0.10);
+      border-radius: 14px;
+      background:#fff;
+      padding: 12px;
+      min-height: 160px;
+    }
+    .panelTitleW{ font-weight: 900; margin-bottom: 8px; }
+    .panelW ul, .panelW ol{ margin: 6px 0 0 18px; line-height: 1.8; }
+    .panelW li{ margin: 4px 0; }
+
+    /* ===== ③ Improve tab ===== */
+    .select, .input{
+      background: rgba(2,6,23,.25);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      color: #e2e8f0;
+      padding: 0.55rem 0.7rem;
+      border-radius: 12px;
+      outline: none;
+      font-weight: 700;
+    }
+
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin: 1rem 0 1.25rem;
+    }
+    .analysis-card {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.75) 100%);
+      padding: 1.5rem;
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      text-align: center;
+      position: relative;
+    }
+    .analysis-count {
+      font-size: 3rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.35rem;
+      line-height: 1;
+    }
+    .analysis-label {
+      font-size: 1rem;
+      color: #94a3b8;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+    .keyword-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
+    .keyword-tag {
+      padding: 0.45rem 0.9rem;
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      border-radius: 999px;
+      font-size: 0.85rem;
+      color: #c7d2fe;
+      font-weight: 800;
+    }
+    .clickable { cursor: pointer; }
+    .clickable:hover { border-color: rgba(239,68,68,0.35); box-shadow: 0 12px 40px rgba(239,68,68,0.10); }
+
+    .popover {
+      position: absolute;
+      z-index: 2000;
+      width: min(680px, calc(100vw - 64px));
+      max-height: 420px;
+      overflow: auto;
+      background: rgba(2,6,23,0.92);
+      border: 1px solid rgba(148,163,184,0.20);
+      border-radius: 16px;
+      box-shadow: 0 22px 80px rgba(0,0,0,0.55);
+      backdrop-filter: blur(10px);
+      display: none;
+    }
+    .popover.active { display: block; }
+    .pop-header{
+      position: sticky;
+      top: 0;
+      background: linear-gradient(135deg, rgba(15,23,42,.98) 0%, rgba(2,6,23,.98) 100%);
+      border-bottom: 1px solid rgba(148,163,184,0.16);
+      padding: .85rem 1rem;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: .75rem;
+    }
+    .pop-title{ font-weight: 1000; }
+    .pop-close{
+      background: transparent;
+      border: 1px solid rgba(148,163,184,0.25);
+      color: #e2e8f0;
+      border-radius: 10px;
+      padding: .35rem .6rem;
+      cursor: pointer;
+      font-weight: 900;
+    }
+    .pop-body{ padding: 1rem; }
+    .ng-item{
+      background: rgba(148,163,184,0.10);
+      border: 1px solid rgba(148,163,184,0.14);
+      border-radius: 14px;
+      padding: .85rem .9rem;
+      margin-bottom: .75rem;
+    }
+    .ng-meta{
+      color:#94a3b8;
+      font-size: .85rem;
+      margin-bottom: .35rem;
+      display:flex;
+      flex-wrap:wrap;
+      gap: .35rem .6rem;
+      align-items:center;
+    }
+    .ng-text{ color:#e5e7eb; line-height: 1.7; }
+    .badge-red{ background: rgba(239,68,68,.14); border-color: rgba(239,68,68,.25); }
+    .badge-blue{ background: rgba(59,130,246,.14); border-color: rgba(59,130,246,.25); }
+    .badge-amber{ background: rgba(245,158,11,.14); border-color: rgba(245,158,11,.25); }
+    mark{ background: rgba(245,158,11,.25); color:#fff; padding: 0 .15rem; border-radius: .25rem; }
+
+    /* ===== ④ AI voice mining ===== */
+    .comment-list { display: flex; flex-direction: column; gap: 1rem; }
+    .comment-card {
+      background: rgba(30, 41, 59, 0.6);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border-left: 4px solid #8b5cf6;
+      transition: all 0.3s ease;
+    }
+    .comment-card:hover { transform: translateX(4px); border-left-color: #3b82f6; }
+    .comment-category {
+      font-size: 0.75rem;
+      color: #8b5cf6;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+    }
+    .comment-text { color: #cbd5e1; line-height: 1.6; }
+
+    /* ===== ⑤ Talent ===== */
+    .performers-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .performer-card{
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+      padding: 1.5rem;
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      transition: all 0.3s ease;
+    }
+    .performer-card:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(16, 185, 129, 0.2);
+      border-color: rgba(16, 185, 129, 0.5);
+    }
+    .performer-badge{
+      display:inline-block;
+      padding: .25rem .75rem;
+      border-radius: 20px;
+      color:#fff;
+      font-size: .75rem;
+      font-weight:900;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 1rem;
+    }
+    .performer-info{ display:flex; flex-direction:column; gap:.5rem; }
+    .performer-name{ font-size: 1.125rem; font-weight:900; color:#e2e8f0; }
+    .performer-detail{ font-size: .875rem; color:#94a3b8; font-weight: 700; }
+    .action-box{
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: rgba(16, 185, 129, 0.1);
+      border-radius: 12px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .action-title{
+      color: #10b981;
+      margin-bottom: 1rem;
+      display:flex;
+      align-items:center;
+      gap:.5rem;
+      font-size: 1.1rem;
+      font-weight: 900;
+    }
+    .action-box ul{ color: #cbd5e1; line-height: 2; padding-left: 1.5rem; }
+
+    .section-title{
+      margin: 1.5rem 0 1rem;
+      color:#e2e8f0;
+      font-size: 1.1rem;
+      font-weight: 900;
+    }
+    .small-note{
+      margin-top: .75rem;
+      color: #94a3b8;
+      font-size: .85rem;
+      line-height: 1.6;
+    }
+    code.kbd{
+      background: rgba(148, 163, 184, 0.12);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      padding: 0.1rem 0.4rem;
+      border-radius: 8px;
+      color: #e2e8f0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="dashboard" id="dashboard">
+    <div class="header">
+      <div class="header-content">
+        <h1 class="title">HR・CS Analytics Dashboard</h1>
+        <p class="subtitle">①サマリー / ②ヒートマップ / ③要改善 / ④AIボイス / ⑤タレント</p>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('overview', this)">📊 ① エグゼクティブサマリー</button>
+      <button class="tab" onclick="switchTab('map', this)">🗾 ② ヒートマップ</button>
+      <button class="tab" onclick="switchTab('improve', this)">🚨 ③ 要改善リーダー・拠点</button>
+      <button class="tab" onclick="switchTab('comments', this)">💬 ④ AIボイスマイニング</button>
+      <button class="tab" onclick="switchTab('talent', this)">🏆 ⑤ タレントマネジメント</button>
+    </div>
+
+    <div class="content">
+
+      <!-- ================= ① Executive summary ================= -->
+      <div id="overview" class="tab-content active">
+        <div class="chart-container">
+          <h3 class="chart-title">📊 エグゼクティブサマリー</h3>
+
+          <!-- hero KPIs -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <div class="kpi-icon">👥</div>
+                <div><div class="kpi-label">アンケート回答者</div></div>
+              </div>
+              <div class="kpi-value" id="ovKpiResponses">—</div>
+              <div class="kpi-sub"><span class="muted">対象月</span><span id="ovKpiMonthLabel">—</span></div>
+              <div class="kpi-trend-mini">
+                <span class="muted">前月比</span><span id="ovDeltaResponses" class="deltaFlat">—</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <div class="kpi-icon">🎯</div>
+                <div><div class="kpi-label">次回予約率</div></div>
+              </div>
+              <div class="kpi-value" id="ovKpiReserve">—</div>
+              <div class="kpi-sub"><span class="muted">回答数</span><span id="ovKpiReserveN">—</span><span class="muted">（1〜5回目）</span></div>
+              <div class="kpi-trend-mini">
+                <span class="muted">前月比</span><span id="ovDeltaReserve" class="deltaFlat">—</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <div class="kpi-icon">⭐</div>
+                <div><div class="kpi-label">満足度平均</div></div>
+              </div>
+              <div class="kpi-value" id="ovKpiSat">—</div>
+              <div class="kpi-sub"><span class="muted">回答数</span><span id="ovKpiSatN">—</span></div>
+              <div class="kpi-trend-mini">
+                <span class="muted">前月比</span><span id="ovDeltaSat" class="deltaFlat">—</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="metric-switch" style="margin-top:.25rem;">
+            <span class="muted" style="font-weight:900;">指標切替：</span>
+            <button class="metric-btn active" id="ov-metric-next" type="button">予約率</button>
+            <button class="metric-btn" id="ov-metric-sat" type="button">満足度</button>
+            <button class="metric-btn" id="ov-metric-greet" type="button">挨拶（なし率）</button>
+            <span style="flex:1"></span>
+            <span class="muted" style="font-weight:900;">月：</span>
+            <button class="metric-btn active" id="ov-month-curr" type="button">今月</button>
+            <button class="metric-btn" id="ov-month-prev" type="button">先月</button>
+            <span class="muted" id="ov-dataStatus"></span>
+          </div>
+
+          <div class="ai-summary-grid">
+            <div class="ai-card">
+              <h4>全体の課題</h4>
+              <ul id="ovAiIssues"></ul>
+            </div>
+            <div class="ai-card">
+              <h4>原因</h4>
+              <ul id="ovAiCauses"></ul>
+            </div>
+            <div class="ai-card">
+              <h4>打ち手</h4>
+              <ul id="ovAiActions"></ul>
+            </div>
+            <div class="ai-card">
+              <h4>傾向</h4>
+              <ul id="ovAiTrends"></ul>
+            </div>
+          </div>
+
+          <div class="grid2">
+            <div class="panel">
+              <div class="panel-title">📈 前月からの改善 Top5拠点（指標切替に連動）</div>
+              <table class="table" id="ovImproveTop5"></table>
+              <div class="muted" style="margin-top:.5rem; font-size:.85rem;">※クリックで②の拠点詳細（モーダル）へ</div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">📈 前月からの改善ワースト5拠点（指標切替に連動）</div>
+              <table class="table" id="ovWorst5"></table>
+              <div class="muted" style="margin-top:.5rem; font-size:.85rem;">※クリックで②の拠点詳細（モーダル）へ</div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">🌟 推しリーダー Top5（拠点名）</div>
+              <table class="table" id="ovOshiTop5"></table>
+              <div class="muted" style="margin-top:.5rem; font-size:.85rem;">※この統合版ではモック（実データ列に接続予定）</div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">🚪 各タブへの入口</div>
+              <div class="row" style="margin-top:.25rem;">
+                <button class="btn primary" type="button" onclick="switchTab('map', document.querySelectorAll('.tab')[1])">②ヒートマップへ</button>
+                <button class="btn" type="button" onclick="switchTab('improve', document.querySelectorAll('.tab')[2])">③要改善へ</button>
+                <button class="btn" type="button" onclick="switchTab('comments', document.querySelectorAll('.tab')[3])">④AIボイスへ</button>
+                <button class="btn" type="button" onclick="switchTab('talent', document.querySelectorAll('.tab')[4])">⑤タレントへ</button>
+              </div>
+              <div class="muted" style="margin-top:.75rem; line-height: 1.8;">
+                ・①の「指標切替」は②の閾値（青/黄/赤/灰）と同じルール<br>
+                ・Top/Worstは「前月比（Δ）」で算出（挨拶なし率は減少が改善）<br>
+                ・データは②の貼り付けTSVから生成（今月/先月）またはダミー
+              </div>
+            </div>
+          </div>
+
+          <details class="low">
+            <summary>（控えめ）TSV/CSV貼り付け（①でも更新できます）</summary>
+            <div class="hint">
+              ②の入力欄と同じ内容をここに貼ってもOKです。<br>
+              ※「更新」ボタンは②へ飛ばずに内部だけ更新します（地図も①のランキングも更新）。
+            </div>
+
+            <div class="grid2txt" style="margin-top:.75rem;">
+              <div>
+                <div class="muted" style="margin:6px 0;">先月 1〜5回目</div>
+                <textarea id="ovTsvPrev1to5" rows="7"></textarea>
+              </div>
+              <div>
+                <div class="muted" style="margin:6px 0;">先月 6〜10回目</div>
+                <textarea id="ovTsvPrev6to10" rows="7"></textarea>
+              </div>
+              <div>
+                <div class="muted" style="margin:6px 0;">今月 1〜5回目</div>
+                <textarea id="ovTsvCurr1to5" rows="7"></textarea>
+              </div>
+              <div>
+                <div class="muted" style="margin:6px 0;">今月 6〜10回目</div>
+                <textarea id="ovTsvCurr6to10" rows="7"></textarea>
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+              <button id="ovBtnLoad" class="btn primary" type="button">貼り付け内容で更新（①）</button>
+              <button id="ovBtnFillDummy" class="btn" type="button">ダミー自動入力（各月3000件・高速）</button>
+              <div id="ovLoadStatus" class="muted"></div>
+            </div>
+          </details>
+
+        </div>
+      </div>
+
+      <!-- ================= ② Map ================= -->
+      <div id="map" class="tab-content">
+        <div class="chart-container map-wrap">
+          <h3 class="chart-title">🗾 都道府県ヒートマップ（県タップで吹き出し）</h3>
+
+          <div class="row">
+            <span class="muted" style="font-weight:900;">指標：</span>
+            <button id="metric-next" class="btn primary" type="button">予約率</button>
+            <button id="metric-sat" class="btn" type="button">満足度</button>
+            <button id="metric-greet" class="btn" type="button">挨拶（なし率）</button>
+            <span style="flex:1"></span>
+            <span class="muted" style="font-weight:900;">月：</span>
+            <button id="month-curr" class="btn primary" type="button">今月</button>
+            <button id="month-prev" class="btn" type="button">先月</button>
+          </div>
+
+          <div class="map-card">
+            <div id="mapContainer2">
+              <div id="prefPopup2">
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <div id="prefPopupTitle2" style="font-weight:900;"></div>
+                  <div style="flex:1"></div>
+                  <button id="prefPopupClose2" type="button" class="btn" style="padding:2px 8px;border-radius:8px;">×</button>
+                </div>
+                <div id="prefPopupMeta2" class="kv"></div>
+                <div id="prefPopupSites2" style="margin-top:10px;display:flex;flex-direction:column;gap:8px;"></div>
+                <div id="prefPopupMore2" class="muted" style="margin-top:8px;font-size:12px;"></div>
+              </div>
+            </div>
+            <div id="mapStatus2" class="muted" style="margin-top:10px;"></div>
+            <div class="muted" style="margin-top:6px;font-size:12px;">
+              ※ 県タップで吹き出し表示。吹き出し外（地図背景）タップで閉じます。
+            </div>
+          </div>
+
+          <div class="map-card">
+            <div style="font-weight:800;margin-bottom:8px;">TSV/CSV貼り付け（ヘッダ必須）</div>
+            <div class="grid2txt">
+              <div>
+                <div class="muted" style="margin:6px 0;">先月 1〜5回目</div>
+                <textarea id="tsvPrev1to5" rows="10"></textarea>
+              </div>
+              <div>
+                <div class="muted" style="margin:6px 0;">先月 6〜10回目</div>
+                <textarea id="tsvPrev6to10" rows="10"></textarea>
+              </div>
+              <div>
+                <div class="muted" style="margin:6px 0;">今月 1〜5回目</div>
+                <textarea id="tsvCurr1to5" rows="10"></textarea>
+              </div>
+              <div>
+                <div class="muted" style="margin:6px 0;">今月 6〜10回目</div>
+                <textarea id="tsvCurr6to10" rows="10"></textarea>
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+              <button id="btnLoad" class="btn primary" type="button">貼り付け内容で更新</button>
+              <button id="btnFillDummy" class="btn" type="button">ダミー生成（各月3000件・高速）</button>
+              <div id="loadStatus" class="muted"></div>
+            </div>
+            <div id="unknownBox" class="muted" style="margin-top:8px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= ③ Improve ================= -->
+      <div id="improve" class="tab-content">
+        <div class="chart-container">
+          <h3 class="chart-title">🚨 要改善リーダー・拠点（NGワード × また働きたい=いいえ）</h3>
+
+          <div style="display:flex; gap:.75rem; flex-wrap:wrap; align-items:center; margin-bottom: 0.25rem;">
+            <span style="color:#94a3b8; font-weight:800;">期間</span>
+            <select id="impDaysSel" class="select">
+              <option value="30">直近30日（モック）</option>
+              <option value="90">直近90日（モック）</option>
+              <option value="365">直近365日（モック）</option>
+            </select>
+
+            <span style="color:#94a3b8; font-weight:800;">検索</span>
+            <input id="impQuery" class="input" placeholder="例：新宿 / 田中 / 無視" style="min-width: 280px;">
+
+            <button class="btn primary" id="impApplyBtn">反映</button>
+          </div>
+
+          <div class="analysis-grid">
+            <div class="analysis-card clickable" id="ngCard" title="クリックでNGワード検知（回答7件）を表示">
+              <div class="analysis-count" id="kpiNg">—</div>
+              <div class="analysis-label">NGワード検知</div>
+              <div class="keyword-tags">
+                <span class="keyword-tag">クリックで詳細</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid2">
+            <div class="panel">
+              <div class="panel-title">要改善リーダー（上位）</div>
+              <table class="table" id="leaderTable"></table>
+              <div style="color:#94a3b8; margin-top:.5rem; font-size:.85rem;">※（拠点名）は「いいえ率が最悪の拠点」</div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">要改善拠点（上位）</div>
+              <table class="table" id="siteTable"></table>
+              <div class="muted" style="margin-top:.5rem; font-size:.85rem;">※並び順は「いいえ件数が多い順」</div>
+            </div>
+          </div>
+
+          <div class="popover" id="ngPopover" role="dialog" aria-modal="false" aria-label="NGワード検知詳細">
+            <div class="pop-header">
+              <div class="pop-title" id="popTitle">NGワード検知（回答単位）</div>
+              <button class="pop-close" id="popCloseBtn">閉じる</button>
+            </div>
+            <div class="pop-body" id="popBody"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= ④ AI voice mining ================= -->
+      <div id="comments" class="tab-content">
+        <div class="chart-container">
+          <h3 class="chart-title">💬 AIボイスマイニング（モック）</h3>
+
+          <div class="analysis-grid">
+            <div class="analysis-card">
+              <div class="analysis-count">324</div>
+              <div class="analysis-label">ポジティブ</div>
+              <div class="keyword-tags">
+                <span class="keyword-tag">やりがい</span>
+                <span class="keyword-tag">楽しい</span>
+                <span class="keyword-tag">勉強になる</span>
+                <span class="keyword-tag">人間関係が良い</span>
+              </div>
+            </div>
+
+            <div class="analysis-card">
+              <div class="analysis-count">156</div>
+              <div class="analysis-label">改善要望</div>
+              <div class="keyword-tags">
+                <span class="keyword-tag">連絡が遅い</span>
+                <span class="keyword-tag">指示が不明確</span>
+                <span class="keyword-tag">枠を増やして</span>
+                <span class="keyword-tag">ユニフォーム</span>
+              </div>
+            </div>
+
+            <div class="analysis-card">
+              <div class="analysis-count">20</div>
+              <div class="analysis-label">ネガティブ</div>
+              <div class="keyword-tags">
+                <span class="keyword-tag">辞めたい</span>
+                <span class="keyword-tag">不満</span>
+                <span class="keyword-tag">改善されない</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-container" style="padding:0;border:none;background:transparent;margin:0;">
+            <h3 class="chart-title" style="margin-top:.5rem;">💬 AIによる自動分析結果</h3>
+            <div class="comment-list">
+              <div class="comment-card">
+                <div class="comment-category">改善推奨アクション</div>
+                <div class="comment-text">
+                  ✅ <strong>連絡体制の強化:</strong> 「連絡が遅い」との指摘が多数。リアルタイム通知システムの導入を推奨。
+                </div>
+              </div>
+              <div class="comment-card">
+                <div class="comment-category">改善推奨アクション</div>
+                <div class="comment-text">
+                  ✅ <strong>作業指示の標準化:</strong> 「指示が不明確」との声あり。マニュアル整備とリーダー研修を実施。
+                </div>
+              </div>
+              <div class="comment-card">
+                <div class="comment-category">改善推奨アクション</div>
+                <div class="comment-text">
+                  ✅ <strong>ユニフォーム管理:</strong> 臭いや痛みに関する不満が散見。定期的な交換サイクルの見直しが必要。
+                </div>
+              </div>
+              <div class="comment-card">
+                <div class="comment-category">強み</div>
+                <div class="comment-text">
+                  🎯 <strong>人間関係の良さ:</strong> 「人間関係が良い」「リーダーが親切」など、チーム環境への高評価多数。この強みを採用PRに活用可能。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= ⑤ Talent ================= -->
+      <div id="talent" class="tab-content">
+        <div class="chart-container">
+          <h3 class="chart-title">🏆 タレントマネジメント（確認用・単体）</h3>
+
+          <div class="analysis-grid">
+            <div class="analysis-card">
+              <div class="analysis-count" id="hpCount">—</div>
+              <div class="analysis-label">社員勧誘候補</div>
+              <div class="keyword-tags" id="hpRuleTag"></div>
+            </div>
+            <div class="analysis-card">
+              <div class="analysis-count" id="almostCount">—</div>
+              <div class="analysis-label">育成/要観察</div>
+              <div class="keyword-tags" id="almostTag"></div>
+            </div>
+          </div>
+
+          <div class="section-title">社員勧誘候補リスト（4名）</div>
+          <div class="performers-grid" id="hpGrid"></div>
+
+          <div class="section-title">育成/要観察（4名）</div>
+          <div class="performers-grid" id="almostGrid"></div>
+
+          <div class="action-box">
+            <h4 class="action-title">📌 次アクション（モック）</h4>
+            <ul id="hpActions"></ul>
+            <div class="small-note">
+              ※この統合版では固定ダミーです。将来はTSV/CSV取り込みに差し替え可能。<br/>
+              ※「足切り」はロジックのみで、画面には表示していません（社員勧誘候補から除外）。
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /dashboard -->
+
+  <!-- ================= ② Map modal A ================= -->
+  <div id="siteDetailModal2" aria-hidden="true">
+    <div class="modalBackdrop" data-close="1"></div>
+    <div class="modalPanel" role="dialog" aria-modal="true" aria-label="拠点詳細">
+      <div class="modalHeader">
+        <div class="modalTitle">アルバイトアンケート ダッシュボード</div>
+        <div id="modalSubTitle2" class="muted"></div>
+        <button id="btnCloseModal2" class="modalCloseBtn" type="button">← 地図に戻る</button>
+      </div>
+      <div id="modalBody2" class="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================
+      Global: stable tab switching
+    ========================================================= */
+    function switchTab(tabName, btnEl) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      const target = document.getElementById(tabName);
+      if (target) target.classList.add('active');
+
+      if (tabName === 'map' && window.__MAP_INIT_DONE__ !== true) {
+        window.__MAP_INIT_DONE__ = true;
+        initMapTab();
+      }
+    }
+
+    window.addEventListener('load', () => {
+      document.getElementById('dashboard').classList.add('loaded');
+      initImproveTab();
+      initTalentTab();
+      initOverviewTab();
+    });
+
+    /* =========================================================
+      ③ Improve tab
+    ========================================================= */
+    function initImproveTab() {
+      document.getElementById("impApplyBtn").addEventListener("click", applyImprove);
+
+      document.getElementById("ngCard").addEventListener("click", (e) => {
+        toggleNgPopover(e.currentTarget);
+      });
+
+      document.getElementById("popCloseBtn").addEventListener("click", closePopover);
+      document.addEventListener("click", (e) => {
+        const pop = document.getElementById("ngPopover");
+        if (!pop.classList.contains("active")) return;
+        const card = document.getElementById("ngCard");
+        if (pop.contains(e.target) || card.contains(e.target)) return;
+        closePopover();
+      });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape") closePopover(); });
+
+      applyImprove();
+    }
+
+    const improveRows = [
+      { at:"2026-01-18T10:12:00+09:00", siteName:"新宿支店", leaderName:"田中", workAgain:"いいえ", comment:"無視された。質問しても返事がない。" },
+      { at:"2026-01-20T12:40:00+09:00", siteName:"新宿支店", leaderName:"田中", workAgain:"いいえ", comment:"詰められて怖かった。" },
+      { at:"2026-01-22T09:10:00+09:00", siteName:"新宿支店", leaderName:"田中", workAgain:"はい",   comment:"忙しいが指示は的確。" },
+      { at:"2026-01-25T18:25:00+09:00", siteName:"新宿支店", leaderName:"田中", workAgain:"いいえ", comment:"蹴られたと感じた（身体的接触があった）。" },
+
+      { at:"2026-01-19T11:05:00+09:00", siteName:"高田馬場サテライト", leaderName:"佐藤", workAgain:"いいえ", comment:"怒鳴られた。萎縮する。" },
+      { at:"2026-01-28T15:12:00+09:00", siteName:"高田馬場サテライト", leaderName:"佐藤", workAgain:"はい",   comment:"改善してきている。" },
+
+      { at:"2026-01-21T14:33:00+09:00", siteName:"仙台東口サテライト", leaderName:"鈴木", workAgain:"いいえ", comment:"放置された。誰にも聞けない。" },
+      { at:"2026-01-29T09:02:00+09:00", siteName:"仙台東口サテライト", leaderName:"鈴木", workAgain:"いいえ", comment:"無視された。目を合わせない。" },
+
+      { at:"2026-01-23T16:40:00+09:00", siteName:"横浜支店", leaderName:"山本", workAgain:"はい",   comment:"丁寧に教えてくれた。" },
+      { at:"2026-01-30T17:10:00+09:00", siteName:"横浜支店", leaderName:"山本", workAgain:"不明",  comment:"特になし" },
+    ];
+
+    const NG_RULES = [
+      { key:"暴力/身体", patterns:["蹴られ","叩かれ","押され","物を投げ","殴"] },
+      { key:"無視/排除", patterns:["無視","放置","目を合わせ","仲間外れ"] },
+      { key:"暴言/威圧", patterns:["怒鳴","罵倒","恫喝","詰められ","怖かった"] },
+    ];
+
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    function normName(s){
+      if (!s) return "";
+      return String(s).trim().replace(/[　\s]+/g,"").replace(/(さん|店長|主任|リーダー)$/,"");
+    }
+    function detectNg(text){
+      const t = (text || "").toString();
+      const hits = [];
+      for (const rule of NG_RULES){
+        for (const p of rule.patterns){
+          if (t.includes(p)){
+            hits.push({ category: rule.key, pattern: p });
+            break;
+          }
+        }
+      }
+      return hits;
+    }
+    function highlightEscaped(escapedText, hits){
+      let out = escapedText;
+      for (const h of hits){
+        const p = escapeHtml(h.pattern);
+        const idx = out.indexOf(p);
+        if (idx >= 0){
+          out = out.slice(0, idx) + "<mark>" + p + "</mark>" + out.slice(idx + p.length);
+        }
+      }
+      return out;
+    }
+    function withinDays(atIso, days){
+      const now = new Date("2026-02-01T00:00:00+09:00");
+      const at = new Date(atIso);
+      return (now - at) <= days * 24 * 60 * 60 * 1000;
+    }
+
+    let __improveLast = null;
+
+    function buildImproveFiltered(){
+      const days = Number(document.getElementById("impDaysSel").value || 30);
+      const q = (document.getElementById("impQuery").value || "").trim();
+
+      return improveRows
+        .filter(r => withinDays(r.at, days))
+        .filter(r => {
+          if (!q) return true;
+          const leader = normName(r.leaderName);
+          return (r.siteName || "").includes(q) || (leader || "").includes(q) || (r.comment || "").includes(q);
+        })
+        .map(r => {
+          const leaderNorm = normName(r.leaderName);
+          const ngHits = detectNg(r.comment);
+          const hasNg = ngHits.length > 0;
+          return { ...r, leaderNorm, ngHits, hasNg };
+        });
+    }
+
+    function leaderWorstSiteName(samples){
+      const bySite = new Map();
+      for (const s of samples){
+        if (s.workAgain !== "はい" && s.workAgain !== "いいえ") continue;
+        const site = s.siteName || "(不明)";
+        if (!bySite.has(site)) bySite.set(site, { site, noCount:0, total:0 });
+        const o = bySite.get(site);
+        if (s.workAgain === "いいえ") o.noCount++;
+        o.total++;
+      }
+      let worst = null, worstRate = -1, worstN = -1;
+      for (const o of bySite.values()){
+        const rate = o.total ? (o.noCount / o.total) : 0;
+        if (rate > worstRate || (rate === worstRate && o.total > worstN)){
+          worstRate = rate; worstN = o.total; worst = o.site;
+        }
+      }
+      return worst || "—";
+    }
+
+    function buildLeaderSiteRanks(enriched){
+      const leaders = new Map();
+      const sites = new Map();
+
+      function bump(map, key, r){
+        if (!map.has(key)) map.set(key, { key, noCount:0, totalKnown:0, ngCount:0, samples:[] });
+        const o = map.get(key);
+        if (r.workAgain === "はい"){ o.totalKnown++; }
+        if (r.workAgain === "いいえ"){ o.noCount++; o.totalKnown++; }
+        if (r.hasNg) o.ngCount += r.ngHits.length;
+        o.samples.push(r);
+      }
+
+      for (const r of enriched){
+        bump(leaders, r.leaderNorm || "(不明)", r);
+        bump(sites, r.siteName || "(不明)", r);
+      }
+
+      const noRate = (o) => o.totalKnown ? (o.noCount / o.totalKnown) : -1;
+
+      const leaderArr = [...leaders.values()]
+        .map(o => ({...o, worstSiteName: leaderWorstSiteName(o.samples)}))
+        .sort((a,b)=> (noRate(b)-noRate(a)) || (b.totalKnown-a.totalKnown) || (b.ngCount-a.ngCount));
+
+      const siteArr = [...sites.values()]
+        .sort((a,b)=> (b.noCount-a.noCount) || (b.totalKnown-a.totalKnown) || (noRate(b)-noRate(a)));
+
+      return { leaderArr, siteArr };
+    }
+
+    function renderLeaderTable(rows){
+      const el = document.getElementById("leaderTable");
+      el.innerHTML = `
+        <tr><th>リーダー名（拠点名）</th><th>いいえ回答率</th><th>回答数</th></tr>
+        ${rows.slice(0,10).map(r=>{
+          const rate = r.totalKnown ? (r.noCount/r.totalKnown*100) : null;
+          return `<tr>
+            <td><strong>${escapeHtml(r.key)}</strong><span class="pill gray" style="margin-left:.5rem;">${escapeHtml(r.worstSiteName)}</span></td>
+            <td>${rate===null?"—":rate.toFixed(0)+"%"}</td>
+            <td>${r.totalKnown}</td>
+          </tr>`;
+        }).join("")}
+      `;
+    }
+
+    function renderSiteTable(rows){
+      const el = document.getElementById("siteTable");
+      el.innerHTML = `
+        <tr><th>拠点名</th><th>いいえ件数</th><th>いいえ回答率</th><th>回答数</th></tr>
+        ${rows.slice(0,10).map(r=>{
+          const rate = r.totalKnown ? (r.noCount/r.totalKnown*100) : null;
+          return `<tr>
+            <td><strong>${escapeHtml(r.key)}</strong></td>
+            <td>${r.noCount}</td>
+            <td>${rate===null?"—":rate.toFixed(0)+"%"}</td>
+            <td>${r.totalKnown}</td>
+          </tr>`;
+        }).join("")}
+      `;
+    }
+
+    function applyImprove(){
+      const enriched = buildImproveFiltered();
+      const ngAnswerCount = enriched.filter(r => r.hasNg).length;
+      document.getElementById("kpiNg").textContent = ngAnswerCount;
+
+      const { leaderArr, siteArr } = buildLeaderSiteRanks(enriched);
+      renderLeaderTable(leaderArr);
+      renderSiteTable(siteArr);
+
+      __improveLast = { enriched };
+      if (document.getElementById("ngPopover").classList.contains("active")) {
+        renderNgPopover();
+      }
+    }
+
+    function waPill(workAgain){
+      if (workAgain === "いいえ") return `<span class="pill badge-red">また働きたい: いいえ</span>`;
+      if (workAgain === "はい") return `<span class="pill badge-blue">また働きたい: はい</span>`;
+      return `<span class="pill badge-amber">また働きたい: 不明</span>`;
+    }
+
+    function renderNgPopover(){
+      const popBody = document.getElementById("popBody");
+      const enriched = __improveLast?.enriched || [];
+      const ngRows = enriched.filter(r => r.hasNg).slice(0,7);
+
+      document.getElementById("popTitle").textContent = `NGワード検知（回答単位） ${ngRows.length}件`;
+
+      popBody.innerHTML = ngRows.map(r => {
+        const ngPills = r.ngHits.map(h => `<span class="pill gray">${escapeHtml(h.category)}:${escapeHtml(h.pattern)}</span>`).join(" ");
+        return `
+          <div class="ng-item">
+            <div class="ng-meta">
+              <span>${new Date(r.at).toLocaleString("ja-JP")}</span>
+              <span>📍 <strong>${escapeHtml(r.siteName)}</strong></span>
+              <span>👤 <strong>${escapeHtml(r.leaderNorm || r.leaderName)}</strong></span>
+              ${waPill(r.workAgain)}
+              ${ngPills}
+            </div>
+            <div class="ng-text">${highlightEscaped(escapeHtml(r.comment), r.ngHits)}</div>
+          </div>
+        `;
+      }).join("") || `<div class="muted">NGワード検知はありません。</div>`;
+    }
+
+    function placePopoverNear(anchorEl){
+      const pop = document.getElementById("ngPopover");
+      const container = document.querySelector("#improve .chart-container");
+      const a = anchorEl.getBoundingClientRect();
+      const c = container.getBoundingClientRect();
+
+      let left = (a.left - c.left);
+      let top  = (a.bottom - c.top) + 10;
+
+      const maxLeft = container.clientWidth - pop.offsetWidth - 12;
+      left = Math.max(12, Math.min(left, maxLeft));
+
+      const maxTop = container.clientHeight - pop.offsetHeight - 12;
+      if (top > maxTop) top = (a.top - c.top) - pop.offsetHeight - 10;
+      top = Math.max(12, top);
+      pop.style.left = left + "px";
+      pop.style.top  = top + "px";
+    }
+
+    function toggleNgPopover(anchorEl){
+      const pop = document.getElementById("ngPopover");
+      if (pop.classList.contains("active")) { closePopover(); return; }
+      renderNgPopover();
+      pop.classList.add("active");
+      requestAnimationFrame(() => placePopoverNear(anchorEl));
+    }
+    function closePopover(){ document.getElementById("ngPopover").classList.remove("active"); }
+
+    /* =========================================================
+      ⑤ Talent tab (as-is)
+    ========================================================= */
+    function initTalentTab() {
+      const HP_RULES = { minSessions: 11, minAvgRating: 4.0, cutRatingValue: 2, cutRatingCount: 2 };
+
+      const leaderEvalMock = [
+        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "田中", rating: 5, good: "声かけが丁寧で周囲の雰囲気が良くなる", bad: "初動が少し遅い日があった" },
+        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "田中", rating: 4, good: "新人へのフォローが自然", bad: "" },
+        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "佐藤", rating: 4, good: "報連相が安定", bad: "混雑時に優先順位がぶれる" },
+        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "田中", rating: 5, good: "ミスが少ない", bad: "" },
+        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "田中", rating: 4, good: "接客が明るい", bad: "" },
+        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "佐藤", rating: 4, good: "遅刻なしで安定", bad: "" },
+        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "田中", rating: 5, good: "周りを見て動ける", bad: "" },
+        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "田中", rating: 4, good: "指示の理解が早い", bad: "" },
+        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "田中", rating: 4, good: "作業が正確", bad: "" },
+        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "佐藤", rating: 5, good: "顧客対応が良い", bad: "" },
+        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "田中", rating: 4, good: "清掃が丁寧", bad: "" },
+
+        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "鈴木", rating: 4, good: "落ち着いて対応できる", bad: "" },
+        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "鈴木", rating: 5, good: "改善提案が出る", bad: "" },
+        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "伊藤", rating: 4, good: "欠員対応に強い", bad: "" },
+        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "鈴木", rating: 4, good: "新人育成が上手い", bad: "" },
+        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "伊藤", rating: 4, good: "報連相が的確", bad: "" },
+        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "鈴木", rating: 5, good: "顧客からの指名があった", bad: "" },
+        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "伊藤", rating: 4, good: "作業が早い", bad: "" },
+        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "鈴木", rating: 4, good: "チームに前向き", bad: "" },
+        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "鈴木", rating: 4, good: "安定稼働", bad: "" },
+        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "伊藤", rating: 4, good: "ミスが少ない", bad: "" },
+        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "鈴木", rating: 4, good: "気配りが良い", bad: "" },
+        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "伊藤", rating: 5, good: "繁忙対応が良い", bad: "" },
+
+        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "渡辺", rating: 5, good: "立ち回りが早い", bad: "" },
+        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "渡辺", rating: 4, good: "報連相が丁寧", bad: "" },
+        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "伊藤", rating: 4, good: "新人のフォローが自然", bad: "" },
+        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "渡辺", rating: 5, good: "ミスが少ない", bad: "" },
+        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "渡辺", rating: 4, good: "時間管理が上手い", bad: "" },
+        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "伊藤", rating: 4, good: "丁寧な接客", bad: "" },
+        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "渡辺", rating: 5, good: "周囲を見て動ける", bad: "" },
+        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "渡辺", rating: 4, good: "手順理解が早い", bad: "" },
+        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "伊藤", rating: 4, good: "安定稼働", bad: "" },
+        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "渡辺", rating: 5, good: "改善提案が出る", bad: "" },
+        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "渡辺", rating: 4, good: "遅刻なし", bad: "" },
+
+        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "高橋", rating: 5, good: "雰囲気づくりが上手い", bad: "" },
+        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "高橋", rating: 4, good: "指示理解が早い", bad: "" },
+        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "小林", rating: 4, good: "丁寧な作業", bad: "" },
+        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "高橋", rating: 5, good: "クレーム対応が落ち着いている", bad: "" },
+        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "高橋", rating: 4, good: "周囲への声かけ", bad: "" },
+        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "小林", rating: 4, good: "遅刻なし", bad: "" },
+        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "高橋", rating: 5, good: "繁忙時の優先順位が良い", bad: "" },
+        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "高橋", rating: 4, good: "報連相が明確", bad: "" },
+        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "小林", rating: 4, good: "ミスが少ない", bad: "" },
+        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "高橋", rating: 5, good: "他者フォローができる", bad: "" },
+        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "高橋", rating: 4, good: "継続意欲が高い", bad: "" },
+
+        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 5, good: "指示理解が早い", bad: "" },
+        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 4, good: "元気に挨拶できる", bad: "" },
+        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 4, good: "丁寧な作業", bad: "" },
+        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 4, good: "チームワーク良い", bad: "緊張で声が小さい" },
+        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 5, good: "改善提案が出る", bad: "" },
+        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 4, good: "遅刻なし", bad: "" },
+        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 4, good: "お客様対応が丁寧", bad: "" },
+        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 4, good: "後片付けが早い", bad: "" },
+        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 4, good: "安定している", bad: "" },
+        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 4, good: "報連相が良い", bad: "" },
+
+        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "基本が丁寧", bad: "" },
+        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "報連相は安定", bad: "" },
+        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "作業速度は十分", bad: "ピーク時に焦りが出る" },
+        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "気配りがある", bad: "" },
+        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 3, good: "改善意欲あり", bad: "優先順位がぶれる" },
+        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "遅刻なし", bad: "" },
+        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "継続している", bad: "" },
+        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "周囲と連携できる", bad: "" },
+        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "注意点の吸収が早い", bad: "" },
+        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 3, good: "少しずつ安定", bad: "初動が遅れる日がある" },
+        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "基本は安定", bad: "" },
+
+        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "佐藤", rating: 5, good: "明るい接客", bad: "" },
+        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "佐藤", rating: 4, good: "手順理解が早い", bad: "" },
+        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "伊藤", rating: 4, good: "報連相が丁寧", bad: "" },
+        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "佐藤", rating: 4, good: "遅刻なし", bad: "" },
+        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "佐藤", rating: 5, good: "周囲を見て動ける", bad: "" },
+        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "伊藤", rating: 4, good: "丁寧な作業", bad: "" },
+        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "佐藤", rating: 4, good: "安定稼働", bad: "" },
+        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "佐藤", rating: 4, good: "初動が早い", bad: "" },
+        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "伊藤", rating: 4, good: "改善提案が出やすい", bad: "" },
+
+        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "海野", rating: 4, good: "基本は安定", bad: "" },
+        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "海野", rating: 3, good: "改善意欲あり", bad: "優先順位がぶれる" },
+        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "海野", rating: 4, good: "報連相は良い", bad: "" },
+        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "小林", rating: 3, good: "丁寧", bad: "ピーク時に焦る" },
+        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "海野", rating: 4, good: "遅刻なし", bad: "" },
+        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "海野", rating: 3, good: "継続", bad: "初動が遅れる日がある" },
+        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "小林", rating: 4, good: "連携できる", bad: "" },
+        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "海野", rating: 3, good: "少しずつ安定", bad: "" },
+        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "海野", rating: 4, good: "基本作業", bad: "" },
+        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "小林", rating: 4, good: "気配り", bad: "" },
+        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "海野", rating: 3, good: "改善傾向", bad: "" },
+
+        { staffId: "A202601-2568", siteName: "大橋サテライト", leaderName: "加藤", rating: 4, good: "普段は問題ない", bad: "" },
+        { staffId: "A202601-2568", siteName: "大橋サテライト", leaderName: "加藤", rating: 2, good: "", bad: "遅刻があった" },
+        { staffId: "A202601-2568", siteName: "大橋サテライト", leaderName: "加藤", rating: 3, good: "改善傾向", bad: "指示の聞き漏れ" },
+        { staffId: "A202601-2568", siteName: "大橋サテライト", leaderName: "加藤", rating: 2, good: "", bad: "無断で抜けた" },
+        { staffId: "A202601-2568", siteName: "大橋サテライト", leaderName: "加藤", rating: 4, good: "その後は回復", bad: "" },
+      ];
+
+      function topKeywords(text, n = 4) {
+        const stop = new Set(["ある","ない","する","した","して","です","ます","もの","こと","それ","これ","ため","よう","その後","普段","日が"]);
+        const tokens = (text || "")
+          .replace(/[0-9a-zA-Z]/g, " ")
+          .match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]{2,}/gu) || [];
+        const freq = new Map();
+        for (const t of tokens) {
+          if (stop.has(t)) continue;
+          freq.set(t, (freq.get(t) || 0) + 1);
+        }
+        return [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, n).map(([w]) => w);
+      }
+
+      function aggregateTalentFromLeaderEvals(rows) {
+        const byStaff = new Map();
+        for (const r of rows) {
+          const key = r.staffId;
+          if (!byStaff.has(key)) {
+            byStaff.set(key, { staffId: r.staffId, siteName: r.siteName, leaderNames: new Set(), ratings: [], goodComments: [], badComments: [] });
+          }
+          const s = byStaff.get(key);
+          if (r.siteName) s.siteName = r.siteName;
+          if (r.leaderName) s.leaderNames.add(r.leaderName);
+          if (Number.isFinite(r.rating)) s.ratings.push(r.rating);
+          if (r.good) s.goodComments.push(r.good);
+          if (r.bad) s.badComments.push(r.bad);
+        }
+
+        const staffList = [];
+        for (const s of byStaff.values()) {
+          const sessions = s.ratings.length;
+          const avg = sessions ? (s.ratings.reduce((a, b) => a + b, 0) / sessions) : null;
+          const cutCount = s.ratings.filter(x => x === HP_RULES.cutRatingValue).length;
+
+          const isCut = cutCount >= HP_RULES.cutRatingCount;
+          const isHighPerformer = !isCut && sessions >= HP_RULES.minSessions && avg !== null && avg >= HP_RULES.minAvgRating;
+
+          let almostReason = null;
+          if (!isCut && !isHighPerformer) {
+            if (avg !== null && avg >= HP_RULES.minAvgRating && sessions < HP_RULES.minSessions) almostReason = "回数不足";
+            else if (sessions >= HP_RULES.minSessions && avg !== null && avg < HP_RULES.minAvgRating) almostReason = "スコア不足";
+            else almostReason = "その他";
+          }
+
+          staffList.push({
+            staffId: s.staffId, siteName: s.siteName, sessions, avgRating: avg, cut2Count: cutCount,
+            leaders: [...s.leaderNames],
+            goodTop: topKeywords(s.goodComments.join(" "), 4),
+            badTop: topKeywords(s.badComments.join(" "), 4),
+            isCut, isHighPerformer, almostReason
+          });
+        }
+
+        const hp = staffList.filter(x => x.isHighPerformer).sort((a, b) => (b.avgRating - a.avgRating) || (b.sessions - a.sessions));
+        const almost = staffList.filter(x => !x.isCut && !x.isHighPerformer).sort((a, b) => (b.avgRating - a.avgRating) || (b.sessions - a.sessions));
+        return { hp, almost };
+      }
+
+      function renderTalentMock() {
+        const { hp, almost } = aggregateTalentFromLeaderEvals(leaderEvalMock);
+
+        document.getElementById("hpCount").textContent = hp.length;
+        document.getElementById("almostCount").textContent = almost.length;
+
+        document.getElementById("hpRuleTag").innerHTML = `
+          <span class="keyword-tag">参加回数 ≥ ${HP_RULES.minSessions}</span>
+          <span class="keyword-tag">平均評価 ≥ ${HP_RULES.minAvgRating}</span>
+          <span class="keyword-tag">評価2が${HP_RULES.cutRatingCount}回以上は除外</span>
+        `;
+        document.getElementById("almostTag").innerHTML = `
+          <span class="keyword-tag">回数不足 / スコア不足 の候補</span>
+          <span class="keyword-tag">育成でHP化</span>
+        `;
+
+        const hpGrid = document.getElementById("hpGrid");
+        const almostGrid = document.getElementById("almostGrid");
+        hpGrid.innerHTML = "";
+        almostGrid.innerHTML = "";
+
+        const makeCard = (p, badgeText, badgeCss, subBadgeText = "") => {
+          const div = document.createElement("div");
+          div.className = "performer-card";
+          const sub = subBadgeText
+            ? `<div class="performer-badge" style="background: rgba(148,163,184,0.18); color:#e2e8f0; border:1px solid rgba(148,163,184,0.25); margin-left:.5rem; text-transform:none;">${escapeHtml(subBadgeText)}</div>`
+            : "";
+          div.innerHTML = `
+            <div style="display:flex; gap:.5rem; align-items:center; flex-wrap:wrap;">
+              <div class="performer-badge" style="${badgeCss}">${escapeHtml(badgeText)}</div>
+              ${sub}
+            </div>
+            <div class="performer-info" style="margin-top: .5rem;">
+              <div class="performer-name">${escapeHtml(p.staffId)}</div>
+              <div class="performer-detail">📍 ${escapeHtml(p.siteName)}</div>
+              <div class="performer-detail">📅 参加（評価回数）: ${p.sessions}回</div>
+              <div class="performer-detail">⭐ 平均評価: ${p.avgRating?.toFixed(2) ?? "—"}</div>
+              <div class="performer-detail">👤 評価者: ${escapeHtml(p.leaders.join(" / ") || "—")}</div>
+              <div class="performer-detail">✅ 良い点: ${escapeHtml((p.goodTop && p.goodTop.length) ? p.goodTop.join(" / ") : "—")}</div>
+              <div class="performer-detail">🛠 悪い点: ${escapeHtml((p.badTop && p.badTop.length) ? p.badTop.join(" / ") : "—")}</div>
+            </div>
+          `;
+          return div;
+        };
+
+        const hpTop4 = hp.slice(0, 4);
+        const almostTop4 = almost.slice(0, 4);
+
+        for (const p of hpTop4) {
+          hpGrid.appendChild(makeCard(p, "社員勧誘候補 (High Performer)", "background: linear-gradient(135deg, #10b981 0%, #059669 100%);"));
+        }
+        for (const p of almostTop4) {
+          const reason = p.almostReason ? `理由: ${p.almostReason}` : "";
+          almostGrid.appendChild(makeCard(p, "育成/要観察", "background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);", reason));
+        }
+
+        const actions = document.getElementById("hpActions");
+        actions.innerHTML = "";
+        const topHp = hpTop4.slice(0, 3);
+
+        const lines = [
+          `社員勧誘候補（表示: ${hpTop4.length}名 / 全体: ${hp.length}名）へ：面談打診テンプレを送付（モック）`,
+          `上位候補（${topHp.map(x => x.staffId).join(", ") || "—"}）は「職種希望/稼働希望」を追加ヒアリング`,
+          `育成/要観察（表示: ${almostTop4.length}名 / 全体: ${almost.length}名）は未達理由（回数/スコア）に応じて目標設定`,
+          `運用提案：評価が2のときは理由カテゴリを必須入力にする`
+        ];
+        for (const t of lines) {
+          const li = document.createElement("li");
+          li.textContent = t;
+          actions.appendChild(li);
+        }
+      }
+
+      renderTalentMock();
+    }
+
+    /* =========================================================
+      ② Map + ① Overview shared model
+    ========================================================= */
+    const norm = (v) => String(v ?? "").trim();
+    const isYes = (v) => norm(v) === "はい";
+    const isNo  = (v) => norm(v) === "いいえ";
+    const toNumberOrNull = (v) => {
+      const s = norm(v);
+      if (!s) return null;
+      const n = Number(s);
+      return Number.isFinite(n) ? n : null;
+    };
+    const fmtPct = (v) => v == null ? "—" : `${v.toFixed(1)}%`;
+    const fmtNum = (v, d=2) => v == null ? "—" : v.toFixed(d);
+    function calcRate(num, den) { return den ? (100 * num / den) : null; }
+    function calcAvg(sum, cnt) { return cnt ? (sum / cnt) : null; }
+    function pillHtml(text, cls) { return `<span class="pill ${cls}">${escapeHtml(text)}</span>`; }
+    function labelForClass(cls) { return cls==="blue"?"青":cls==="yellow"?"黄":cls==="red"?"赤":"—"; }
+
+    const siteToPrefCode = new Map([
+      ["大通公園サテライトセンター", 1],["札幌支店", 1],["新さっぽろサテライトセンター", 1],["清田支店", 1],
+      ["仙台東口サテライトセンター", 4],["仙台南支店", 4],
+      ["土浦サテライトセンター", 8],["つくば支店", 8],
+      ["宇都宮サテライトセンター", 9],["栃木支店", 9],
+      ["大宮サテライトセンター", 11],["さいたま支店", 11],["熊谷サテライトセンター", 11],["熊谷支店", 11],
+      ["所沢サテライトセンター", 11],["所沢支店", 11],["川越サテライトセンター", 11],["川越支店", 11],
+      ["船橋サテライトセンター", 12],["千葉支店", 12],["津田沼サテライトセンター", 12],["八千代支店", 12],
+      ["柏サテライトセンター", 12],["柏支店", 12],["新松戸サテライトセンター", 12],["松戸支店", 12],
+      ["千葉サテライトセンター", 12],["千葉南支店", 12],
+      ["新宿サテライトセンター", 13],["東京北支店", 13],["池袋サテライトセンター", 13],["練馬支店", 13],
+      ["赤羽サテライトセンター", 13],["京北支店", 13],["高田馬場サテライトセンター", 13],["新宿支店", 13],
+      ["下北沢サテライトセンター", 13],["世田谷支店", 13],["立川サテライトセンター", 13],["国立支店", 13],
+      ["八王子サテライトセンター", 13],["八王子支店", 13],["多摩支店", 13],["拝島サテライトセンター", 13],
+      ["東大和支店", 13],["吉祥寺サテライトセンター", 13],["西東京支店", 13],["渋谷サテライトセンター", 13],
+      ["自由が丘サテライトセンター", 13],["五反田サテライトセンター", 13],["港支店", 13],["蒲田サテライトセンター", 13],
+      ["東京南支店", 13],["目黒支店", 13],["錦糸町サテライトセンター", 13],["墨田支店", 13],
+      ["秋葉原サテライトセンター", 13],["江東支店", 13],["北千住サテライトセンター", 13],["足立支店", 13],
+      ["葛西サテライトセンター", 13],["葛西支店", 13],["町田サテライトセンター", 13],
+      ["登戸サテライトセンター", 14],["東京支店", 14],["川崎サテライトセンター", 14],["川崎支店", 14],
+      ["溝の口サテライトセンター", 14],["横浜支店", 14],["藤沢サテライトセンター", 14],["湘南支店", 14],
+      ["厚木サテライトセンター", 14],["厚木支店", 14],["平塚サテライトセンター", 14],["小田原支店", 14],
+      ["上大岡サテライトセンター", 14],["横浜南支店", 14],["横浜サテライトセンター", 14],["新横浜支店", 14],
+      ["横浜都筑支店", 14],["横須賀サテライトセンター", 14],["横須賀支店", 14],
+      ["金沢鼓門サテライトセンター", 17],["金沢支店", 17],
+      ["静岡サテライトセンター", 22],["静岡支店", 22],["浜松サテライトセンター", 22],["浜松支店", 22],
+      ["名駅サテライトセンター", 23],["名古屋支店", 23],["大曽根サテライトセンター", 23],["名東支店", 23],
+      ["天白支店", 23],["一宮サテライトセンター", 23],["北名古屋支店", 23],
+      ["京都駅前サテライトセンター", 26],["京都北支店", 26],
+      ["京橋サテライトセンター", 27],["大阪中央支店", 27],["難波サテライトセンター", 27],["西大阪支店", 27],
+      ["北大阪支店", 27],["十三サテライトセンター", 27],["大阪支店", 27],["梅田サテライトセンター", 27],["吹田支店", 27],
+      ["伊丹サテライトセンター", 28],["三宮サテライトセンター", 28],["神戸東支店", 28],["神戸支店", 28],
+      ["西宮北口サテライトセンター", 28],["西宮支店", 28],["姫路サテライトセンター", 28],["姫路支店", 28],
+      ["広島駅前サテライトセンター", 34],["広島南支店", 34],
+      ["瓦町サテライトセンター", 37],["高松支店", 37],
+      ["福岡中央サテライトセンター", 40],["福岡支店", 40],["大橋サテライトセンター", 40],["福岡南支店", 40],
+    ]);
+
+    const metricDefs = {
+      next: { label: "予約率", prefValue: (p) => p.nextReservationRate, format: (v) => v == null ? "—" : `${v.toFixed(1)}%`,
+        color: (v) => (v == null) ? "#475569" : (v >= 80 ? "#3b82f6" : v >= 60 ? "#f59e0b" : "#ef4444") },
+      sat:  { label: "満足度", prefValue: (p) => p.satisfactionAvg, format: (v) => v == null ? "—" : v.toFixed(2),
+        color: (v) => (v == null) ? "#475569" : (v >= 4 ? "#3b82f6" : v >= 3 ? "#f59e0b" : "#ef4444") },
+      greet:{ label: "挨拶（なし率）", prefValue: (p) => p.noGreetingRate, format: (v) => v == null ? "—" : `${v.toFixed(1)}%`,
+        color: (v) => (v == null) ? "#475569" : (v >= 50 ? "#ef4444" : v >= 20 ? "#f59e0b" : "#3b82f6") }
+    };
+
+    function classForMetric(metricKey, obj) {
+      if (!obj) return "gray";
+      if (metricKey === "next") { const v=obj.nextReservationRate; if (v==null) return "gray"; return v>=80?"blue":v>=60?"yellow":"red"; }
+      if (metricKey === "sat")  { const v=obj.satisfactionAvg; if (v==null) return "gray"; return v>=4?"blue":v>=3?"yellow":"red"; }
+      if (metricKey === "greet"){ const v=obj.noGreetingRate; if (v==null) return "gray"; return v>=50?"red":v>=20?"yellow":"blue"; }
+      return "gray";
+    }
+    function overallClassForSite(siteObj) {
+      const c1 = classForMetric("next", siteObj);
+      const c2 = classForMetric("sat", siteObj);
+      const c3 = classForMetric("greet", siteObj);
+      if ([c1,c2,c3].includes("red")) return "red";
+      if ([c1,c2,c3].includes("yellow")) return "yellow";
+      if ([c1,c2,c3].includes("blue")) return "blue";
+      return "gray";
+    }
+
+    function parseTable(text) {
+      const raw = (text ?? "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+      if (!raw) return [];
+      const firstLine = raw.split("\n")[0] ?? "";
+      const delim = firstLine.includes("\t") ? "\t" : (firstLine.includes(",") ? "," : "\t");
+      const lines = raw.split("\n").filter(l => l.trim().length > 0);
+      if (lines.length < 2) return [];
+      const header = lines[0].split(delim).map(h => h.replace(/\uFEFF/g,"").trim());
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(delim);
+        const obj = {};
+        for (let j = 0; j < header.length; j++) obj[header[j]] = (cols[j] ?? "");
+        rows.push(obj);
+      }
+      return rows;
+    }
+    function getCol(row, names) {
+      for (const name of names) {
+        if (row[name] != null && String(row[name]).trim() !== "") return row[name];
+      }
+      for (const name of names) if (row[name] != null) return row[name];
+      return "";
+    }
+    function normJP(v) {
+      return String(v ?? "")
+        .trim()
+        .replace(/[ 　]+/g, "")
+        .replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+    }
+    function parseReserveAnswer(raw) {
+      const s = normJP(raw);
+      if (!s) return { kind: "empty" };
+      const yes = ["いれた","入れた","予約した","予約入れた","予約いれた","入れる","入れます","はい","有","あり","する","済"];
+      const no  = ["いれない","入れない","予約しない","予約なし","いいえ","無","なし","しない","未"];
+      if (yes.some(w => s.includes(w))) return { kind: "yes" };
+      if (no.some(w => s.includes(w))) return { kind: "no" };
+      return { kind: "unknown" };
+    }
+
+    function aggregateSites(rows1_5, rows6_10) {
+      const bySite = new Map();
+      const get = (siteName) => {
+        if (!bySite.has(siteName)) {
+          bySite.set(siteName, { siteName, next_num:0, next_den:0, sat_sum:0, sat_cnt:0, greet_no:0, greet_den:0 });
+        }
+        return bySite.get(siteName);
+      };
+
+      for (const r of rows1_5) {
+        const site = norm(getCol(r, ["勤務先","拠点","支店","店舗","店","勤務地"]));
+        if (!site) continue;
+        const a = get(site);
+
+        const parsed = parseReserveAnswer(r["次の予約"]);
+        if (parsed.kind === "yes") { a.next_den++; a.next_num++; }
+        else if (parsed.kind === "no") { a.next_den++; }
+
+        const sat = toNumberOrNull(getCol(r, ["満足度","満足","満足度（5段階）"]));
+        if (sat != null) { a.sat_sum += sat; a.sat_cnt++; }
+
+        const introRaw = getCol(r, ["リーダーからの自己紹介","自己紹介"]);
+        const intro = norm(introRaw);
+        if (isYes(intro) || isNo(intro)) { a.greet_den++; if (isNo(intro)) a.greet_no++; }
+      }
+
+      for (const r of rows6_10) {
+        const site = norm(getCol(r, ["勤務先","拠点","支店","店舗","店","勤務地"]));
+        if (!site) continue;
+        const a = get(site);
+
+        const sat = toNumberOrNull(getCol(r, ["満足度","満足","満足度（5段階）"]));
+        if (sat != null) { a.sat_sum += sat; a.sat_cnt++; }
+
+        const introRaw = getCol(r, ["リーダーからの自己紹介","自己紹介"]);
+        const intro = norm(introRaw);
+        if (isYes(intro) || isNo(intro)) { a.greet_den++; if (isNo(intro)) a.greet_no++; }
+      }
+
+      return bySite;
+    }
+
+    function buildPrefView(bySite) {
+      const byPref = new Map();
+      const unknownSites = [];
+      const getPref = (prefCode) => {
+        if (!byPref.has(prefCode)) {
+          byPref.set(prefCode, { prefCode, next_num:0, next_den:0, sat_sum:0, sat_cnt:0, greet_no:0, greet_den:0, sites:[] });
+        }
+        return byPref.get(prefCode);
+      };
+
+      for (const a of bySite.values()) {
+        const prefCode = siteToPrefCode.get(a.siteName);
+        if (!prefCode) { unknownSites.push(a.siteName); continue; }
+        const p = getPref(prefCode);
+
+        p.next_num += a.next_num; p.next_den += a.next_den;
+        p.sat_sum  += a.sat_sum;  p.sat_cnt  += a.sat_cnt;
+        p.greet_no += a.greet_no; p.greet_den += a.greet_den;
+
+        p.sites.push({
+          siteName: a.siteName,
+          prefCode,
+          next_num: a.next_num, next_den: a.next_den,
+          sat_sum: a.sat_sum,   sat_cnt: a.sat_cnt,
+          greet_no: a.greet_no, greet_den: a.greet_den,
+          nextReservationRate: calcRate(a.next_num, a.next_den),
+          satisfactionAvg: calcAvg(a.sat_sum, a.sat_cnt),
+          noGreetingRate: calcRate(a.greet_no, a.greet_den),
+        });
+      }
+
+      for (const p of byPref.values()) {
+        p.nextReservationRate = calcRate(p.next_num, p.next_den);
+        p.satisfactionAvg = calcAvg(p.sat_sum, p.sat_cnt);
+        p.noGreetingRate = calcRate(p.greet_no, p.greet_den);
+        p.sites.sort((x,y)=> (y.sat_cnt+y.greet_den+y.next_den)-(x.sat_cnt+x.greet_den+x.next_den));
+      }
+      return { byPref, unknownSites };
+    }
+
+    let svgRoot2 = null;
+    let currentMetricKey2 = "next";
+    let currentMonthMode2 = "curr";
+    let statePrev2 = { byPref: new Map(), unknownSites: [] };
+    let stateCurr2 = { byPref: new Map(), unknownSites: [] };
+    let lastPrefPopupContext2 = null;
+    let activeSiteKey2 = null;
+
+    async function loadJapanSvg2(url = "./japan.svg") {
+      const container = document.getElementById("mapContainer2");
+      const status = document.getElementById("mapStatus2");
+      status.textContent = "地図を読み込み中…";
+      const res = await fetch(url, { cache:"no-store" });
+      if (!res.ok) {
+        status.textContent = `地図SVGの読み込みに失敗: ${res.status}`;
+        throw new Error(`fetch failed: ${res.status}`);
+      }
+      const svgText = await res.text();
+      container.insertAdjacentHTML("afterbegin", svgText);
+
+      const svg = container.querySelector("svg.geolonia-svg-map") || container.querySelector("svg");
+      if (!svg) throw new Error("SVG element not found");
+      svg.style.width = "100%";
+      svg.style.height = "100%";
+      try { svg.setAttribute("viewBox", "80 40 860 860"); } catch(e) {}
+      const n = svg.querySelectorAll(".prefecture").length;
+      status.textContent = `地図読み込みOK（prefecture数: ${n}）`;
+      return svg;
+    }
+
+    function getActiveState2() {
+      const st = currentMonthMode2 === "prev" ? statePrev2 : stateCurr2;
+      return { byPref: st.byPref, metricKey: currentMetricKey2, monthLabel: currentMonthMode2==="prev" ? "先月" : "今月" };
+    }
+
+    function paintMap2(svg, byPref, metricKey) {
+      const def = metricDefs[metricKey];
+      svg.querySelectorAll(".prefecture").forEach(el => {
+        const prefCode = Number(el.getAttribute("data-code"));
+        const pref = byPref.get(prefCode);
+        const v = pref ? def.prefValue(pref) : null;
+        el.style.fill = def.color(v);
+      });
+    }
+
+    function hidePrefPopup2() { document.getElementById("prefPopup2").style.display = "none"; }
+
+    function showPrefPopup2({ prefEl, prefCode, prefAgg, metricKey, monthLabel, anchorEvent }) {
+      const popup = document.getElementById("prefPopup2");
+      const titleEl = document.getElementById("prefPopupTitle2");
+      const metaEl  = document.getElementById("prefPopupMeta2");
+      const sitesEl = document.getElementById("prefPopupSites2");
+      const moreEl  = document.getElementById("prefPopupMore2");
+
+      const rawTitle = prefEl.querySelector("title")?.textContent?.trim() || `都道府県 ${prefCode}`;
+      const prefName = rawTitle.split("/")[0].trim();
+      titleEl.textContent = `${monthLabel}：${prefName}`;
+
+      const pillCls = classForMetric(metricKey, prefAgg);
+      metaEl.innerHTML = `
+        ${pillHtml(labelForClass(pillCls), pillCls)}
+        <span class="muted">予約率</span>：<b>${fmtPct(prefAgg?.nextReservationRate)}</b>
+        <span class="muted">拠点数</span>：<b>${prefAgg?.sites?.length ?? 0}</b>
+        <span class="muted">満足</span>：<b>${fmtNum(prefAgg?.satisfactionAvg,2)}</b>
+        <span class="muted">挨拶なし</span>：<b>${fmtPct(prefAgg?.noGreetingRate)}</b>
+      `;
+
+      const sites = (prefAgg?.sites ?? []).slice()
+        .sort((a,b)=> (b.sat_cnt+b.greet_den+b.next_den)-(a.sat_cnt+a.greet_den+a.next_den));
+      const top = sites.slice(0, 10);
+
+      if (top.length === 0) {
+        sitesEl.innerHTML = `<div class="muted">データがありません</div>`;
+      } else {
+        sitesEl.innerHTML = top.map(s => {
+          const clsOverall = overallClassForSite(s);
+          return `
+            <button class="popupSiteBtn" type="button" data-site="${escapeHtml(s.siteName)}" data-pref="${prefCode}">
+              <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <div style="font-weight:900;">${escapeHtml(s.siteName)}</div>
+                ${pillHtml(labelForClass(clsOverall), clsOverall)}
+              </div>
+              <div style="color:#cbd5e1;font-size:12px;margin-top:4px;">
+                予約: ${fmtPct(s.nextReservationRate)}（回答数=${s.next_den}） /
+                満足: ${fmtNum(s.satisfactionAvg,2)}（回答数=${s.sat_cnt}） /
+                挨拶なし: ${fmtPct(s.noGreetingRate)}（回答数=${s.greet_den}）
+              </div>
+            </button>
+          `;
+        }).join("");
+      }
+
+      moreEl.textContent = sites.length > 10 ? `他 ${sites.length - 10} 拠点…（先頭10件のみ表示）` : "";
+
+      const container = document.getElementById("mapContainer2");
+      const rect = container.getBoundingClientRect();
+      let x = rect.width * 0.5, y = rect.height * 0.3;
+      if (anchorEvent?.clientX != null) { x = anchorEvent.clientX - rect.left; y = anchorEvent.clientY - rect.top; }
+
+      popup.style.display = "block";
+      popup.style.left = "0px"; popup.style.top = "0px";
+
+      const pw = popup.offsetWidth, ph = popup.offsetHeight;
+      let left = x + 12, topPos = y + 12;
+      if (left + pw > rect.width) left = Math.max(8, x - pw - 12);
+      if (topPos + ph > rect.height) topPos = Math.max(8, y - ph - 12);
+      popup.style.left = `${left}px`;
+      popup.style.top  = `${topPos}px`;
+
+      lastPrefPopupContext2 = { prefCode, anchor: anchorEvent ? { clientX: anchorEvent.clientX, clientY: anchorEvent.clientY } : null };
+    }
+
+    function openModal2() {
+      const m = document.getElementById("siteDetailModal2");
+      m.classList.add("is-open");
+      m.setAttribute("aria-hidden", "false");
+    }
+    function closeModal2() {
+      const m = document.getElementById("siteDetailModal2");
+      m.classList.remove("is-open");
+      m.setAttribute("aria-hidden", "true");
+    }
+
+    function buildAiMock2(site) {
+      const issues = [], causes = [], actions = [], trends = [];
+      if (site.nextReservationRate != null && site.nextReservationRate < 60) {
+        issues.push("予約率が低い（<60%）");
+        causes.push("初回体験の期待値調整不足、当日のコミュニケーション不足の可能性");
+        actions.push("終了5分前の予約提案トークを標準化（テンプレ＋QR案内）");
+        actions.push("当日中に予約できる導線（枠見える化）を強化");
+        trends.push("初回層の離脱が起きやすい構造になっている可能性");
+      } else if (site.nextReservationRate != null && site.nextReservationRate < 80) {
+        issues.push("予約率が中位（60〜80%）");
+        causes.push("予約導線はあるが、背中押しが弱い可能性");
+        actions.push("『次に来るメリット』を一言で伝える運用（稼ぎ/慣れ/人間関係）");
+        trends.push("運用改善で80%+に上げられる余地");
+      }
+      if (site.satisfactionAvg != null && site.satisfactionAvg < 3) {
+        issues.push("満足度が低い（<3.0）");
+        causes.push("指示の不明確さ、フォロー不足、備品/ユニフォーム不満が顕在化している可能性");
+        actions.push("作業開始前の5分ブリーフィング（流れ/注意点/質疑）を必須化");
+        actions.push("ユニフォーム状態のチェック＆交換サイクルの見直し");
+        trends.push("自由記述に不満系ワードが増える傾向");
+      } else if (site.satisfactionAvg != null && site.satisfactionAvg < 4) {
+        issues.push("満足度が中位（3.0〜4.0）");
+        causes.push("一定の満足はあるが、体験のムラが残る可能性");
+        actions.push("説明品質を均一化（チェックリスト運用）");
+        trends.push("改善要望は『連絡』『指示』に寄りやすい");
+      }
+      if (site.noGreetingRate != null && site.noGreetingRate >= 50) {
+        issues.push("挨拶（自己紹介）未実施率が高い（>=50%）");
+        causes.push("導入が省略されている/多忙/手順未整備の可能性");
+        actions.push("『自己紹介→今日の流れ→質問』の30秒導線を標準化");
+        actions.push("導入実施チェック（簡易チェック）");
+        trends.push("満足度/予約率にも波及しやすい");
+      } else if (site.noGreetingRate != null && site.noGreetingRate >= 20) {
+        issues.push("挨拶未実施率が中位（20〜50%）");
+        causes.push("ピーク時に導入が飛びやすい運用の可能性");
+        actions.push("忙しい日ほど導入を短縮しても必ず実施（10秒版）");
+        trends.push("時間帯/担当者で偏りが出やすい");
+      }
+      if (issues.length === 0) {
+        issues.push("大きな課題シグナルは強くない（指標上）");
+        causes.push("現状維持でも良いが、運用標準化で安定化余地");
+        actions.push("良い運用を他拠点に展開（テンプレ化）");
+        trends.push("母数増加時にブレが見える可能性");
+      }
+      return { issues, causes, actions, trends };
+    }
+
+    function renderSiteDetailModal2({ site, prefCode, monthLabel }) {
+      activeSiteKey2 = site.siteName;
+      document.getElementById("modalSubTitle2").textContent = `${monthLabel} / 都道府県コード ${prefCode} / ${site.siteName}`;
+
+      const st = (currentMonthMode2 === "prev") ? statePrev2 : stateCurr2;
+      const prefAgg = st.byPref.get(prefCode);
+      const sites = prefAgg?.sites ?? [];
+
+      const otherState = currentMonthMode2 === "prev" ? stateCurr2 : statePrev2;
+      const otherPref = otherState.byPref.get(prefCode);
+      const otherSite = otherPref?.sites?.find(s => s.siteName === site.siteName);
+
+      function deltaPct(curr, prev) {
+        if (curr == null || prev == null) return { text:"—", cls:"deltaFlat" };
+        const d = clamp(curr - prev, -8, 8); // ★保険：Δを-8〜+8ptにクランプ
+        const cls = d > 0.0001 ? "deltaUp" : d < -0.0001 ? "deltaDown" : "deltaFlat";
+        const sign = d > 0.0001 ? "+" : d < -0.0001 ? "" : "±";
+        return { text: `${sign}${d.toFixed(1)}%`, cls };
+      }
+      function deltaNum(curr, prev) {
+        if (curr == null || prev == null) return { text:"—", cls:"deltaFlat" };
+        const dRaw = curr - prev;
+        const d = clamp(dRaw, -0.8, 0.8); // ★満足度Δは±0.8に保険（要件Δ±8ptの趣旨に合わせた運用）
+        const cls = d > 0.0001 ? "deltaUp" : d < -0.0001 ? "deltaDown" : "deltaFlat";
+        const sign = d > 0.0001 ? "+" : d < -0.0001 ? "" : "±";
+        return { text: `${sign}${d.toFixed(2)}`, cls };
+      }
+
+      const dRes = deltaPct(site.nextReservationRate, otherSite?.nextReservationRate ?? null);
+      const dNg  = deltaPct(site.noGreetingRate, otherSite?.noGreetingRate ?? null);
+      const dSat = deltaNum(site.satisfactionAvg, otherSite?.satisfactionAvg ?? null);
+
+      const ai = buildAiMock2(site);
+
+      const body = document.getElementById("modalBody2");
+      body.innerHTML = `
+        <div class="selectBar">
+          <div class="muted" style="font-weight:800;">拠点</div>
+          <select id="siteSelect2"></select>
+        </div>
+
+        <div class="kpiGrid">
+          <div class="kpiCard">
+            <div class="kpiLabel">予約率（1〜5回目）</div>
+            <div class="kpiValue">${fmtPct(site.nextReservationRate)}</div>
+            <div class="kpiDelta ${dRes.cls}">${dRes.text}</div>
+            <div class="muted" style="margin-top:6px;font-size:12px;">回答数=${site.next_den}</div>
+          </div>
+          <div class="kpiCard">
+            <div class="kpiLabel">挨拶なし率</div>
+            <div class="kpiValue">${fmtPct(site.noGreetingRate)}</div>
+            <div class="kpiDelta ${dNg.cls}">${dNg.text}</div>
+            <div class="muted" style="margin-top:6px;font-size:12px;">回答数=${site.greet_den}</div>
+          </div>
+          <div class="kpiCard">
+            <div class="kpiLabel">満足度（平均）</div>
+            <div class="kpiValue">${fmtNum(site.satisfactionAvg,2)}</div>
+            <div class="kpiDelta ${dSat.cls}">${dSat.text}</div>
+            <div class="muted" style="margin-top:6px;font-size:12px;">回答数=${site.sat_cnt}</div>
+          </div>
+          <div class="kpiCard">
+            <div class="kpiLabel">（モック枠）</div>
+            <div class="kpiValue">—</div>
+            <div class="kpiDelta deltaFlat">—</div>
+            <div class="muted" style="margin-top:6px;font-size:12px;">※拡張用</div>
+          </div>
+        </div>
+
+        <div class="detailGrid">
+          <div class="panelW">
+            <div class="panelTitleW">課題</div>
+            <ul>${ai.issues.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>
+            <div class="panelTitleW" style="margin-top:12px;">原因</div>
+            <ul>${ai.causes.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>
+          </div>
+          <div class="panelW">
+            <div class="panelTitleW">改善施策</div>
+            <ol>${ai.actions.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ol>
+            <div class="panelTitleW" style="margin-top:12px;">傾向</div>
+            <ul>${ai.trends.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>
+          </div>
+        </div>
+      `;
+
+      const sel = body.querySelector("#siteSelect2");
+      sel.innerHTML = sites.map(s => {
+        const selected = s.siteName === site.siteName ? "selected" : "";
+        return `<option value="${escapeHtml(s.siteName)}" ${selected}>${escapeHtml(s.siteName)}</option>`;
+      }).join("");
+
+      sel.addEventListener("change", () => {
+        const nextSite = sites.find(s => s.siteName === sel.value);
+        if (!nextSite) return;
+        renderSiteDetailModal2({ site: nextSite, prefCode, monthLabel });
+      });
+    }
+
+    function openSiteDetailFromPopup2(siteName, prefCode) {
+      const st = (currentMonthMode2 === "prev") ? statePrev2 : stateCurr2;
+      const prefAgg = st.byPref.get(prefCode);
+      const site = prefAgg?.sites?.find(s => s.siteName === siteName);
+      if (!site) return;
+      openModal2();
+      renderSiteDetailModal2({ site, prefCode, monthLabel: currentMonthMode2 === "prev" ? "先月" : "今月" });
+    }
+
+    function openSiteDetail(siteName) {
+      const prefCode = siteToPrefCode.get(siteName);
+      if (!prefCode) { alert("都道府県コードが不明な拠点です: " + siteName); return; }
+      if (window.__MAP_INIT_DONE__ !== true) {
+        const mapTabBtn = document.querySelectorAll('.tab')[1];
+        switchTab('map', mapTabBtn);
+      }
+      const st = (currentMonthMode2 === "prev") ? statePrev2 : stateCurr2;
+      const prefAgg = st.byPref.get(prefCode);
+      const site = prefAgg?.sites?.find(s => s.siteName === siteName);
+      if (!site) { alert("該当拠点の集計が見つかりません（TSVを読み込んでください）: " + siteName); return; }
+      openModal2();
+      renderSiteDetailModal2({ site, prefCode, monthLabel: currentMonthMode2 === "prev" ? "先月" : "今月" });
+      lastPrefPopupContext2 = { prefCode, anchor: null };
+    }
+
+    function wirePrefClick2(svg) {
+      document.getElementById("prefPopupClose2").addEventListener("click", hidePrefPopup2);
+
+      document.getElementById("mapContainer2").addEventListener("click", (e) => {
+        const isPref = e.target.closest && e.target.closest(".prefecture");
+        const isPopup = e.target.closest && e.target.closest("#prefPopup2");
+        if (!isPref && !isPopup) hidePrefPopup2();
+      });
+
+      svg.querySelectorAll(".prefecture").forEach(el => {
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const { byPref, metricKey, monthLabel } = getActiveState2();
+          const prefCode = Number(el.getAttribute("data-code"));
+          const prefAgg = byPref.get(prefCode);
+          if (!prefAgg) { hidePrefPopup2(); return; }
+          showPrefPopup2({ prefEl: el, prefCode, prefAgg, metricKey, monthLabel, anchorEvent: e });
+        });
+      });
+    }
+
+    function debugTopValues(rows, colName, limit=5) {
+      const vals = rows.map(r => String(r[colName] ?? "").trim()).filter(Boolean);
+      const counts = new Map();
+      for (const v of vals) counts.set(v, (counts.get(v)||0)+1);
+      return [...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,limit);
+    }
+    function looksLikeWorkHoursTop(topPairs) {
+      const s = topPairs.map(([v])=>String(v));
+      return s.some(v => v.includes("時間以内") || v.includes("時間以上") || v.includes("4〜6") || v.includes("〜"));
+    }
+
+    function loadFromTextareas2(fromOverview=false) {
+      const id = (x)=>document.getElementById(x);
+
+      const prev1 = parseTable(id(fromOverview ? "ovTsvPrev1to5" : "tsvPrev1to5").value);
+      const prev6 = parseTable(id(fromOverview ? "ovTsvPrev6to10" : "tsvPrev6to10").value);
+      const curr1 = parseTable(id(fromOverview ? "ovTsvCurr1to5" : "tsvCurr1to5").value);
+      const curr6 = parseTable(id(fromOverview ? "ovTsvCurr6to10" : "tsvCurr6to10").value);
+
+      const topNextPrev = debugTopValues(prev1, "次の予約", 5);
+      const topNextCurr = debugTopValues(curr1, "次の予約", 5);
+      if (looksLikeWorkHoursTop(topNextPrev) || looksLikeWorkHoursTop(topNextCurr)) {
+        alert("TSVの列ズレの可能性：『次の予約』列に勤務時間（4時間以内 等）が入っています。データを確認してください。");
+      }
+
+      const bySitePrev = aggregateSites(prev1, prev6);
+      const bySiteCurr = aggregateSites(curr1, curr6);
+      statePrev2 = buildPrefView(bySitePrev);
+      stateCurr2 = buildPrefView(bySiteCurr);
+
+      const msg =
+        `読込: 先月 sites=${bySitePrev.size} / 今月 sites=${bySiteCurr.size}（漏れ 先月${statePrev2.unknownSites.length}・今月${stateCurr2.unknownSites.length}）`;
+
+      if (fromOverview) document.getElementById("ovLoadStatus").textContent = msg;
+      else document.getElementById("loadStatus").textContent = msg;
+
+      const unknownAll = [...new Set([...statePrev2.unknownSites, ...stateCurr2.unknownSites])];
+      const unknownMsg = unknownAll.length ? `⚠️ マッピング漏れ（最大20件）: ${unknownAll.slice(0,20).join(" / ")}${unknownAll.length>20?" ...":""}` : "";
+      const ub = document.getElementById("unknownBox");
+      if (ub) ub.textContent = unknownMsg;
+
+      if (svgRoot2) paintMap2(svgRoot2, getActiveState2().byPref, currentMetricKey2);
+      hidePrefPopup2();
+
+      refreshOverviewFromMapStates();
+    }
+
+    function makeRng(seed = 1) {
+      let a = seed >>> 0;
+      return function() {
+        a |= 0; a = (a + 0x6D2B79F5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    function pick(rng, arr) { return arr[Math.floor(rng() * arr.length)]; }
+    function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
+    function clampAvoidEdges(n, lo, hi, eps=1e-6){ return Math.max(lo+eps, Math.min(hi-eps, n)); }
+    function pad2(n){ return String(n).padStart(2,"0"); }
+
+    // =========================================================
+    // Dummy distribution requirements:
+    //  - 予約率 55–92%
+    //  - 満足度(平均) 3.6–4.7
+    //  - 挨拶なし率 1–18%
+    //  - Δ -8pt〜+8pt（表示側でもクランプ）
+    // =========================================================
+    const DUMMY_RANGES = {
+      reserveYesRate: { lo: 0.55, hi: 0.92 },
+      greetNoRate:    { lo: 0.01, hi: 0.18 }, // "なし率"
+      satAvg:         { lo: 3.6,  hi: 4.7  },
+      deltaPt:        { lo: -8,   hi: 8    }
+    };
+
+    function siteProfile2(siteName, monthLabel) {
+      // siteごとの中心を作る（安定）
+      let h = 2166136261;
+      for (let i=0;i<siteName.length;i++) h = Math.imul(h ^ siteName.charCodeAt(i), 16777619);
+      const p = (h >>> 0) / 4294967296;
+      const center = (p - 0.5);
+
+      const monthBias = monthLabel.startsWith("Jan") ? -0.012 : +0.010; // 小さめ（Δが暴れない）
+      const satBias   = monthLabel.startsWith("Jan") ? -0.04  : +0.035;
+
+      // 予約 yes率
+      const reserve = clampAvoidEdges(0.74 + center * 0.22 + monthBias, DUMMY_RANGES.reserveYesRate.lo, DUMMY_RANGES.reserveYesRate.hi);
+
+      // 挨拶 "なし率" を直接作ってから yes率へ（1–18%厳守）
+      const greetNo = clampAvoidEdges(0.08 - center * 0.06 - monthBias*0.5, DUMMY_RANGES.greetNoRate.lo, DUMMY_RANGES.greetNoRate.hi);
+      const introYes = 1 - greetNo;
+
+      // 満足度平均（連続値の中心）
+      const satCenter = clamp(4.10 + center * 0.45 + satBias, DUMMY_RANGES.satAvg.lo, DUMMY_RANGES.satAvg.hi);
+
+      return { reserveYesRate: reserve, introYesRate: introYes, satCenter };
+    }
+
+    // =========================================================
+    // Dummy (FAST): generate states directly without textarea
+    // =========================================================
+    function generateDummyStatesDirect(monthLabel, { seed = 1, totalPerMonth = 3000 } = {}) {
+      const rng = makeRng(seed);
+      const sites = [...siteToPrefCode.keys()];
+
+      // 従来の比率(64:36)を踏襲
+      const n1 = Math.round(totalPerMonth * 0.64);
+      const n6 = totalPerMonth - n1;
+
+      const bySite = new Map();
+      const get = (siteName) => {
+        if (!bySite.has(siteName)) {
+          bySite.set(siteName, { siteName, next_num:0, next_den:0, sat_sum:0, sat_cnt:0, greet_no:0, greet_den:0 });
+        }
+        return bySite.get(siteName);
+      };
+
+      // 1〜5回目：予約 + 満足 + 自己紹介
+      for (let i=0;i<n1;i++) {
+        const site = pick(rng, sites);
+        const prof = siteProfile2(site, monthLabel);
+        const a = get(site);
+
+        // reserve
+        const nextYes = (rng() < prof.reserveYesRate);
+        a.next_den++;
+        if (nextYes) a.next_num++;
+
+        // satisfaction: 1〜5整数だが、平均が3.6〜4.7に寄るよう中心を設計
+        // 低評価(1,2)をほぼ出さない
+        let sat = Math.round(prof.satCenter + (rng()-0.5)*0.70);
+        sat = clamp(sat, 3, 5);
+        // たまに2を出すが極小
+        if (sat === 3 && rng() < 0.03) sat = 2;
+        a.sat_sum += sat; a.sat_cnt++;
+
+        // greet intro: yes率 = 1 - (なし率)
+        const introYes = (rng() < prof.introYesRate);
+        a.greet_den++;
+        if (!introYes) a.greet_no++;
+      }
+
+      // 6〜10回目：満足 + 自己紹介
+      for (let i=0;i<n6;i++) {
+        const site = pick(rng, sites);
+        const prof = siteProfile2(site, monthLabel);
+        const a = get(site);
+
+        let sat = Math.round((prof.satCenter + 0.05) + (rng()-0.5)*0.70);
+        sat = clamp(sat, 3, 5);
+        if (sat === 3 && rng() < 0.025) sat = 2;
+        a.sat_sum += sat; a.sat_cnt++;
+
+        const introYes = (rng() < prof.introYesRate);
+        a.greet_den++;
+        if (!introYes) a.greet_no++;
+      }
+
+      return buildPrefView(bySite);
+    }
+
+    // =========================================================
+    // TSV生成（generateDummyTSV(monthLabel, opts) を実運用に接続）
+    //  - opts.totalPerMonth が来たら 64:36 で n1/n6 を決める
+    // =========================================================
+    function generateDummyTSV(monthLabel, opts = {}) {
+      const rng = makeRng(opts.seed ?? 1);
+
+      const sites = [...siteToPrefCode.keys()];
+      const leaders = ["高橋","鈴木","田中","佐藤","海野","渡辺","伊藤","小林"];
+      const occs = ["大学生","高校生","会社員","フリーター","主婦/主夫"];
+      const triggers = ["たまたま","SNS","求人を見て","以前働いたことがある"];
+      const workHours = ["4時間以内","4〜6時間","6時間以上"];
+      const smell = ["問題なし","普通","臭い"];
+
+      const totalPerMonth = Number(opts.totalPerMonth ?? 500); // TSVは巨大化しやすいので既定は500（stateは別で3000）
+      const n1 = Math.round(totalPerMonth * 0.64);
+      const n6 = totalPerMonth - n1;
+
+      const header1 = [
+        "送信日時","month","勤務先","氏名（またはアルバイトコード）","出勤回数","職業","アートにきたきっかけ",
+        "面接官の対応","面接官の対応の良かった理由","面接官の対応の悪かった理由","リーダー名","リーダーからの自己紹介",
+        "作業内容・一日の流れの話があったか","着る前のユニフォームの痛みや匂い","働いた時間","次の予約","予約を入れなかった理由",
+        "リーダーとまた作業をしたいですか？","行きたい理由","行きたくない理由","満足度","その他ご意見"
+      ];
+
+      const header6 = [
+        "送信日時","month","勤務先","氏名（またはアルバイトコード）","出勤回数","リーダー名","リーダーからの自己紹介",
+        "作業内容・一日の流れの話があったか","着る前のユニフォームの痛みや匂い","希望日時に働けているか","希望日に働けなかった日",
+        "リーダーとまた作業をしたいですか？","行きたい理由","行きたくない理由","満足度","改善してほしいこと","内勤者への良かった・悪かった点","継続にあたっての要望"
+      ];
+
+      function makeDatetime() {
+        const monthNum = monthLabel.startsWith("Jan") ? 1 : 2;
+        const day = 1 + Math.floor(rng() * 28);
+        const hh = Math.floor(rng() * 23);
+        const mm = Math.floor(rng() * 59);
+        return `2026/${monthNum}/${pad2(day)} ${pad2(hh)}:${pad2(mm)}`;
+      }
+      function makeCode(prefix, base) {
+        return `${prefix}-${String(base).padStart(4,"0")}`;
+      }
+
+      function buildRow(header, setFn) {
+        const row = Array(header.length).fill("");
+        const idx = Object.fromEntries(header.map((h,i)=>[h,i]));
+        setFn(row, idx);
+        return row.join("\t");
+      }
+
+      const prefix = monthLabel === "Jan-26" ? "A202601" : "A202602";
+
+      const rows1 = [header1.join("\t")];
+      for (let i=0;i<n1;i++) {
+        const site = pick(rng, sites);
+        const prof = siteProfile2(site, monthLabel);
+
+        const dt = makeDatetime();
+        const code = makeCode(prefix, 1000 + i);
+        const attendance = `${1 + Math.floor(rng() * 5)}回目`;
+
+        const intro = (rng() < prof.introYesRate) ? "はい" : "いいえ";
+        const next  = (rng() < prof.reserveYesRate) ? "いれた" : "いれない";
+
+        let sat = Math.round(prof.satCenter + (rng()-0.5)*0.70);
+        sat = clamp(sat, 3, 5);
+        if (sat === 3 && rng() < 0.03) sat = 2;
+
+        const notReserveReason = (next === "いれない")
+          ? pick(rng, ["別のバイトが忙しい","指示が分かりにくい","会話が少ない/雑に扱われた","ユニフォームが臭い/痛い","予定が合わない"])
+          : "";
+
+        rows1.push(buildRow(header1, (row, idx) => {
+          row[idx["送信日時"]] = dt;
+          row[idx["month"]] = monthLabel;
+          row[idx["勤務先"]] = site;
+          row[idx["氏名（またはアルバイトコード）"]] = code;
+          row[idx["出勤回数"]] = attendance;
+          row[idx["職業"]] = pick(rng, occs);
+          row[idx["アートにきたきっかけ"]] = pick(rng, triggers);
+          row[idx["面接官の対応"]] = "良かった";
+          row[idx["面接官の対応の良かった理由"]] = "分かりやすかった";
+          row[idx["面接官の対応の悪かった理由"]] = "";
+          row[idx["リーダー名"]] = pick(rng, leaders);
+          row[idx["リーダーからの自己紹介"]] = intro;
+          row[idx["作業内容・一日の流れの話があったか"]] = (rng() < 0.90) ? "はい" : "いいえ";
+          row[idx["着る前のユニフォームの痛みや匂い"]] = pick(rng, smell);
+          row[idx["働いた時間"]] = pick(rng, workHours);
+          row[idx["次の予約"]] = next;
+          row[idx["予約を入れなかった理由"]] = notReserveReason;
+          row[idx["リーダーとまた作業をしたいですか？"]] = (rng() < 0.80) ? "はい" : "いいえ";
+          row[idx["行きたい理由"]] = pick(rng, ["稼げる","稼げる/慣れた","人間関係が良い","融通がきく"]);
+          row[idx["行きたくない理由"]] = "";
+          row[idx["満足度"]] = String(sat);
+          row[idx["その他ご意見"]] = "";
+        }));
+      }
+
+      const rows6 = [header6.join("\t")];
+      for (let i=0;i<n6;i++) {
+        const site = pick(rng, sites);
+        const prof = siteProfile2(site, monthLabel);
+
+        const dt = makeDatetime();
+        const code = makeCode(prefix, 2000 + i);
+        const attendance = `${6 + Math.floor(rng() * 5)}回目`;
+        const intro = (rng() < prof.introYesRate) ? "はい" : "いいえ";
+
+        let sat = Math.round((prof.satCenter + 0.05) + (rng()-0.5)*0.70);
+        sat = clamp(sat, 3, 5);
+        if (sat === 3 && rng() < 0.025) sat = 2;
+
+        rows6.push(buildRow(header6, (row, idx) => {
+          row[idx["送信日時"]] = dt;
+          row[idx["month"]] = monthLabel;
+          row[idx["勤務先"]] = site;
+          row[idx["氏名（またはアルバイトコード）"]] = code;
+          row[idx["出勤回数"]] = attendance;
+          row[idx["リーダー名"]] = pick(rng, leaders);
+          row[idx["リーダーからの自己紹介"]] = intro;
+          row[idx["作業内容・一日の流れの話があったか"]] = (rng() < 0.85) ? "はい" : "いいえ";
+          row[idx["着る前のユニフォームの痛みや匂い"]] = pick(rng, smell);
+          row[idx["希望日時に働けているか"]] = (rng() < 0.75) ? "はい" : "いいえ";
+          row[idx["希望日に働けなかった日"]] = "";
+          row[idx["リーダーとまた作業をしたいですか？"]] = (rng() < 0.75) ? "はい" : "いいえ";
+          row[idx["行きたい理由"]] = "稼げる/慣れた";
+          row[idx["行きたくない理由"]] = "";
+          row[idx["満足度"]] = String(sat);
+          row[idx["改善してほしいこと"]] = "";
+          row[idx["内勤者への良かった・悪かった点"]] = (rng() < 0.7) ? "連絡が早い" : "連絡が遅い";
+          row[idx["継続にあたっての要望"]] = "";
+        }));
+      }
+
+      return { tsv1: rows1.join("\n"), tsv6: rows6.join("\n") };
+    }
+
+    // =========================================================
+    // Dummy button behavior: ensure generateDummyTSV + textarea + load pipeline
+    // =========================================================
+    function fillDummyToTextareasAndLoad({ fromOverview, totalPerMonthState = 3000, totalPerMonthTSV = 500 } = {}) {
+      // 1) state高速生成（3000件）
+      statePrev2 = generateDummyStatesDirect("Jan-26", { seed: 1, totalPerMonth: totalPerMonthState });
+      stateCurr2 = generateDummyStatesDirect("Feb-26", { seed: 2, totalPerMonth: totalPerMonthState });
+
+      // 2) TSV生成（重くしないため500件既定。要件の「generateDummyTSV連携」満たす）
+      const prev = generateDummyTSV("Jan-26", { seed: 1, totalPerMonth: totalPerMonthTSV });
+      const curr = generateDummyTSV("Feb-26", { seed: 2, totalPerMonth: totalPerMonthTSV });
+
+      const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+
+      if (fromOverview) {
+        setVal("ovTsvPrev1to5", prev.tsv1);
+        setVal("ovTsvPrev6to10", prev.tsv6);
+        setVal("ovTsvCurr1to5", curr.tsv1);
+        setVal("ovTsvCurr6to10", curr.tsv6);
+      } else {
+        setVal("tsvPrev1to5", prev.tsv1);
+        setVal("tsvPrev6to10", prev.tsv6);
+        setVal("tsvCurr1to5", curr.tsv1);
+        setVal("tsvCurr6to10", curr.tsv6);
+      }
+
+      // 3) 貼付と同じ反映経路で統一
+      loadFromTextareas2(!!fromOverview);
+    }
+
+    function setMetric2(key) {
+      currentMetricKey2 = key;
+      document.getElementById("metric-next").classList.toggle("primary", key==="next");
+      document.getElementById("metric-sat").classList.toggle("primary", key==="sat");
+      document.getElementById("metric-greet").classList.toggle("primary", key==="greet");
+      if (svgRoot2) paintMap2(svgRoot2, getActiveState2().byPref, currentMetricKey2);
+      refreshOverviewFromMapStates();
+    }
+
+    function setMonth2(mode) {
+      currentMonthMode2 = mode;
+      document.getElementById("month-curr").classList.toggle("primary", mode==="curr");
+      document.getElementById("month-prev").classList.toggle("primary", mode==="prev");
+      if (svgRoot2) paintMap2(svgRoot2, getActiveState2().byPref, currentMetricKey2);
+      refreshOverviewFromMapStates();
+    }
+
+    function initMapTab() {
+      (async () => {
+        try {
+          svgRoot2 = await loadJapanSvg2("./japan.svg");
+          wirePrefClick2(svgRoot2);
+
+          document.getElementById("prefPopupClose2").addEventListener("click", hidePrefPopup2);
+
+          document.getElementById("prefPopup2").addEventListener("click", (e) => {
+            const btn = e.target.closest?.(".popupSiteBtn");
+            if (!btn) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const siteName = btn.getAttribute("data-site");
+            const prefCode = Number(btn.getAttribute("data-pref"));
+            if (!siteName || !prefCode) return;
+            openSiteDetailFromPopup2(siteName, prefCode);
+          });
+
+          document.getElementById("btnCloseModal2").addEventListener("click", () => closeModal2());
+          document.getElementById("siteDetailModal2").addEventListener("click", (e) => {
+            const close = e.target?.getAttribute?.("data-close");
+            if (close) document.getElementById("btnCloseModal2").click();
+          });
+          window.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+              const m = document.getElementById("siteDetailModal2");
+              if (m.classList.contains("is-open")) document.getElementById("btnCloseModal2").click();
+            }
+          });
+
+          document.getElementById("metric-next").addEventListener("click", ()=>setMetric2("next"));
+          document.getElementById("metric-sat").addEventListener("click", ()=>setMetric2("sat"));
+          document.getElementById("metric-greet").addEventListener("click", ()=>setMetric2("greet"));
+          document.getElementById("month-curr").addEventListener("click", ()=>setMonth2("curr"));
+          document.getElementById("month-prev").addEventListener("click", ()=>setMonth2("prev"));
+
+          document.getElementById("btnLoad").addEventListener("click", () => {
+            try { loadFromTextareas2(false); setMonth2("curr"); }
+            catch (e) { console.error(e); alert("更新でエラー。F12→Consoleの赤い行を確認してください。"); }
+          });
+
+          // Dummy: state(3000) + TSV(500) + load pipeline
+          document.getElementById("btnFillDummy").addEventListener("click", () => {
+            try {
+              fillDummyToTextareasAndLoad({ fromOverview:false, totalPerMonthState:3000, totalPerMonthTSV:500 });
+              document.getElementById("loadStatus").textContent = `ダミー生成: 各月3000件（高速） / TSV投入(各月500件)`;
+              setMonth2("curr");
+            } catch (e) {
+              console.error(e);
+              alert("ダミー入力でエラー。F12→Consoleの赤い行を確認してください。");
+            }
+          });
+
+          paintMap2(svgRoot2, new Map(), currentMetricKey2);
+          document.getElementById("mapStatus2").textContent += "（TSVを貼り付けて『更新』してください。ダミー高速も可）";
+        } catch (e) {
+          console.error(e);
+          document.getElementById("mapStatus2").textContent = "初期化エラー。F12→Consoleの赤い行を確認してください。";
+        }
+      })();
+    }
+
+    /* =========================================================
+      ① Overview tab
+    ========================================================= */
+    let ovMetricKey = "next";
+    let ovMonthMode = "curr";
+
+    function initOverviewTab() {
+      document.getElementById("ov-metric-next").addEventListener("click", ()=>setOvMetric("next"));
+      document.getElementById("ov-metric-sat").addEventListener("click", ()=>setOvMetric("sat"));
+      document.getElementById("ov-metric-greet").addEventListener("click", ()=>setOvMetric("greet"));
+      document.getElementById("ov-month-curr").addEventListener("click", ()=>setOvMonth("curr"));
+      document.getElementById("ov-month-prev").addEventListener("click", ()=>setOvMonth("prev"));
+
+      document.getElementById("ovBtnLoad").addEventListener("click", () => {
+        try { loadFromTextareas2(true); }
+        catch (e) { console.error(e); alert("①の更新でエラー。F12→Consoleの赤い行を確認してください。"); }
+      });
+
+      document.getElementById("ovBtnFillDummy").addEventListener("click", () => {
+        try {
+          fillDummyToTextareasAndLoad({ fromOverview:true, totalPerMonthState:3000, totalPerMonthTSV:500 });
+          document.getElementById("ovLoadStatus").textContent = `ダミー生成: 各月3000件（高速） / TSV投入(各月500件)`;
+        } catch (e) {
+          console.error(e);
+          alert("①ダミー入力でエラー。F12→Consoleの赤い行を確認してください。");
+        }
+      });
+
+      setAiSummaryMock();
+      refreshOverviewFromMapStates();
+    }
+
+    function setOvMetric(k){
+      ovMetricKey = k;
+      document.getElementById("ov-metric-next").classList.toggle("active", k==="next");
+      document.getElementById("ov-metric-sat").classList.toggle("active", k==="sat");
+      document.getElementById("ov-metric-greet").classList.toggle("active", k==="greet");
+      refreshOverviewFromMapStates();
+    }
+    function setOvMonth(m){
+      ovMonthMode = m;
+      document.getElementById("ov-month-curr").classList.toggle("active", m==="curr");
+      document.getElementById("ov-month-prev").classList.toggle("active", m==="prev");
+      refreshOverviewFromMapStates();
+    }
+
+    function setAiSummaryMock(){
+      const issues = [
+        "拠点間の体験品質にムラ（予約率・挨拶なし率で差が出やすい）",
+        "初回（1〜5回目）での離脱兆候が見える拠点がある"
+      ];
+      const causes = [
+        "導入（自己紹介/流れ説明）の省略がピーク時に起きる",
+        "次回予約の提案が担当者依存になっている"
+      ];
+      const actions = [
+        "導入30秒（自己紹介→流れ→質問）を標準化",
+        "終了前5分の予約提案テンプレ＋QR導線を統一"
+      ];
+      const trends = [
+        "『連絡』『指示』系の改善要望が出やすい（④で根拠確認）",
+        "母数が小さい拠点は率が振れやすいので回答数併記で判断"
+      ];
+
+      const fill = (id, arr) => {
+        const el = document.getElementById(id);
+        el.innerHTML = arr.map(x => `<li>${escapeHtml(x)}</li>`).join("");
+      };
+      fill("ovAiIssues", issues);
+      fill("ovAiCauses", causes);
+      fill("ovAiActions", actions);
+      fill("ovAiTrends", trends);
+    }
+
+    function flattenSitesFromState(state){
+      const out = [];
+      for (const p of state.byPref.values()){
+        for (const s of (p.sites || [])) out.push(s);
+      }
+      const m = new Map();
+      for (const s of out) m.set(s.siteName, s);
+      return [...m.values()];
+    }
+
+    function metricValue(site, metricKey){
+      if (metricKey === "next") return site.nextReservationRate;
+      if (metricKey === "sat") return site.satisfactionAvg;
+      if (metricKey === "greet") return site.noGreetingRate;
+      return null;
+    }
+    function metricDen(site, metricKey){
+      if (metricKey === "next") return site.next_den;
+      if (metricKey === "sat") return site.sat_cnt;
+      if (metricKey === "greet") return site.greet_den;
+      return 0;
+    }
+    function formatMetric(metricKey, v){
+      if (v == null) return "—";
+      if (metricKey === "sat") return v.toFixed(2);
+      return v.toFixed(1) + "%";
+    }
+    function deltaForMetric(metricKey, curr, prev){
+      if (curr == null || prev == null) return null;
+      return curr - prev;
+    }
+    function improvementScore(metricKey, delta){
+      if (delta == null) return null;
+      if (metricKey === "greet") return -delta;
+      return delta;
+    }
+
+    function renderSiteDeltaTable(elId, rows){
+      const el = document.getElementById(elId);
+      el.innerHTML = `
+        <tr><th>拠点</th><th>今月</th><th>前月比(Δ)</th><th>回答数</th></tr>
+        ${rows.map(r => `
+          <tr>
+            <td><span class="link" data-site="${escapeHtml(r.siteName)}">${escapeHtml(r.siteName)}</span></td>
+            <td>${escapeHtml(r.currText)}</td>
+            <td>${r.deltaText}</td>
+            <td>${r.n}</td>
+          </tr>
+        `).join("")}
+      `;
+      el.querySelectorAll("[data-site]").forEach(a => {
+        a.addEventListener("click", () => openSiteDetail(a.getAttribute("data-site")));
+      });
+    }
+
+    function setDeltaEl(id, d, mode){
+      const el = document.getElementById(id);
+      if (d == null) { el.textContent="—"; el.className="deltaFlat"; return; }
+      if (d > 0.0001) { el.className="deltaUp"; el.textContent = (mode==="int"?`+${Math.round(d)}`:mode==="pct"?`+${d.toFixed(1)}%`:`+${d.toFixed(2)}`); return; }
+      if (d < -0.0001) { el.className="deltaDown"; el.textContent = (mode==="int"?`${Math.round(d)}`:mode==="pct"?`${d.toFixed(1)}%`:`${d.toFixed(2)}`); return; }
+      el.className="deltaFlat"; el.textContent = (mode==="int"?"±0":mode==="pct"?"±0.0%":"±0.00");
+    }
+
+    function refreshOverviewFromMapStates(){
+      const monthLabel = ovMonthMode === "prev" ? "先月" : "今月";
+      document.getElementById("ovKpiMonthLabel").textContent = monthLabel;
+
+      const stCurr = stateCurr2;
+      const stPrev = statePrev2;
+      const hasAny = (stCurr.byPref && stCurr.byPref.size) || (stPrev.byPref && stPrev.byPref.size);
+
+      if (!hasAny) {
+        document.getElementById("ov-dataStatus").textContent = `（データ: TSV未読込なら—）`;
+        document.getElementById("ovKpiResponses").textContent = "—";
+        document.getElementById("ovKpiReserve").textContent = "—";
+        document.getElementById("ovKpiReserveN").textContent = "—";
+        document.getElementById("ovKpiSat").textContent = "—";
+        document.getElementById("ovKpiSatN").textContent = "—";
+        setDeltaEl("ovDeltaResponses", null, "int");
+        setDeltaEl("ovDeltaReserve", null, "pct");
+        setDeltaEl("ovDeltaSat", null, "num");
+        document.getElementById("ovImproveTop5").innerHTML = `<tr><th>拠点</th><th>今月</th><th>前月比</th><th>回答数</th></tr><tr><td colspan="4" class="muted">②または①でTSVを読み込みしてください（ダミー高速でもOK）</td></tr>`;
+        document.getElementById("ovWorst5").innerHTML = document.getElementById("ovImproveTop5").innerHTML;
+      } else {
+        const useState = ovMonthMode === "prev" ? stPrev : stCurr;
+        const sitesNow = flattenSitesFromState(useState);
+
+        const nResponses = sitesNow.reduce((a,s)=>a + (s.sat_cnt||0), 0);
+        document.getElementById("ovKpiResponses").textContent = nResponses ? nResponses.toLocaleString("ja-JP") : "—";
+
+        const aggCompany = (state) => {
+          let next_num=0,next_den=0,sat_sum=0,sat_cnt=0;
+          for (const p of state.byPref.values()){
+            next_num += p.next_num||0; next_den += p.next_den||0;
+            sat_sum += p.sat_sum||0; sat_cnt += p.sat_cnt||0;
+          }
+          return {
+            reserve: calcRate(next_num, next_den),
+            reserveN: next_den,
+            sat: calcAvg(sat_sum, sat_cnt),
+            satN: sat_cnt,
+            responsesApprox: sat_cnt
+          };
+        };
+
+        const compCurr = aggCompany(stCurr);
+        const compPrev = aggCompany(stPrev);
+        const compUse = (ovMonthMode==="prev") ? compPrev : compCurr;
+
+        document.getElementById("ovKpiReserve").textContent = compUse.reserve==null ? "—" : (compUse.reserve.toFixed(1)+"%");
+        document.getElementById("ovKpiReserveN").textContent = compUse.reserveN ? compUse.reserveN.toLocaleString("ja-JP") : "—";
+        document.getElementById("ovKpiSat").textContent = compUse.sat==null ? "—" : compUse.sat.toFixed(2);
+        document.getElementById("ovKpiSatN").textContent = compUse.satN ? compUse.satN.toLocaleString("ja-JP") : "—";
+
+        const dResp = (compCurr.responsesApprox && compPrev.responsesApprox) ? (compCurr.responsesApprox - compPrev.responsesApprox) : null;
+        const dReserveRaw = (compCurr.reserve!=null && compPrev.reserve!=null) ? (compCurr.reserve - compPrev.reserve) : null;
+        const dSatRaw = (compCurr.sat!=null && compPrev.sat!=null) ? (compCurr.sat - compPrev.sat) : null;
+
+        // Δは要件どおり保険クランプ（表示）
+        const dReserve = dReserveRaw == null ? null : clamp(dReserveRaw, DUMMY_RANGES.deltaPt.lo, DUMMY_RANGES.deltaPt.hi);
+        const dSat = dSatRaw == null ? null : clamp(dSatRaw, -0.8, 0.8);
+
+        setDeltaEl("ovDeltaResponses", dResp, "int");
+        setDeltaEl("ovDeltaReserve", dReserve, "pct");
+        setDeltaEl("ovDeltaSat", dSat, "num");
+
+        const currSites = flattenSitesFromState(stCurr);
+        const prevSites = flattenSitesFromState(stPrev);
+        const prevByName = new Map(prevSites.map(s=>[s.siteName, s]));
+
+        // 指標ごとのMIN回答数（根本対策）
+        const MIN_N_BY_METRIC = { next: 12, sat: 12, greet: 12 };
+        const MIN_N = MIN_N_BY_METRIC[ovMetricKey] ?? 12;
+
+        const rows = currSites.map(s => {
+          const prev = prevByName.get(s.siteName);
+          const currV = metricValue(s, ovMetricKey);
+          const prevV = prev ? metricValue(prev, ovMetricKey) : null;
+
+          let d = deltaForMetric(ovMetricKey, currV, prevV);
+          if (d != null) {
+            // Δ表示は-8〜+8ptにクランプ（満足度は±0.8運用）
+            if (ovMetricKey === "sat") d = clamp(d, -0.8, 0.8);
+            else d = clamp(d, DUMMY_RANGES.deltaPt.lo, DUMMY_RANGES.deltaPt.hi);
+          }
+
+          const n = metricDen(s, ovMetricKey) || 0;
+          if (n < MIN_N) return null;
+
+          const score = improvementScore(ovMetricKey, d);
+          const currText = formatMetric(ovMetricKey, currV);
+          const deltaText = (d==null) ? "—"
+            : (ovMetricKey==="sat"
+                ? ((d>=0?"+":"") + d.toFixed(2))
+                : ((d>=0?"+":"") + d.toFixed(1) + "%"));
+          return { siteName: s.siteName, currText, deltaText, n, score };
+        }).filter(Boolean).filter(r => r.score != null);
+
+        const improve = rows.slice().sort((a,b)=> (b.score - a.score) || (b.n - a.n)).slice(0,5);
+        const worst = rows.slice().sort((a,b)=> (a.score - b.score) || (b.n - a.n)).slice(0,5);
+
+        renderSiteDeltaTable("ovImproveTop5", improve);
+        renderSiteDeltaTable("ovWorst5", worst);
+
+        document.getElementById("ov-dataStatus").textContent =
+          `（指標:${metricDefs[ovMetricKey].label} / 前月比でTop・Worst算出 / MIN回答数=${MIN_N} / Δはクランプ）`;
+      }
+
+      renderOshiMock();
+    }
+
+    function renderOshiMock(){
+      const el = document.getElementById("ovOshiTop5");
+      const mock = [
+        { leader:"田中", site:"新宿支店", votes: 42, n: 180 },
+        { leader:"鈴木", site:"仙台東口サテライト", votes: 31, n: 120 },
+        { leader:"佐藤", site:"高田馬場サテライト", votes: 28, n: 95 },
+        { leader:"山本", site:"横浜支店", votes: 22, n: 110 },
+        { leader:"伊藤", site:"千葉支店", votes: 19, n: 80 },
+      ];
+      el.innerHTML = `
+        <tr><th>リーダー名（拠点名）</th><th>推し票数</th><th>回答数</th></tr>
+        ${mock.map(r => `
+          <tr>
+            <td><strong>${escapeHtml(r.leader)}</strong> <span class="pill gray">${escapeHtml(r.site)}</span></td>
+            <td>${r.votes}</td>
+            <td>${r.n}</td>
+          </tr>
+        `).join("")}
+      `;
+    }
+  </script>
+</body>
+</html>
