@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -2482,8 +2482,8 @@
           // Dummy: state(3000) + TSV(500) + load pipeline
           document.getElementById("btnFillDummy").addEventListener("click", () => {
             try {
-              fillDummyToTextareasAndLoad({ fromOverview:false, totalPerMonthState:3000, totalPerMonthTSV:500 });
-              document.getElementById("loadStatus").textContent = `ダミー生成: 各月3000件（高速） / TSV投入(各月500件)`;
+              fillDummyToTextareasAndLoad({ fromOverview:false, totalPerMonthState:3000, totalPerMonthTSV:3000 });
+              document.getElementById("loadStatus").textContent = `ダミー生成: 各月3000件（高速） / TSV投入(各月3000件)`;
               setMonth2("curr");
             } catch (e) {
               console.error(e);
@@ -2520,8 +2520,8 @@
 
       document.getElementById("ovBtnFillDummy").addEventListener("click", () => {
         try {
-          fillDummyToTextareasAndLoad({ fromOverview:true, totalPerMonthState:3000, totalPerMonthTSV:500 });
-          document.getElementById("ovLoadStatus").textContent = `ダミー生成: 各月3000件（高速） / TSV投入(各月500件)`;
+          fillDummyToTextareasAndLoad({ fromOverview:true, totalPerMonthState:3000, totalPerMonthTSV:3000 });
+          document.getElementById("ovLoadStatus").textContent = `ダミー生成: 各月3000件（高速） / TSV投入(各月3000件)`;
         } catch (e) {
           console.error(e);
           alert("①ダミー入力でエラー。F12→Consoleの赤い行を確認してください。");
@@ -2768,3 +2768,5 @@
   </script>
 </body>
 </html>
+
+
