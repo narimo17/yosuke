@@ -79,6 +79,11 @@
     --sp-6: 24px;
     --sp-8: 32px;
     --sp-10: 40px;
+
+    /* Readability helpers */
+    --text-subtle: rgba(71, 85, 105, 1);  /* slate-ish */
+    --text-weak: rgba(100, 116, 139, 1);
+    --focus-ring: rgba(31, 132, 244, 0.35);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -205,9 +210,10 @@
     font-weight: var(--font-weight-medium);
     font-size: var(--text-sm);
     line-height: 1.2;
-    transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease;
   }
   .btn:hover{ background: var(--muted); }
+  .btn:focus{ outline: none; box-shadow: 0 0 0 4px var(--focus-ring); }
 
   .btn.primary{
     background: var(--primary);
@@ -314,9 +320,10 @@
     cursor:pointer;
     font-weight: var(--font-weight-medium);
     font-size: var(--text-sm);
-    transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease;
   }
   .metric-btn:hover{ background: var(--muted); color: var(--primary); }
+  .metric-btn:focus{ outline: none; box-shadow: 0 0 0 4px var(--focus-ring); }
   .metric-btn.active{
     background: rgba(232,236,255,1);
     border-color: var(--primary);
@@ -479,9 +486,10 @@
     padding: 10px 12px;
     border-radius: var(--radius);
     cursor:pointer;
-    transition: background-color .15s ease;
+    transition: background-color .15s ease, box-shadow .15s ease;
   }
   .popupSiteBtn:hover{ background: var(--muted); }
+  .popupSiteBtn:focus{ outline: none; box-shadow: 0 0 0 4px var(--focus-ring); }
   .kv{ display:flex; gap: var(--sp-2); flex-wrap:wrap; align-items:center; margin-top: var(--sp-2); font-size: var(--text-xs); color: var(--muted-foreground); }
   .kv b{ color: var(--foreground); }
 
@@ -519,9 +527,10 @@
     padding: 10px 20px;
     cursor:pointer;
     font-weight: var(--font-weight-medium);
-    transition: background-color .15s ease, border-color .15s ease;
+    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
   }
   .modalCloseBtn:hover{ background: var(--primary-hover); border-color: var(--primary-hover); }
+  .modalCloseBtn:focus{ outline: none; box-shadow: 0 0 0 4px var(--focus-ring); }
   .modalBody{ padding: 20px 24px 24px 24px; }
 
   select{
@@ -544,7 +553,7 @@
     font-weight: var(--font-weight-normal);
     font-size: var(--text-sm);
   }
-  .input::placeholder{ color: rgba(184,184,184,1); }
+  .input::placeholder{ color: rgba(148,148,148,1); }
 
   .analysis-grid{
     display:grid;
@@ -623,6 +632,7 @@
     font-weight: var(--font-weight-medium);
   }
   .pop-close:hover{ background: var(--muted); }
+
   .pop-body{ padding: 20px 24px 24px 24px; }
 
   .ng-item{
@@ -633,7 +643,7 @@
     margin-bottom: var(--sp-3);
   }
   .ng-meta{
-    color: var(--muted-foreground);
+    color: var(--text-subtle);
     font-size: var(--text-xs);
     margin-bottom: var(--sp-2);
     display:flex;
@@ -698,7 +708,7 @@
     background: var(--primary);
   }
   .performer-name{ font-size: var(--text-md); font-weight: var(--font-weight-bold); color: var(--foreground); }
-  .performer-detail{ font-size: var(--text-sm); color: var(--muted-foreground); font-weight: var(--font-weight-normal); }
+  .performer-detail{ font-size: var(--text-sm); color: var(--text-subtle); font-weight: var(--font-weight-normal); }
 
   .action-box{
     margin-top: var(--sp-8);
@@ -746,9 +756,56 @@
     font-weight: var(--font-weight-medium);
     cursor:pointer;
     box-shadow: var(--elevation-md);
-    transition: background-color .15s ease;
+    transition: background-color .15s ease, box-shadow .15s ease;
   }
   #backToTop:hover{ background: var(--muted); }
+  #backToTop:focus{ outline: none; box-shadow: 0 0 0 4px var(--focus-ring); }
+
+  /* ===== Missing modal classes (were referenced but not styled) ===== */
+  .kpiGrid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-5);
+  }
+  .kpiCard{
+    background: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--sp-4);
+  }
+  .kpiLabel{
+    font-size: var(--text-xs);
+    color: var(--muted-foreground);
+    font-weight: var(--font-weight-medium);
+  }
+  .kpiValue{
+    margin-top: 6px;
+    font-size: 22px;
+    font-weight: var(--font-weight-bold);
+    color: var(--foreground);
+    line-height: 1.2;
+  }
+  .detailGrid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-5);
+  }
+  .panelW{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--sp-5);
+  }
+  .panelTitleW{
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--sp-2);
+  }
+  .panelW ul, .panelW ol{
+    padding-left: 1.2rem;
+    line-height: 1.85;
+    color: var(--foreground);
+  }
 
   /* Responsive */
   @media (max-width: 1100px){
@@ -756,6 +813,7 @@
     .grid2{ grid-template-columns: 1fr; }
     .content{ padding: var(--sp-5); }
     .header, .tabs{ padding-left: var(--sp-5); padding-right: var(--sp-5); }
+    .detailGrid{ grid-template-columns: 1fr; }
   }
   @media (max-width: 900px){
     .grid2txt{ grid-template-columns: 1fr; }
@@ -798,7 +856,7 @@
             <div class="kpi-card">
               <div class="kpi-header">
                 <div class="kpi-icon">👥</div>
-                <div><div class="kpi-label">アンケート回答者</div></div>
+                <div><div class="kpi-label">アンケート回答数</div></div>
               </div>
               <div class="kpi-value" id="ovKpiResponses">—</div>
               <div class="kpi-sub"><span class="muted">対象月</span><span id="ovKpiMonthLabel">—</span></div>
@@ -969,14 +1027,14 @@
           <h3 class="chart-title">🚨 要改善リーダー・拠点（NGワード × また働きたい=いいえ）</h3>
 
           <div style="display:flex; gap:.75rem; flex-wrap:wrap; align-items:center; margin-bottom: 0.25rem;">
-            <span style="color:#94a3b8; font-weight:800;">期間</span>
+            <span style="color: var(--text-weak); font-weight:800;">期間</span>
             <select id="impDaysSel" class="select">
               <option value="30">直近30日（モック）</option>
               <option value="90">直近90日（モック）</option>
               <option value="365">直近365日（モック）</option>
             </select>
 
-            <span style="color:#94a3b8; font-weight:800;">検索</span>
+            <span style="color: var(--text-weak); font-weight:800;">検索</span>
             <input id="impQuery" class="input" placeholder="例：新宿 / 田中 / 無視" style="min-width: 280px;">
 
             <button class="btn primary" id="impApplyBtn" type="button">反映</button>
@@ -996,7 +1054,7 @@
             <div class="panel">
               <div class="panel-title">要改善リーダー（上位）</div>
               <table class="table" id="leaderTable"></table>
-              <div style="color:#94a3b8; margin-top:.5rem; font-size:.85rem;">※（拠点名）は「いいえ率が最悪の拠点」</div>
+              <div style="color: var(--text-weak); margin-top:.5rem; font-size:.85rem;">※（拠点名）は「いいえ率が最悪の拠点」</div>
             </div>
 
             <div class="panel">
@@ -1097,20 +1155,20 @@
           <div class="analysis-grid">
             <div class="analysis-card">
               <div class="analysis-count" id="hpCount">—</div>
-              <div class="analysis-label">社員勧誘候補</div>
+              <div class="analysis-label">社員勧誘候補（表示件数）</div>
               <div class="keyword-tags" id="hpRuleTag"></div>
             </div>
             <div class="analysis-card">
               <div class="analysis-count" id="almostCount">—</div>
-              <div class="analysis-label">育成/要観察</div>
+              <div class="analysis-label">育成/要観察（表示件数）</div>
               <div class="keyword-tags" id="almostTag"></div>
             </div>
           </div>
 
-          <div class="section-title">社員勧誘候補リスト（4名）</div>
+          <div class="section-title" id="hpSectionTitle">社員勧誘候補リスト（—名）</div>
           <div class="performers-grid" id="hpGrid"></div>
 
-          <div class="section-title">育成/要観察（4名）</div>
+          <div class="section-title" id="almostSectionTitle">育成/要観察（—名）</div>
           <div class="performers-grid" id="almostGrid"></div>
 
           <div class="action-box">
@@ -1519,8 +1577,19 @@
       function renderTalentMock() {
         const { hp, almost } = aggregateTalentFromLeaderEvals(leaderEvalMock);
 
-        safeGet("hpCount").textContent = hp.length;
-        safeGet("almostCount").textContent = almost.length;
+        const hpTop4 = hp.slice(0, 4);
+        const almostTop4 = almost.slice(0, 4);
+
+        // ★FIX: 画面の「表示件数」に合わせる（4人ずつ表示の整合）
+        const hpCountEl = safeGet("hpCount");
+        const almostCountEl = safeGet("almostCount");
+        if (hpCountEl) hpCountEl.textContent = hpTop4.length;
+        if (almostCountEl) almostCountEl.textContent = almostTop4.length;
+
+        const hpTitle = safeGet("hpSectionTitle");
+        const almostTitle = safeGet("almostSectionTitle");
+        if (hpTitle) hpTitle.textContent = `社員勧誘候補リスト（${hpTop4.length}名）`;
+        if (almostTitle) almostTitle.textContent = `育成/要観察（${almostTop4.length}名）`;
 
         safeGet("hpRuleTag").innerHTML = `
           <span class="keyword-tag">参加回数 ≥ ${HP_RULES.minSessions}</span>
@@ -1542,7 +1611,7 @@
           const div = document.createElement("div");
           div.className = "performer-card";
           const sub = subBadgeText
-            ? `<div class="performer-badge" style="background: rgba(148,163,184,0.18); color:#e2e8f0; border:1px solid rgba(148,163,184,0.25); margin-left:.5rem; text-transform:none;">${escapeHtml(subBadgeText)}</div>`
+            ? `<div class="performer-badge" style="background: rgba(148,163,184,0.18); color: var(--foreground); border:1px solid rgba(148,163,184,0.25); margin-left:.5rem; text-transform:none;">${escapeHtml(subBadgeText)}</div>`
             : "";
           div.innerHTML = `
             <div style="display:flex; gap:.5rem; align-items:center; flex-wrap:wrap;">
@@ -1562,15 +1631,12 @@
           return div;
         };
 
-        const hpTop4 = hp.slice(0, 4);
-        const almostTop4 = almost.slice(0, 4);
-
         for (const p of hpTop4) {
-          hpGrid.appendChild(makeCard(p, "社員勧誘候補 (High Performer)", "background: linear-gradient(135deg, #10b981 0%, #059669 100%);"));
+          hpGrid.appendChild(makeCard(p, "社員勧誘候補 (High Performer)", "background: linear-gradient(135deg, rgba(88,193,30,1) 0%, rgba(50,160,18,1) 100%);"));
         }
         for (const p of almostTop4) {
           const reason = p.almostReason ? `理由: ${p.almostReason}` : "";
-          almostGrid.appendChild(makeCard(p, "育成/要観察", "background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);", reason));
+          almostGrid.appendChild(makeCard(p, "育成/要観察", "background: linear-gradient(135deg, rgba(31,132,244,1) 0%, rgba(29,32,136,1) 100%);", reason));
         }
 
         const actions = safeGet("hpActions");
@@ -1893,7 +1959,7 @@
                 <div style="font-weight:900;">${escapeHtml(s.siteName)}</div>
                 ${pillHtml(labelForClass(clsOverall), clsOverall)}
               </div>
-              <div style="color:#cbd5e1;font-size:12px;margin-top:4px;">
+              <div class="muted" style="font-size:12px;margin-top:4px;">
                 予約: ${fmtPct(s.nextReservationRate)}（回答数=${s.next_den}） /
                 満足: ${fmtNum(s.satisfactionAvg,2)}（回答数=${s.sat_cnt}） /
                 挨拶なし: ${fmtPct(s.noGreetingRate)}（回答数=${s.greet_den}）
@@ -2259,7 +2325,7 @@
     }
 
     // Dummy button behavior
-    function fillDummyToTextareasAndLoad({ fromOverview, totalPerMonthState = 3000, totalPerMonthTSV = 500 } = {}) {
+    function fillDummyToTextareasAndLoad({ fromOverview, totalPerMonthState = 3000, totalPerMonthTSV = 3000 } = {}) {
       // 1) state高速生成（3000件）
       statePrev2 = generateDummyStatesDirect("Jan-26", { seed: 1, totalPerMonth: totalPerMonthState });
       stateCurr2 = generateDummyStatesDirect("Feb-26", { seed: 2, totalPerMonth: totalPerMonthState });
@@ -2352,7 +2418,7 @@
             try {
               fillDummyToTextareasAndLoad({ fromOverview:false, totalPerMonthState:3000, totalPerMonthTSV:3000 });
               const ls = safeGet("loadStatus");
-              if (ls) ls.textContent = `ダミー生成: 各月3000件（高速） / TSV投入(各月500件)`;
+              if (ls) ls.textContent = `ダミー生成: 各月3000件（高速） / TSV投入(各月3000件)`;
               setMonth2("curr");
             } catch (e) {
               console.error(e);
@@ -2391,9 +2457,9 @@
 
       on(safeGet("ovBtnFillDummy"), "click", () => {
         try {
-          fillDummyToTextareasAndLoad({ fromOverview:true, totalPerMonthState:3000, totalPerMonthTSV:500 });
+          fillDummyToTextareasAndLoad({ fromOverview:true, totalPerMonthState:3000, totalPerMonthTSV:3000 });
           const st = safeGet("ovLoadStatus");
-          if (st) st.textContent = `ダミー生成: 各月3000件（高速） / TSV投入(各月500件)`;
+          if (st) st.textContent = `ダミー生成: 各月3000件（高速） / TSV投入(各月3000件)`;
         } catch (e) {
           console.error(e);
           alert("①ダミー入力でエラー。F12→Consoleの赤い行を確認してください。");
@@ -2645,6 +2711,28 @@
     /* =========================================================
       Modal contents (site detail)  ※簡易版（元の構造を維持）
     ========================================================= */
+    function buildAiMock2(site){
+      // 未定義で落ちるのを防ぐ（要件④）
+      const cls = (site && typeof site === "object") ? {
+        next: site.nextReservationRate,
+        sat: site.satisfactionAvg,
+        greet: site.noGreetingRate
+      } : { next:null, sat:null, greet:null };
+
+      const issues = [];
+      if (cls.next != null && cls.next < 60) issues.push("次回予約の提案が弱い可能性");
+      if (cls.sat != null && cls.sat < 3.8) issues.push("作業体験の満足度が伸び悩み");
+      if (cls.greet != null && cls.greet >= 20) issues.push("挨拶（自己紹介）不足の可能性");
+      if (!issues.length) issues.push("大きな異常は見られません（要モニタリング）");
+
+      return {
+        issues,
+        causes: ["ピーク時の導入省略", "担当者ごとの運用差", "次回予約の導線が統一されていない"],
+        actions: ["導入30秒の標準化", "終了前5分の予約提案テンプレ適用", "新人OJTのチェックリスト化"],
+        trends: ["回答数が少ない場合は率が振れやすい", "改善は2〜4週遅れて指標に反映されがち"]
+      };
+    }
+
     function renderSiteDetailModal2({ site, prefCode, monthLabel }) {
       safeGet("modalSubTitle2").textContent = `${monthLabel} / 都道府県コード ${prefCode} / ${site.siteName}`;
 
