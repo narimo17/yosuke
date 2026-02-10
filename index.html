@@ -1,677 +1,799 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HR・CS Analytics Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* =========================
+    DECA Cloud Design System (CSS vars)
+    - 内容(HTML/ID/JS)は不変、見た目のみ差し替え
+  ========================= */
+  :root{
+    /* Colors */
+    --primary: rgba(29, 32, 136, 1);
+    --primary-hover: rgba(21, 26, 94, 1);
+    --primary-foreground: rgba(255, 255, 255, 1);
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-      color: #e2e8f0;
-      overflow-x: hidden;
-      min-height: 100vh;
-    }
+    --secondary: rgba(31, 132, 244, 1);
+    --secondary-hover: rgba(18, 112, 214, 1);
+    --secondary-foreground: rgba(255, 255, 255, 1);
 
-    .dashboard {
-      min-height: 100vh;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .dashboard.loaded { opacity: 1; transform: translateY(0); }
+    --accent: rgba(248, 118, 64, 1);
+    --accent-foreground: rgba(255, 255, 255, 1);
 
-    .header {
-      background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
-      padding: 2rem 3rem;
-      border-bottom: 3px solid rgba(139, 92, 246, 0.3);
-      box-shadow: 0 10px 40px rgba(124, 58, 237, 0.2);
-      position: relative;
-      overflow: hidden;
-    }
-    .header::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%);
-      animation: shimmer 3s infinite;
-    }
-    @keyframes shimmer { 0% { transform: translateX(-100%);} 100% { transform: translateX(100%);} }
+    --destructive: rgba(249, 53, 73, 1);
+    --destructive-hover: rgba(217, 54, 74, 1);
+    --destructive-foreground: rgba(255, 255, 255, 1);
 
-    .header-content { position: relative; z-index: 1; }
-    .title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 2.5rem;
-      font-weight: 900;
-      background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: 2px;
-      margin-bottom: 0.5rem;
-    }
-    .subtitle {
-      font-size: 1rem;
-      color: #c7d2fe;
-      font-weight: 500;
-      letter-spacing: 1px;
-    }
+    --background: rgba(249, 249, 250, 1);
+    --foreground: rgba(51, 51, 51, 1);
 
-    .tabs {
-      display: flex;
-      gap: 1rem;
-      padding: 1.5rem 3rem;
-      background: rgba(15, 23, 42, 0.5);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-      flex-wrap: wrap;
-    }
-    .tab {
-      padding: 0.75rem 1.5rem;
-      background: transparent;
-      border: 2px solid transparent;
-      border-radius: 12px;
-      color: #94a3b8;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      font-size: 0.95rem;
-    }
-    .tab:hover {
-      color: #e2e8f0;
-      border-color: rgba(139, 92, 246, 0.5);
-      transform: translateY(-2px);
-    }
-    .tab.active {
-      background: linear-gradient(135deg, #7c3aed 0%, #1e40af 100%);
-      border-color: #8b5cf6;
-      color: #fff;
-      box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
-    }
+    --card: rgba(255, 255, 255, 1);
+    --card-foreground: rgba(51, 51, 51, 1);
 
-    .content { padding: 2rem 3rem; max-width: 1800px; margin: 0 auto; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+    --muted: rgba(249, 249, 250, 1);
+    --muted-foreground: rgba(102, 102, 102, 1);
 
-    .chart-container {
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
-      padding: 2rem;
-      border-radius: 20px;
-      border: 1px solid rgba(148, 163, 184, 0.1);
-      backdrop-filter: blur(10px);
-      margin-bottom: 2rem;
-      position: relative;
-    }
-    .chart-title {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: #e2e8f0;
-      margin-bottom: 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
+    --border: rgba(207, 207, 215, 1);
+    --input-background: rgba(255, 255, 255, 1);
 
-    .muted { color:#94a3b8; }
-    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    /* Chart palette (for future) */
+    --chart-1: rgba(29, 32, 136, 1);
+    --chart-2: rgba(31, 132, 244, 1);
+    --chart-3: rgba(88, 193, 30, 1);
+    --chart-4: rgba(249, 53, 73, 1);
+    --chart-5: rgba(248, 118, 64, 1);
 
-    .btn {
-      background: transparent;
-      color:#cbd5e1;
-      border:1px solid rgba(148,163,184,.25);
-      padding:8px 12px;
-      border-radius:10px;
-      cursor:pointer;
-      font-weight: 800;
-    }
-    .btn.primary {
-      background: linear-gradient(135deg,#7c3aed,#1e40af);
-      border-color:#8b5cf6;
-      color:#fff;
-    }
-    .btn:active { transform: translateY(1px); }
+    /* Typography scale */
+    --text-4xl: 40px;
+    --text-2xl: 32px;
+    --text-lg: 20px;
+    --text-md: 18px;
+    --text-base: 16px;
+    --text-sm: 14px;
+    --text-xs: 12px;
 
-    .pill {
-      display:inline-flex;
-      align-items:center;
-      padding:2px 10px;
-      border-radius:999px;
-      font-weight:900;
-      letter-spacing: .02em;
-      color:#fff;
-      font-size:12px;
-      border: 1px solid rgba(255,255,255,0.10);
-      box-shadow: 0 6px 18px rgba(0,0,0,0.22);
-      line-height: 1.4;
-      white-space: nowrap;
-    }
-    .pill.blue   { background: rgba(59,130,246,0.95); }
-    .pill.yellow { background: rgba(245,158,11,0.95); }
-    .pill.red    { background: rgba(239,68,68,0.95); }
-    .pill.gray   { background: rgba(71,85,105,0.95); }
+    --font-weight-bold: 700;
+    --font-weight-medium: 500;
+    --font-weight-normal: 400;
 
-    /* ===== ① Executive summary ===== */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 0.75rem;
-    }
-    .kpi-card {
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
-      padding: 1.6rem;
-      border-radius: 20px;
-      border: 1px solid rgba(148, 163, 184, 0.1);
-      backdrop-filter: blur(10px);
-      transition: all 0.25s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    .kpi-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 16px 50px rgba(139, 92, 246, 0.22);
-      border-color: rgba(139, 92, 246, 0.35);
-    }
-    .kpi-header { display:flex; align-items:center; gap: 1rem; margin-bottom: .8rem; }
-    .kpi-icon {
-      width: 44px; height: 44px; border-radius: 12px;
-      display:flex; align-items:center; justify-content:center;
-      background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
-      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
-      font-size: 1.3rem;
-      flex: 0 0 auto;
-    }
-    .kpi-label { font-size: .85rem; color:#94a3b8; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
-    .kpi-value {
-      font-size: 2.35rem;
-      font-weight: 900;
-      background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: .2rem;
-      line-height: 1.05;
-    }
-    .kpi-sub { font-size: .9rem; color:#94a3b8; font-weight: 800; display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; }
-    .kpi-trend-mini{
-      margin-top: .45rem;
-      font-size: .85rem;
-      color:#cbd5e1;
-      display:flex;
-      gap:.6rem;
-      align-items:center;
-      flex-wrap:wrap;
-      opacity: .9;
-    }
-    .deltaUp { color:#16a34a; font-weight: 900; }
-    .deltaDown { color:#ef4444; font-weight: 900; }
-    .deltaFlat { color:#94a3b8; font-weight: 900; }
+    /* Radius */
+    --radius: 4px;
+    --radius-md: 4px;
+    --radius-card: 8px;
 
-    .metric-switch { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; margin: .35rem 0 0.75rem; }
-    .metric-btn {
-      padding: .45rem .75rem;
-      border-radius: 12px;
-      border: 1px solid rgba(148,163,184,.22);
-      background: rgba(2,6,23,.18);
-      color:#cbd5e1;
-      cursor:pointer;
-      font-weight: 900;
-    }
-    .metric-btn.active { background: linear-gradient(135deg,#7c3aed,#1e40af); border-color:#8b5cf6; color:#fff; }
+    /* Elevation */
+    --elevation-sm: 0 6px 18px rgba(0,0,0,0.10);
+    --elevation-md: 0 14px 40px rgba(0,0,0,0.12);
 
-    .ai-summary-grid {
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-top: .75rem;
-    }
-    @media (max-width: 1100px){
-      .ai-summary-grid{ grid-template-columns: 1fr; }
-      .content{ padding: 1.25rem; }
-      .header, .tabs{ padding-left: 1.25rem; padding-right: 1.25rem; }
-    }
-    .ai-card {
-      background: rgba(2,6,23,.18);
-      border: 1px solid rgba(148,163,184,.12);
-      border-radius: 16px;
-      padding: 1rem 1rem;
-    }
-    .ai-card h4 { font-size: 1rem; margin-bottom: .5rem; }
-    .ai-card ul { padding-left: 1.2rem; line-height: 1.85; color:#cbd5e1; }
-    .ai-card li { margin: .2rem 0; }
+    /* Spacing (4px grid) */
+    --sp-1: 4px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-5: 20px;
+    --sp-6: 24px;
+    --sp-8: 32px;
+    --sp-10: 40px;
+  }
 
-    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
-    @media (max-width: 1100px){ .grid2{ grid-template-columns: 1fr; } }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    .panel {
-      background: rgba(2,6,23,.18);
-      border: 1px solid rgba(148,163,184,.12);
-      border-radius: 16px;
-      padding: 1rem 1rem;
-    }
-    .panel-title { font-weight: 900; margin-bottom: .75rem; color:#e2e8f0; display:flex; align-items:center; gap:.5rem; }
-    .table { width:100%; border-collapse: collapse; overflow:hidden; border-radius: 12px; border: 1px solid rgba(148,163,184,0.12); }
-    .table th, .table td {
-      padding: .7rem .8rem;
-      border-bottom: 1px solid rgba(148,163,184,0.10);
-      vertical-align: top;
-      font-size: .92rem;
-      color: #cbd5e1;
-      text-align: left;
-    }
-    .table th { background: rgba(2,6,23,.25); font-weight: 900; color: #e2e8f0; }
-    .table tr:hover td { background: rgba(124,58,237,.08); }
-    .link { color:#a5b4fc; text-decoration: underline; cursor:pointer; font-weight: 900; }
+  body{
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--background);
+    color: var(--foreground);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
 
-    details.low {
-      margin-top: 1.25rem;
-      background: rgba(2,6,23,.12);
-      border: 1px dashed rgba(148,163,184,.18);
-      border-radius: 16px;
-      padding: .85rem 1rem;
-    }
-    details.low > summary {
-      cursor: pointer;
-      font-weight: 900;
-      color:#cbd5e1;
-      list-style: none;
-    }
-    details.low > summary::-webkit-details-marker { display:none; }
-    details.low .hint { margin-top:.25rem; color:#94a3b8; font-size:.85rem; line-height: 1.6; }
+  .dashboard{
+    min-height: 100vh;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity .35s ease, transform .35s ease;
+  }
+  .dashboard.loaded{ opacity:1; transform: translateY(0); }
 
-    /* ===== ② Map tab ===== */
-    .map-wrap { max-width: 1200px; margin: 0 auto; }
-    .map-card { background: rgba(15,23,42,.6); border:1px solid rgba(148,163,184,.15); border-radius:16px; padding:14px; margin-top:12px; }
-    #mapContainer2 {
-      height: 600px; border-radius: 16px; overflow:hidden;
-      background: linear-gradient(135deg, #111827 0%, #0b1220 100%);
-      border:1px solid rgba(148,163,184,.15);
-      position: relative;
-    }
-    #mapContainer2 svg { width:100%; height:100%; display:block; }
+  /* Header */
+  .header{
+    background: var(--card);
+    padding: var(--sp-8) var(--sp-8);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--elevation-sm);
+    position: relative;
+    overflow: hidden;
+  }
+  .header-content{ position: relative; z-index: 1; }
 
-    #mapContainer2 svg .prefecture { cursor:pointer; transition: filter .15s ease; }
-    #mapContainer2 svg .prefecture:hover { filter: brightness(1.15); }
+  .title{
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--foreground);
+    letter-spacing: 0;
+    margin-bottom: var(--sp-2);
+  }
+  .subtitle{
+    font-size: var(--text-sm);
+    color: var(--muted-foreground);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0;
+  }
+  #globalStatus{
+    margin-top: var(--sp-3);
+    color: var(--muted-foreground);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--text-xs);
+    line-height: 1.8;
+  }
+  #globalStatus b { color: var(--foreground); }
 
-    #mapContainer2 svg .prefecture path,
-    #mapContainer2 svg .prefecture polygon {
-      stroke: rgba(255, 255, 255, 0.22);
-      stroke-width: 0.6;
-      stroke-linejoin: round;
-      stroke-linecap: round;
-    }
-    #mapContainer2 svg .boundary-line { opacity: 1; }
-    #mapContainer2 svg .boundary-line line,
-    #mapContainer2 svg .boundary-line path,
-    #mapContainer2 svg .boundary-line polyline,
-    #mapContainer2 svg .boundary-line polygon {
-      stroke: rgba(255, 255, 255, 0.96) !important;
-      stroke-width: 6 !important;
-      stroke-linejoin: round;
-      stroke-linecap: round;
-      filter:
-        drop-shadow(0 0 0 rgba(0, 0, 0, 0.90))
-        drop-shadow(0 0 1.2px rgba(0, 0, 0, 0.85))
-        drop-shadow(0 0 2.2px rgba(0, 0, 0, 0.70));
-    }
-    #mapContainer2 [data-code="47"] { display:none; }
+  /* Tabs */
+  .tabs{
+    display:flex;
+    gap: var(--sp-2);
+    padding: var(--sp-4) var(--sp-8);
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .tab{
+    padding: 10px 16px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-bottom: 2px solid transparent;
+    border-radius: var(--radius);
+    color: var(--muted-foreground);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+    font-size: var(--text-sm);
+    line-height: 1.2;
+  }
+  .tab:hover{
+    color: var(--primary);
+    background: var(--muted);
+    border-color: var(--border);
+  }
+  .tab.active{
+    color: var(--primary);
+    border-color: transparent;
+    border-bottom-color: var(--primary);
+    background: transparent;
+    box-shadow: none;
+  }
 
-    textarea {
-      width:100%; background: rgba(2,6,23,.6); color:#e5e7eb;
-      border:1px solid rgba(148,163,184,.2); border-radius:12px;
-      padding:10px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
-      font-size:12px; line-height:1.35;
-      tab-size: 2;
-      white-space: pre;
-    }
-    .grid2txt { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-    @media (max-width: 900px) { .grid2txt { grid-template-columns: 1fr; } #mapContainer2{ height:420px; } }
+  .content{ padding: var(--sp-6) var(--sp-8); max-width: 1800px; margin: 0 auto; }
+  .tab-content{ display:none; }
+  .tab-content.active{ display:block; }
 
-    #prefPopup2 {
-      position:absolute;
-      display:none;
-      min-width:260px;
-      max-width:560px;
-      max-height: 420px;
-      overflow:auto;
-      background:rgba(0,0,0,0.88);
-      color:#fff;
-      border:1px solid rgba(148,163,184,0.25);
-      border-radius:12px;
-      padding:12px;
-      z-index:50;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.45);
-      backdrop-filter: blur(6px);
-    }
-    .popupSiteBtn {
-      width:100%;
-      text-align:left;
-      background:rgba(30,41,59,0.35);
-      border:1px solid rgba(148,163,184,0.15);
-      color:#fff;
-      padding:10px 10px;
-      border-radius:12px;
-      cursor:pointer;
-    }
-    .popupSiteBtn:hover { filter: brightness(1.08); }
-    .kv { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:6px; font-size:12px; color:#cbd5e1; }
-    .kv b { color:#fff; }
+  /* Containers / Cards */
+  .chart-container{
+    background: var(--card);
+    padding: var(--sp-6);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    box-shadow: var(--elevation-sm);
+    margin-bottom: var(--sp-6);
+    position: relative;
+  }
+  .chart-title{
+    font-size: var(--text-md);
+    font-weight: var(--font-weight-bold);
+    color: var(--foreground);
+    margin-bottom: var(--sp-5);
+    display:flex;
+    align-items:center;
+    gap: var(--sp-2);
+  }
 
-    /* modal A (map detail) */
-    #siteDetailModal2 { position: fixed; inset: 0; display: none; z-index: 200; }
-    #siteDetailModal2.is-open { display:block; }
-    .modalBackdrop{ position:absolute; inset:0; background: rgba(2,6,23,0.78); backdrop-filter: blur(2px); }
-    .modalPanel{
-      position:absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
-      width: min(1080px, calc(100vw - 28px));
-      max-height: min(86vh, 900px);
-      overflow:auto;
-      background: rgba(255,255,255,0.98);
-      color:#0f172a;
-      border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.55);
-      border: 1px solid rgba(15,23,42,0.10);
-    }
-    .modalHeader{
-      position: sticky; top: 0;
-      background: rgba(255,255,255,0.98);
-      border-bottom: 1px solid rgba(15,23,42,0.08);
-      padding: 12px 14px;
-      display:flex; align-items:center; gap:10px;
-      z-index: 5;
-    }
-    .modalTitle{ font-weight: 900; font-size: 18px; }
-    .modalHeader .muted{ color:#475569; }
-    .modalCloseBtn{
-      margin-left:auto;
-      background:#0f172a;
-      border-color:#0f172a;
-      color:#fff;
-      border-radius: 10px;
-      padding: 8px 10px;
-      cursor:pointer;
-      font-weight: 900;
-    }
-    .modalBody{ padding: 12px 14px 14px 14px; }
-    .selectBar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom: 10px; }
-    select {
-      background: #fff;
-      border: 1px solid rgba(15,23,42,0.14);
-      border-radius: 10px;
-      padding: 8px 10px;
-      font: inherit;
-      min-width: 280px;
-    }
-    @media (max-width: 560px) { select { min-width: 100%; } }
+  .muted{ color: var(--muted-foreground); }
+  .row{ display:flex; gap: var(--sp-3); flex-wrap:wrap; align-items:center; }
 
-    .kpiGrid {
-      display:grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap:12px;
-      margin: 10px 0 12px 0;
-    }
-    @media (max-width: 1100px) { .kpiGrid{ grid-template-columns: repeat(2,1fr);} }
-    @media (max-width: 560px) { .kpiGrid{ grid-template-columns: 1fr;} }
+  /* Buttons */
+  .btn{
+    background: var(--card);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    border-radius: var(--radius);
+    cursor:pointer;
+    font-weight: var(--font-weight-medium);
+    font-size: var(--text-sm);
+    line-height: 1.2;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .btn:hover{ background: var(--muted); }
 
-    .kpiCard{
-      border: 1px solid rgba(15,23,42,0.10);
-      border-radius: 14px;
-      background: #fff;
-      padding: 12px;
-    }
-    .kpiLabel{ font-size: 12px; color:#475569; font-weight:800; }
-    .kpiValue{ font-size: 22px; font-weight: 900; margin-top: 6px; }
-    .kpiDelta{ margin-top: 6px; font-size: 12px; font-weight: 800; }
+  .btn.primary{
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border-color: var(--primary);
+  }
+  .btn.primary:hover{ background: var(--primary-hover); border-color: var(--primary-hover); }
 
-    .detailGrid{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    @media (max-width: 900px){ .detailGrid{ grid-template-columns: 1fr; } }
+  .btn:active{ transform: translateY(1px); }
 
-    .panelW{
-      border: 1px solid rgba(15,23,42,0.10);
-      border-radius: 14px;
-      background:#fff;
-      padding: 12px;
-      min-height: 160px;
-    }
-    .panelTitleW{ font-weight: 900; margin-bottom: 8px; }
-    .panelW ul, .panelW ol{ margin: 6px 0 0 18px; line-height: 1.8; }
-    .panelW li{ margin: 4px 0; }
+  /* Pills (use DECA-like badges) */
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    padding: 4px 10px;
+    border-radius: var(--radius);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    line-height: 1.4;
+    white-space: nowrap;
+    background: var(--muted);
+    color: var(--foreground);
+    box-shadow: none;
+  }
+  .pill.blue   { background: rgba(232,236,255,1); border-color: var(--primary); color: var(--primary); }
+  .pill.yellow { background: rgba(255,249,230,1); border-color: rgba(255,153,0,1); color: rgba(102,102,102,1); }
+  .pill.red    { background: rgba(249,53,73,0.10); border-color: rgba(249,53,73,0.25); color: rgba(249,53,73,1); }
+  .pill.gray   { background: rgba(245,245,245,1); border-color: rgba(193,193,204,1); color: rgba(102,102,102,1); }
 
-    /* ===== ③ Improve tab ===== */
-    .select, .input{
-      background: rgba(2,6,23,.25);
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      color: #e2e8f0;
-      padding: 0.55rem 0.7rem;
-      border-radius: 12px;
-      outline: none;
-      font-weight: 700;
-    }
+  /* KPI */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--sp-5);
+    margin-bottom: var(--sp-3);
+  }
+  .kpi-card{
+    background: var(--card);
+    padding: var(--sp-6);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    box-shadow: var(--elevation-sm);
+    transition: box-shadow .15s ease, transform .15s ease;
+  }
+  .kpi-card:hover{ transform: translateY(-2px); box-shadow: var(--elevation-md); }
 
-    .analysis-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.25rem;
-      margin: 1rem 0 1.25rem;
-    }
-    .analysis-card {
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.75) 100%);
-      padding: 1.5rem;
-      border-radius: 16px;
-      border: 1px solid rgba(148, 163, 184, 0.12);
-      text-align: center;
-      position: relative;
-    }
-    .analysis-count {
-      font-size: 3rem;
-      font-weight: 900;
-      background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 0.35rem;
-      line-height: 1;
-    }
-    .analysis-label {
-      font-size: 1rem;
-      color: #94a3b8;
-      font-weight: 700;
-      margin-bottom: 0.75rem;
-    }
-    .keyword-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
-    .keyword-tag {
-      padding: 0.45rem 0.9rem;
-      background: rgba(139, 92, 246, 0.2);
-      border: 1px solid rgba(139, 92, 246, 0.4);
-      border-radius: 999px;
-      font-size: 0.85rem;
-      color: #c7d2fe;
-      font-weight: 800;
-    }
-    .clickable { cursor: pointer; }
-    .clickable:hover { border-color: rgba(239,68,68,0.35); box-shadow: 0 12px 40px rgba(239,68,68,0.10); }
+  .kpi-header{ display:flex; align-items:center; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+  .kpi-icon{
+    width: 44px; height: 44px;
+    border-radius: var(--radius);
+    display:flex; align-items:center; justify-content:center;
+    background: rgba(232,236,255,1);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    font-size: 18px;
+    flex: 0 0 auto;
+  }
+  .kpi-label{
+    font-size: var(--text-xs);
+    color: var(--muted-foreground);
+    font-weight: var(--font-weight-medium);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .kpi-value{
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--foreground);
+    margin-bottom: var(--sp-1);
+    line-height: 1.1;
+  }
+  .kpi-sub{
+    font-size: var(--text-sm);
+    color: var(--muted-foreground);
+    font-weight: var(--font-weight-medium);
+    display:flex;
+    gap: var(--sp-2);
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .kpi-trend-mini{
+    margin-top: var(--sp-2);
+    font-size: var(--text-xs);
+    color: var(--muted-foreground);
+    display:flex;
+    gap: var(--sp-2);
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .deltaUp{ color: rgba(88,193,30,1); font-weight: var(--font-weight-bold); }
+  .deltaDown{ color: var(--destructive); font-weight: var(--font-weight-bold); }
+  .deltaFlat{ color: var(--muted-foreground); font-weight: var(--font-weight-bold); }
 
-    .popover {
-      position: absolute;
-      z-index: 2000;
-      width: min(680px, calc(100vw - 64px));
-      max-height: 420px;
-      overflow: auto;
-      background: rgba(2,6,23,0.92);
-      border: 1px solid rgba(148,163,184,0.20);
-      border-radius: 16px;
-      box-shadow: 0 22px 80px rgba(0,0,0,0.55);
-      backdrop-filter: blur(10px);
-      display: none;
-    }
-    .popover.active { display: block; }
-    .pop-header{
-      position: sticky;
-      top: 0;
-      background: linear-gradient(135deg, rgba(15,23,42,.98) 0%, rgba(2,6,23,.98) 100%);
-      border-bottom: 1px solid rgba(148,163,184,0.16);
-      padding: .85rem 1rem;
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      gap: .75rem;
-    }
-    .pop-title{ font-weight: 1000; }
-    .pop-close{
-      background: transparent;
-      border: 1px solid rgba(148,163,184,0.25);
-      color: #e2e8f0;
-      border-radius: 10px;
-      padding: .35rem .6rem;
-      cursor: pointer;
-      font-weight: 900;
-    }
-    .pop-body{ padding: 1rem; }
-    .ng-item{
-      background: rgba(148,163,184,0.10);
-      border: 1px solid rgba(148,163,184,0.14);
-      border-radius: 14px;
-      padding: .85rem .9rem;
-      margin-bottom: .75rem;
-    }
-    .ng-meta{
-      color:#94a3b8;
-      font-size: .85rem;
-      margin-bottom: .35rem;
-      display:flex;
-      flex-wrap:wrap;
-      gap: .35rem .6rem;
-      align-items:center;
-    }
-    .ng-text{ color:#e5e7eb; line-height: 1.7; }
-    .badge-red{ background: rgba(239,68,68,.14); border-color: rgba(239,68,68,.25); }
-    .badge-blue{ background: rgba(59,130,246,.14); border-color: rgba(59,130,246,.25); }
-    .badge-amber{ background: rgba(245,158,11,.14); border-color: rgba(245,158,11,.25); }
-    mark{ background: rgba(245,158,11,.25); color:#fff; padding: 0 .15rem; border-radius: .25rem; }
+  /* Metric switch buttons */
+  .metric-switch{ display:flex; gap: var(--sp-2); flex-wrap:wrap; align-items:center; margin: var(--sp-2) 0 var(--sp-4); }
+  .metric-btn{
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted-foreground);
+    cursor:pointer;
+    font-weight: var(--font-weight-medium);
+    font-size: var(--text-sm);
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .metric-btn:hover{ background: var(--muted); color: var(--primary); }
+  .metric-btn.active{
+    background: rgba(232,236,255,1);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
 
-    /* ===== ④ AI voice mining ===== */
-    .comment-list { display: flex; flex-direction: column; gap: 1rem; }
-    .comment-card {
-      background: rgba(30, 41, 59, 0.6);
-      padding: 1.5rem;
-      border-radius: 12px;
-      border-left: 4px solid #8b5cf6;
-      transition: all 0.3s ease;
-    }
-    .comment-card:hover { transform: translateX(4px); border-left-color: #3b82f6; }
-    .comment-category {
-      font-size: 0.75rem;
-      color: #8b5cf6;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 0.5rem;
-    }
-    .comment-text { color: #cbd5e1; line-height: 1.6; }
+  /* AI cards */
+  .ai-summary-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-5);
+    margin-top: var(--sp-4);
+  }
+  .ai-card{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--sp-5);
+  }
+  .ai-card h4{ font-size: var(--text-sm); font-weight: var(--font-weight-bold); margin-bottom: var(--sp-2); }
+  .ai-card ul{ padding-left: 1.2rem; line-height: 1.85; color: var(--foreground); }
+  .ai-card li{ margin: 2px 0; }
 
-    /* ===== ⑤ Talent ===== */
-    .performers-grid{
-      display:grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 1.5rem;
-    }
-    .performer-card{
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
-      padding: 1.5rem;
-      border-radius: 16px;
-      border: 1px solid rgba(148, 163, 184, 0.1);
-      transition: all 0.3s ease;
-    }
-    .performer-card:hover{
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(16, 185, 129, 0.2);
-      border-color: rgba(16, 185, 129, 0.5);
-    }
-    .performer-badge{
-      display:inline-block;
-      padding: .25rem .75rem;
-      border-radius: 20px;
-      color:#fff;
-      font-size: .75rem;
-      font-weight:900;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-      margin-bottom: 1rem;
-    }
-    .performer-info{ display:flex; flex-direction:column; gap:.5rem; }
-    .performer-name{ font-size: 1.125rem; font-weight:900; color:#e2e8f0; }
-    .performer-detail{ font-size: .875rem; color:#94a3b8; font-weight: 700; }
-    .action-box{
-      margin-top: 2rem;
-      padding: 1.5rem;
-      background: rgba(16, 185, 129, 0.1);
-      border-radius: 12px;
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-    .action-title{
-      color: #10b981;
-      margin-bottom: 1rem;
-      display:flex;
-      align-items:center;
-      gap:.5rem;
-      font-size: 1.1rem;
-      font-weight: 900;
-    }
-    .action-box ul{ color: #cbd5e1; line-height: 2; padding-left: 1.5rem; }
+  .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap: var(--sp-5); margin-top: var(--sp-5); }
 
-    .section-title{
-      margin: 1.5rem 0 1rem;
-      color:#e2e8f0;
-      font-size: 1.1rem;
-      font-weight: 900;
-    }
-    .small-note{
-      margin-top: .75rem;
-      color: #94a3b8;
-      font-size: .85rem;
-      line-height: 1.6;
-    }
-    code.kbd{
-      background: rgba(148, 163, 184, 0.12);
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      padding: 0.1rem 0.4rem;
-      border-radius: 8px;
-      color: #e2e8f0;
-    }
+  .panel{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--sp-5);
+  }
+  .panel-title{ font-weight: var(--font-weight-bold); margin-bottom: var(--sp-3); color: var(--foreground); display:flex; align-items:center; gap: var(--sp-2); }
+
+  /* Tables */
+  .table{
+    width:100%;
+    border-collapse: collapse;
+    overflow:hidden;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    background: var(--card);
+  }
+  .table th, .table td{
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    font-size: var(--text-sm);
+    color: var(--foreground);
+    text-align: left;
+  }
+  .table th{
+    background: var(--muted);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--text-xs);
+    color: var(--muted-foreground);
+  }
+  .table tr:hover td{ background: var(--muted); }
+
+  .link{
+    color: var(--primary);
+    text-decoration: underline;
+    cursor:pointer;
+    font-weight: var(--font-weight-medium);
+  }
+
+  details.low{
+    margin-top: var(--sp-6);
+    background: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--sp-4) var(--sp-5);
+  }
+  details.low > summary{
+    cursor:pointer;
+    font-weight: var(--font-weight-medium);
+    color: var(--foreground);
+    list-style:none;
+  }
+  details.low > summary::-webkit-details-marker{ display:none; }
+  details.low .hint{ margin-top: var(--sp-2); color: var(--muted-foreground); font-size: var(--text-xs); line-height: 1.6; }
+
+  /* Map tab */
+  .map-wrap{ max-width: 1200px; margin: 0 auto; }
+  .map-card{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--sp-4);
+    margin-top: var(--sp-3);
+  }
+  #mapContainer2{
+    height: 600px;
+    border-radius: var(--radius-card);
+    overflow:hidden;
+    background: var(--muted);
+    border: 1px solid var(--border);
+    position: relative;
+  }
+  #mapContainer2 svg { width:100%; height:100%; display:block; }
+
+  #mapContainer2 svg .prefecture{ cursor:pointer; transition: filter .15s ease; }
+  #mapContainer2 svg .prefecture:hover{ filter: brightness(0.98); }
+
+  #mapContainer2 svg .prefecture path,
+  #mapContainer2 svg .prefecture polygon{
+    stroke: rgba(207,207,215,1);
+    stroke-width: 0.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  /* （境界線の強調は元のままだと強すぎるのでDECA寄せで抑える） */
+  #mapContainer2 svg .boundary-line line,
+  #mapContainer2 svg .boundary-line path,
+  #mapContainer2 svg .boundary-line polyline,
+  #mapContainer2 svg .boundary-line polygon{
+    stroke: rgba(207,207,215,1) !important;
+    stroke-width: 2 !important;
+    filter: none;
+  }
+
+  #mapContainer2 [data-code="47"] { display:none; }
+
+  textarea{
+    width:100%;
+    background: var(--input-background);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.35;
+    tab-size: 2;
+    white-space: pre;
+  }
+
+  .grid2txt{ display:grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+
+  #prefPopup2{
+    position:absolute;
+    display:none;
+    min-width:260px;
+    max-width:560px;
+    max-height: 420px;
+    overflow:auto;
+    background: var(--card);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--sp-4);
+    z-index: 50;
+    box-shadow: var(--elevation-md);
+  }
+  .popupSiteBtn{
+    width:100%;
+    text-align:left;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    cursor:pointer;
+    transition: background-color .15s ease;
+  }
+  .popupSiteBtn:hover{ background: var(--muted); }
+  .kv{ display:flex; gap: var(--sp-2); flex-wrap:wrap; align-items:center; margin-top: var(--sp-2); font-size: var(--text-xs); color: var(--muted-foreground); }
+  .kv b{ color: var(--foreground); }
+
+  /* Modal */
+  #siteDetailModal2{ position: fixed; inset:0; display:none; z-index:200; }
+  #siteDetailModal2.is-open{ display:block; }
+  .modalBackdrop{ position:absolute; inset:0; background: rgba(0,0,0,0.50); }
+  .modalPanel{
+    position:absolute; left:50%; top:50%; transform: translate(-50%,-50%);
+    width: min(1080px, calc(100vw - 32px));
+    max-height: min(86vh, 900px);
+    overflow:auto;
+    background: var(--card);
+    color: var(--foreground);
+    border-radius: var(--radius-card);
+    box-shadow: var(--elevation-md);
+    border: 1px solid var(--border);
+  }
+  .modalHeader{
+    position: sticky; top:0;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px;
+    display:flex; align-items:center; gap: var(--sp-3);
+    z-index: 5;
+  }
+  .modalTitle{ font-weight: var(--font-weight-bold); font-size: var(--text-md); }
+  .modalHeader .muted{ color: var(--muted-foreground); }
+  .modalCloseBtn{
+    margin-left:auto;
+    background: var(--primary);
+    border: 1px solid var(--primary);
+    color: var(--primary-foreground);
+    border-radius: var(--radius);
+    padding: 10px 20px;
+    cursor:pointer;
+    font-weight: var(--font-weight-medium);
+    transition: background-color .15s ease, border-color .15s ease;
+  }
+  .modalCloseBtn:hover{ background: var(--primary-hover); border-color: var(--primary-hover); }
+  .modalBody{ padding: 20px 24px 24px 24px; }
+
+  select{
+    background: var(--input-background);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    font: inherit;
+    min-width: 280px;
+  }
+
+  /* Improve tab inputs (keep class names) */
+  .select, .input{
+    background: var(--input-background);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    outline: none;
+    font-weight: var(--font-weight-normal);
+    font-size: var(--text-sm);
+  }
+  .input::placeholder{ color: rgba(184,184,184,1); }
+
+  .analysis-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--sp-5);
+    margin: var(--sp-4) 0 var(--sp-5);
+  }
+  .analysis-card{
+    background: var(--card);
+    padding: var(--sp-6);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    text-align:center;
+    box-shadow: var(--elevation-sm);
+    position: relative;
+  }
+  .analysis-count{
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary);
+    margin-bottom: var(--sp-2);
+    line-height: 1.1;
+  }
+  .analysis-label{
+    font-size: var(--text-sm);
+    color: var(--muted-foreground);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--sp-3);
+  }
+  .keyword-tags{ display:flex; flex-wrap:wrap; gap: var(--sp-2); justify-content:center; }
+  .keyword-tag{
+    padding: 6px 10px;
+    background: rgba(232,236,255,1);
+    border: 1px solid var(--primary);
+    border-radius: var(--radius);
+    font-size: var(--text-xs);
+    color: var(--primary);
+    font-weight: var(--font-weight-medium);
+  }
+  .clickable{ cursor:pointer; }
+  .clickable:hover{ box-shadow: var(--elevation-md); }
+
+  /* Popover */
+  .popover{
+    position:absolute;
+    z-index:2000;
+    width: min(680px, calc(100vw - 64px));
+    max-height: 420px;
+    overflow:auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--elevation-md);
+    display:none;
+  }
+  .popover.active{ display:block; }
+  .pop-header{
+    position: sticky;
+    top:0;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px;
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+  }
+  .pop-title{ font-weight: var(--font-weight-bold); }
+  .pop-close{
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+    border-radius: var(--radius);
+    padding: 6px 10px;
+    cursor:pointer;
+    font-weight: var(--font-weight-medium);
+  }
+  .pop-close:hover{ background: var(--muted); }
+  .pop-body{ padding: 20px 24px 24px 24px; }
+
+  .ng-item{
+    background: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 12px;
+    margin-bottom: var(--sp-3);
+  }
+  .ng-meta{
+    color: var(--muted-foreground);
+    font-size: var(--text-xs);
+    margin-bottom: var(--sp-2);
+    display:flex;
+    flex-wrap:wrap;
+    gap: var(--sp-2) var(--sp-3);
+    align-items:center;
+  }
+  .ng-text{ color: var(--foreground); line-height: 1.7; }
+
+  .badge-red{ background: rgba(249,53,73,0.10); border-color: rgba(249,53,73,0.25); }
+  .badge-blue{ background: rgba(232,236,255,1); border-color: var(--primary); }
+  .badge-amber{ background: rgba(255,249,230,1); border-color: rgba(255,153,0,1); }
+  mark{ background: rgba(255,153,0,0.22); color: var(--foreground); padding: 0 .15rem; border-radius: 3px; }
+
+  /* Comments */
+  .comment-list{ display:flex; flex-direction:column; gap: var(--sp-4); }
+  .comment-card{
+    background: var(--card);
+    padding: var(--sp-6);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+    transition: background-color .15s ease, border-color .15s ease;
+  }
+  .comment-card:hover{ background: var(--muted); border-left-color: var(--secondary); }
+  .comment-category{
+    font-size: var(--text-xs);
+    color: var(--primary);
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--sp-2);
+  }
+  .comment-text{ color: var(--foreground); line-height: 1.6; }
+
+  /* Talent */
+  .performers-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--sp-5);
+  }
+  .performer-card{
+    background: var(--card);
+    padding: var(--sp-6);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    box-shadow: var(--elevation-sm);
+    transition: box-shadow .15s ease, transform .15s ease;
+  }
+  .performer-card:hover{ transform: translateY(-2px); box-shadow: var(--elevation-md); }
+
+  .performer-badge{
+    display:inline-block;
+    padding: 4px 10px;
+    border-radius: var(--radius);
+    color: var(--primary-foreground);
+    font-size: var(--text-xs);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--sp-4);
+    background: var(--primary);
+  }
+  .performer-name{ font-size: var(--text-md); font-weight: var(--font-weight-bold); color: var(--foreground); }
+  .performer-detail{ font-size: var(--text-sm); color: var(--muted-foreground); font-weight: var(--font-weight-normal); }
+
+  .action-box{
+    margin-top: var(--sp-8);
+    padding: var(--sp-6);
+    background: rgba(232,236,255,1);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--primary);
+  }
+  .action-title{
+    color: var(--primary);
+    margin-bottom: var(--sp-4);
+    display:flex;
+    align-items:center;
+    gap: var(--sp-2);
+    font-size: var(--text-md);
+    font-weight: var(--font-weight-bold);
+  }
+  .action-box ul{ color: var(--foreground); line-height: 2; padding-left: 1.2rem; }
+
+  .section-title{
+    margin: var(--sp-6) 0 var(--sp-4);
+    color: var(--foreground);
+    font-size: var(--text-md);
+    font-weight: var(--font-weight-bold);
+  }
+  .small-note{
+    margin-top: var(--sp-3);
+    color: var(--muted-foreground);
+    font-size: var(--text-xs);
+    line-height: 1.6;
+  }
+
+  /* Back-to-top */
+  #backToTop{
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 5000;
+    display:none;
+    padding: 10px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--foreground);
+    font-weight: var(--font-weight-medium);
+    cursor:pointer;
+    box-shadow: var(--elevation-md);
+    transition: background-color .15s ease;
+  }
+  #backToTop:hover{ background: var(--muted); }
+
+  /* Responsive */
+  @media (max-width: 1100px){
+    .ai-summary-grid{ grid-template-columns: 1fr; }
+    .grid2{ grid-template-columns: 1fr; }
+    .content{ padding: var(--sp-5); }
+    .header, .tabs{ padding-left: var(--sp-5); padding-right: var(--sp-5); }
+  }
+  @media (max-width: 900px){
+    .grid2txt{ grid-template-columns: 1fr; }
+    #mapContainer2{ height: 420px; }
+  }
+  @media (max-width: 560px){
+    select{ min-width: 100%; }
+  }
   </style>
+
 </head>
 
 <body>
+  <button id="backToTop" type="button" aria-label="上に戻る">↑ 上に戻る</button>
+
   <div class="dashboard" id="dashboard">
     <div class="header">
       <div class="header-content">
         <h1 class="title">HR・CS Analytics Dashboard</h1>
         <p class="subtitle">①サマリー / ②ヒートマップ / ③要改善 / ④AIボイス / ⑤タレント</p>
+        <div id="globalStatus"></div>
       </div>
     </div>
 
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('overview', this)">📊 ① エグゼクティブサマリー</button>
-      <button class="tab" onclick="switchTab('map', this)">🗾 ② ヒートマップ</button>
-      <button class="tab" onclick="switchTab('improve', this)">🚨 ③ 要改善リーダー・拠点</button>
-      <button class="tab" onclick="switchTab('comments', this)">💬 ④ AIボイスマイニング</button>
-      <button class="tab" onclick="switchTab('talent', this)">🏆 ⑤ タレントマネジメント</button>
+      <button class="tab active" type="button" onclick="switchTab('overview', this)">📊 ① エグゼクティブサマリー</button>
+      <button class="tab" type="button" onclick="switchTab('map', this)">🗾 ② ヒートマップ</button>
+      <button class="tab" type="button" onclick="switchTab('improve', this)">🚨 ③ 要改善リーダー・拠点</button>
+      <button class="tab" type="button" onclick="switchTab('comments', this)">💬 ④ AIボイスマイニング</button>
+      <button class="tab" type="button" onclick="switchTab('talent', this)">🏆 ⑤ タレントマネジメント</button>
     </div>
 
     <div class="content">
-
       <!-- ================= ① Executive summary ================= -->
       <div id="overview" class="tab-content active">
         <div class="chart-container">
           <h3 class="chart-title">📊 エグゼクティブサマリー</h3>
 
-          <!-- hero KPIs -->
           <div class="kpi-grid">
             <div class="kpi-card">
               <div class="kpi-header">
@@ -723,22 +845,10 @@
           </div>
 
           <div class="ai-summary-grid">
-            <div class="ai-card">
-              <h4>全体の課題</h4>
-              <ul id="ovAiIssues"></ul>
-            </div>
-            <div class="ai-card">
-              <h4>原因</h4>
-              <ul id="ovAiCauses"></ul>
-            </div>
-            <div class="ai-card">
-              <h4>打ち手</h4>
-              <ul id="ovAiActions"></ul>
-            </div>
-            <div class="ai-card">
-              <h4>傾向</h4>
-              <ul id="ovAiTrends"></ul>
-            </div>
+            <div class="ai-card"><h4>全体の課題</h4><ul id="ovAiIssues"></ul></div>
+            <div class="ai-card"><h4>原因</h4><ul id="ovAiCauses"></ul></div>
+            <div class="ai-card"><h4>打ち手</h4><ul id="ovAiActions"></ul></div>
+            <div class="ai-card"><h4>傾向</h4><ul id="ovAiTrends"></ul></div>
           </div>
 
           <div class="grid2">
@@ -784,22 +894,10 @@
             </div>
 
             <div class="grid2txt" style="margin-top:.75rem;">
-              <div>
-                <div class="muted" style="margin:6px 0;">先月 1〜5回目</div>
-                <textarea id="ovTsvPrev1to5" rows="7"></textarea>
-              </div>
-              <div>
-                <div class="muted" style="margin:6px 0;">先月 6〜10回目</div>
-                <textarea id="ovTsvPrev6to10" rows="7"></textarea>
-              </div>
-              <div>
-                <div class="muted" style="margin:6px 0;">今月 1〜5回目</div>
-                <textarea id="ovTsvCurr1to5" rows="7"></textarea>
-              </div>
-              <div>
-                <div class="muted" style="margin:6px 0;">今月 6〜10回目</div>
-                <textarea id="ovTsvCurr6to10" rows="7"></textarea>
-              </div>
+              <div><div class="muted" style="margin:6px 0;">先月 1〜5回目</div><textarea id="ovTsvPrev1to5" rows="7"></textarea></div>
+              <div><div class="muted" style="margin:6px 0;">先月 6〜10回目</div><textarea id="ovTsvPrev6to10" rows="7"></textarea></div>
+              <div><div class="muted" style="margin:6px 0;">今月 1〜5回目</div><textarea id="ovTsvCurr1to5" rows="7"></textarea></div>
+              <div><div class="muted" style="margin:6px 0;">今月 6〜10回目</div><textarea id="ovTsvCurr6to10" rows="7"></textarea></div>
             </div>
 
             <div class="row" style="margin-top:10px;">
@@ -808,7 +906,6 @@
               <div id="ovLoadStatus" class="muted"></div>
             </div>
           </details>
-
         </div>
       </div>
 
@@ -850,22 +947,10 @@
           <div class="map-card">
             <div style="font-weight:800;margin-bottom:8px;">TSV/CSV貼り付け（ヘッダ必須）</div>
             <div class="grid2txt">
-              <div>
-                <div class="muted" style="margin:6px 0;">先月 1〜5回目</div>
-                <textarea id="tsvPrev1to5" rows="10"></textarea>
-              </div>
-              <div>
-                <div class="muted" style="margin:6px 0;">先月 6〜10回目</div>
-                <textarea id="tsvPrev6to10" rows="10"></textarea>
-              </div>
-              <div>
-                <div class="muted" style="margin:6px 0;">今月 1〜5回目</div>
-                <textarea id="tsvCurr1to5" rows="10"></textarea>
-              </div>
-              <div>
-                <div class="muted" style="margin:6px 0;">今月 6〜10回目</div>
-                <textarea id="tsvCurr6to10" rows="10"></textarea>
-              </div>
+              <div><div class="muted" style="margin:6px 0;">先月 1〜5回目</div><textarea id="tsvPrev1to5" rows="10"></textarea></div>
+              <div><div class="muted" style="margin:6px 0;">先月 6〜10回目</div><textarea id="tsvPrev6to10" rows="10"></textarea></div>
+              <div><div class="muted" style="margin:6px 0;">今月 1〜5回目</div><textarea id="tsvCurr1to5" rows="10"></textarea></div>
+              <div><div class="muted" style="margin:6px 0;">今月 6〜10回目</div><textarea id="tsvCurr6to10" rows="10"></textarea></div>
             </div>
 
             <div class="row" style="margin-top:10px;">
@@ -894,7 +979,7 @@
             <span style="color:#94a3b8; font-weight:800;">検索</span>
             <input id="impQuery" class="input" placeholder="例：新宿 / 田中 / 無視" style="min-width: 280px;">
 
-            <button class="btn primary" id="impApplyBtn">反映</button>
+            <button class="btn primary" id="impApplyBtn" type="button">反映</button>
           </div>
 
           <div class="analysis-grid">
@@ -924,7 +1009,7 @@
           <div class="popover" id="ngPopover" role="dialog" aria-modal="false" aria-label="NGワード検知詳細">
             <div class="pop-header">
               <div class="pop-title" id="popTitle">NGワード検知（回答単位）</div>
-              <button class="pop-close" id="popCloseBtn">閉じる</button>
+              <button class="pop-close" id="popCloseBtn" type="button">閉じる</button>
             </div>
             <div class="pop-body" id="popBody"></div>
           </div>
@@ -936,6 +1021,7 @@
         <div class="chart-container">
           <h3 class="chart-title">💬 AIボイスマイニング（モック）</h3>
 
+        <!--（省略：モック表示はそのまま保持）-->
           <div class="analysis-grid">
             <div class="analysis-card">
               <div class="analysis-count">324</div>
@@ -999,6 +1085,7 @@
               </div>
             </div>
           </div>
+
         </div>
       </div>
 
@@ -1055,8 +1142,19 @@
 
   <script>
     /* =========================================================
-      Global: stable tab switching
+      Global: stable tab switching + robust guards
     ========================================================= */
+    function safeGet(id){ return document.getElementById(id); }
+    function on(el, ev, fn){ if (el) el.addEventListener(ev, fn); }
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function setGlobalStatus(html){
+      const el = safeGet("globalStatus");
+      if (!el) return;
+      el.innerHTML = html;
+    }
+
     function switchTab(tabName, btnEl) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       if (btnEl) btnEl.classList.add('active');
@@ -1070,29 +1168,41 @@
       }
     }
 
+    // Back-to-top UX
+    (function wireBackToTop(){
+      const btn = safeGet("backToTop");
+      if (!btn) return;
+      const onScroll = () => {
+        const y = window.scrollY || document.documentElement.scrollTop || 0;
+        btn.style.display = y > 400 ? "block" : "none";
+      };
+      window.addEventListener("scroll", onScroll, { passive:true });
+      on(btn, "click", () => window.scrollTo({ top:0, behavior:"smooth" }));
+      onScroll();
+    })();
+
     window.addEventListener('load', () => {
-      document.getElementById('dashboard').classList.add('loaded');
-      initImproveTab();
-      initTalentTab();
-      initOverviewTab();
+      safeGet('dashboard')?.classList.add('loaded');
+      try { initImproveTab(); } catch(e){ console.error(e); }
+      try { initTalentTab(); } catch(e){ console.error(e); }
+      try { initOverviewTab(); } catch(e){ console.error(e); }
+
+      setGlobalStatus(`状態: <b>OK</b> / Pages: <b>main/(root)</b> / SVG: <b>./japan.svg</b> / ダミーでTop/Worstが出ない場合は予約列名を確認`);
     });
 
     /* =========================================================
-      ③ Improve tab
+      ③ Improve tab (mock)
     ========================================================= */
     function initImproveTab() {
-      document.getElementById("impApplyBtn").addEventListener("click", applyImprove);
+      on(safeGet("impApplyBtn"), "click", applyImprove);
+      on(safeGet("ngCard"), "click", (e) => toggleNgPopover(e.currentTarget));
+      on(safeGet("popCloseBtn"), "click", closePopover);
 
-      document.getElementById("ngCard").addEventListener("click", (e) => {
-        toggleNgPopover(e.currentTarget);
-      });
-
-      document.getElementById("popCloseBtn").addEventListener("click", closePopover);
       document.addEventListener("click", (e) => {
-        const pop = document.getElementById("ngPopover");
-        if (!pop.classList.contains("active")) return;
-        const card = document.getElementById("ngCard");
-        if (pop.contains(e.target) || card.contains(e.target)) return;
+        const pop = safeGet("ngPopover");
+        if (!pop || !pop.classList.contains("active")) return;
+        const card = safeGet("ngCard");
+        if (pop.contains(e.target) || (card && card.contains(e.target))) return;
         closePopover();
       });
       document.addEventListener("keydown", (e) => { if (e.key === "Escape") closePopover(); });
@@ -1105,13 +1215,10 @@
       { at:"2026-01-20T12:40:00+09:00", siteName:"新宿支店", leaderName:"田中", workAgain:"いいえ", comment:"詰められて怖かった。" },
       { at:"2026-01-22T09:10:00+09:00", siteName:"新宿支店", leaderName:"田中", workAgain:"はい",   comment:"忙しいが指示は的確。" },
       { at:"2026-01-25T18:25:00+09:00", siteName:"新宿支店", leaderName:"田中", workAgain:"いいえ", comment:"蹴られたと感じた（身体的接触があった）。" },
-
       { at:"2026-01-19T11:05:00+09:00", siteName:"高田馬場サテライト", leaderName:"佐藤", workAgain:"いいえ", comment:"怒鳴られた。萎縮する。" },
       { at:"2026-01-28T15:12:00+09:00", siteName:"高田馬場サテライト", leaderName:"佐藤", workAgain:"はい",   comment:"改善してきている。" },
-
       { at:"2026-01-21T14:33:00+09:00", siteName:"仙台東口サテライト", leaderName:"鈴木", workAgain:"いいえ", comment:"放置された。誰にも聞けない。" },
       { at:"2026-01-29T09:02:00+09:00", siteName:"仙台東口サテライト", leaderName:"鈴木", workAgain:"いいえ", comment:"無視された。目を合わせない。" },
-
       { at:"2026-01-23T16:40:00+09:00", siteName:"横浜支店", leaderName:"山本", workAgain:"はい",   comment:"丁寧に教えてくれた。" },
       { at:"2026-01-30T17:10:00+09:00", siteName:"横浜支店", leaderName:"山本", workAgain:"不明",  comment:"特になし" },
     ];
@@ -1122,8 +1229,6 @@
       { key:"暴言/威圧", patterns:["怒鳴","罵倒","恫喝","詰められ","怖かった"] },
     ];
 
-    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
     function normName(s){
       if (!s) return "";
       return String(s).trim().replace(/[　\s]+/g,"").replace(/(さん|店長|主任|リーダー)$/,"");
@@ -1133,10 +1238,7 @@
       const hits = [];
       for (const rule of NG_RULES){
         for (const p of rule.patterns){
-          if (t.includes(p)){
-            hits.push({ category: rule.key, pattern: p });
-            break;
-          }
+          if (t.includes(p)){ hits.push({ category: rule.key, pattern: p }); break; }
         }
       }
       return hits;
@@ -1153,16 +1255,16 @@
       return out;
     }
     function withinDays(atIso, days){
-      const now = new Date("2026-02-01T00:00:00+09:00");
+      const now = new Date();
       const at = new Date(atIso);
-      return (now - at) <= days * 24 * 60 * 60 * 1000;
+      return Number.isFinite(at.getTime()) && (now - at) <= days * 24 * 60 * 60 * 1000;
     }
 
     let __improveLast = null;
 
     function buildImproveFiltered(){
-      const days = Number(document.getElementById("impDaysSel").value || 30);
-      const q = (document.getElementById("impQuery").value || "").trim();
+      const days = Number(safeGet("impDaysSel")?.value || 30);
+      const q = (safeGet("impQuery")?.value || "").trim();
 
       return improveRows
         .filter(r => withinDays(r.at, days))
@@ -1230,7 +1332,8 @@
     }
 
     function renderLeaderTable(rows){
-      const el = document.getElementById("leaderTable");
+      const el = safeGet("leaderTable");
+      if (!el) return;
       el.innerHTML = `
         <tr><th>リーダー名（拠点名）</th><th>いいえ回答率</th><th>回答数</th></tr>
         ${rows.slice(0,10).map(r=>{
@@ -1245,7 +1348,8 @@
     }
 
     function renderSiteTable(rows){
-      const el = document.getElementById("siteTable");
+      const el = safeGet("siteTable");
+      if (!el) return;
       el.innerHTML = `
         <tr><th>拠点名</th><th>いいえ件数</th><th>いいえ回答率</th><th>回答数</th></tr>
         ${rows.slice(0,10).map(r=>{
@@ -1263,16 +1367,15 @@
     function applyImprove(){
       const enriched = buildImproveFiltered();
       const ngAnswerCount = enriched.filter(r => r.hasNg).length;
-      document.getElementById("kpiNg").textContent = ngAnswerCount;
+      const kpiNg = safeGet("kpiNg"); if (kpiNg) kpiNg.textContent = ngAnswerCount;
 
       const { leaderArr, siteArr } = buildLeaderSiteRanks(enriched);
       renderLeaderTable(leaderArr);
       renderSiteTable(siteArr);
 
       __improveLast = { enriched };
-      if (document.getElementById("ngPopover").classList.contains("active")) {
-        renderNgPopover();
-      }
+      const pop = safeGet("ngPopover");
+      if (pop && pop.classList.contains("active")) renderNgPopover();
     }
 
     function waPill(workAgain){
@@ -1282,11 +1385,13 @@
     }
 
     function renderNgPopover(){
-      const popBody = document.getElementById("popBody");
+      const popBody = safeGet("popBody");
+      if (!popBody) return;
       const enriched = __improveLast?.enriched || [];
       const ngRows = enriched.filter(r => r.hasNg).slice(0,7);
 
-      document.getElementById("popTitle").textContent = `NGワード検知（回答単位） ${ngRows.length}件`;
+      const title = safeGet("popTitle");
+      if (title) title.textContent = `NGワード検知（回答単位） ${ngRows.length}件`;
 
       popBody.innerHTML = ngRows.map(r => {
         const ngPills = r.ngHits.map(h => `<span class="pill gray">${escapeHtml(h.category)}:${escapeHtml(h.pattern)}</span>`).join(" ");
@@ -1306,8 +1411,10 @@
     }
 
     function placePopoverNear(anchorEl){
-      const pop = document.getElementById("ngPopover");
+      const pop = safeGet("ngPopover");
       const container = document.querySelector("#improve .chart-container");
+      if (!pop || !container || !anchorEl) return;
+
       const a = anchorEl.getBoundingClientRect();
       const c = container.getBoundingClientRect();
 
@@ -1325,16 +1432,17 @@
     }
 
     function toggleNgPopover(anchorEl){
-      const pop = document.getElementById("ngPopover");
+      const pop = safeGet("ngPopover");
+      if (!pop) return;
       if (pop.classList.contains("active")) { closePopover(); return; }
       renderNgPopover();
       pop.classList.add("active");
       requestAnimationFrame(() => placePopoverNear(anchorEl));
     }
-    function closePopover(){ document.getElementById("ngPopover").classList.remove("active"); }
+    function closePopover(){ safeGet("ngPopover")?.classList.remove("active"); }
 
     /* =========================================================
-      ⑤ Talent tab (as-is)
+      ⑤ Talent tab (mock)
     ========================================================= */
     function initTalentTab() {
       const HP_RULES = { minSessions: 11, minAvgRating: 4.0, cutRatingValue: 2, cutRatingCount: 2 };
@@ -1344,101 +1452,10 @@
         { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "田中", rating: 4, good: "新人へのフォローが自然", bad: "" },
         { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "佐藤", rating: 4, good: "報連相が安定", bad: "混雑時に優先順位がぶれる" },
         { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "田中", rating: 5, good: "ミスが少ない", bad: "" },
-        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "田中", rating: 4, good: "接客が明るい", bad: "" },
-        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "佐藤", rating: 4, good: "遅刻なしで安定", bad: "" },
-        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "田中", rating: 5, good: "周りを見て動ける", bad: "" },
-        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "田中", rating: 4, good: "指示の理解が早い", bad: "" },
-        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "田中", rating: 4, good: "作業が正確", bad: "" },
-        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "佐藤", rating: 5, good: "顧客対応が良い", bad: "" },
-        { staffId: "A202601-0010", siteName: "高田馬場サテライト", leaderName: "田中", rating: 4, good: "清掃が丁寧", bad: "" },
-
-        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "鈴木", rating: 4, good: "落ち着いて対応できる", bad: "" },
         { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "鈴木", rating: 5, good: "改善提案が出る", bad: "" },
-        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "伊藤", rating: 4, good: "欠員対応に強い", bad: "" },
-        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "鈴木", rating: 4, good: "新人育成が上手い", bad: "" },
-        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "伊藤", rating: 4, good: "報連相が的確", bad: "" },
-        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "鈴木", rating: 5, good: "顧客からの指名があった", bad: "" },
-        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "伊藤", rating: 4, good: "作業が早い", bad: "" },
-        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "鈴木", rating: 4, good: "チームに前向き", bad: "" },
-        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "鈴木", rating: 4, good: "安定稼働", bad: "" },
-        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "伊藤", rating: 4, good: "ミスが少ない", bad: "" },
-        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "鈴木", rating: 4, good: "気配りが良い", bad: "" },
-        { staffId: "A202601-0024", siteName: "仙台東口サテライト", leaderName: "伊藤", rating: 5, good: "繁忙対応が良い", bad: "" },
-
-        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "渡辺", rating: 5, good: "立ち回りが早い", bad: "" },
         { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "渡辺", rating: 4, good: "報連相が丁寧", bad: "" },
-        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "伊藤", rating: 4, good: "新人のフォローが自然", bad: "" },
-        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "渡辺", rating: 5, good: "ミスが少ない", bad: "" },
-        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "渡辺", rating: 4, good: "時間管理が上手い", bad: "" },
-        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "伊藤", rating: 4, good: "丁寧な接客", bad: "" },
-        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "渡辺", rating: 5, good: "周囲を見て動ける", bad: "" },
-        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "渡辺", rating: 4, good: "手順理解が早い", bad: "" },
-        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "伊藤", rating: 4, good: "安定稼働", bad: "" },
-        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "渡辺", rating: 5, good: "改善提案が出る", bad: "" },
-        { staffId: "A202601-0099", siteName: "大通公園サテライト", leaderName: "渡辺", rating: 4, good: "遅刻なし", bad: "" },
-
         { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "高橋", rating: 5, good: "雰囲気づくりが上手い", bad: "" },
-        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "高橋", rating: 4, good: "指示理解が早い", bad: "" },
-        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "小林", rating: 4, good: "丁寧な作業", bad: "" },
-        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "高橋", rating: 5, good: "クレーム対応が落ち着いている", bad: "" },
-        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "高橋", rating: 4, good: "周囲への声かけ", bad: "" },
-        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "小林", rating: 4, good: "遅刻なし", bad: "" },
-        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "高橋", rating: 5, good: "繁忙時の優先順位が良い", bad: "" },
-        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "高橋", rating: 4, good: "報連相が明確", bad: "" },
-        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "小林", rating: 4, good: "ミスが少ない", bad: "" },
-        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "高橋", rating: 5, good: "他者フォローができる", bad: "" },
-        { staffId: "A202601-0111", siteName: "新横浜支店", leaderName: "高橋", rating: 4, good: "継続意欲が高い", bad: "" },
-
-        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 5, good: "指示理解が早い", bad: "" },
         { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 4, good: "元気に挨拶できる", bad: "" },
-        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 4, good: "丁寧な作業", bad: "" },
-        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 4, good: "チームワーク良い", bad: "緊張で声が小さい" },
-        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 5, good: "改善提案が出る", bad: "" },
-        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 4, good: "遅刻なし", bad: "" },
-        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 4, good: "お客様対応が丁寧", bad: "" },
-        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 4, good: "後片付けが早い", bad: "" },
-        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 4, good: "安定している", bad: "" },
-        { staffId: "A202601-0150", siteName: "八王子支店", leaderName: "山本", rating: 4, good: "報連相が良い", bad: "" },
-
-        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "基本が丁寧", bad: "" },
-        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "報連相は安定", bad: "" },
-        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "作業速度は十分", bad: "ピーク時に焦りが出る" },
-        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "気配りがある", bad: "" },
-        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 3, good: "改善意欲あり", bad: "優先順位がぶれる" },
-        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "遅刻なし", bad: "" },
-        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "継続している", bad: "" },
-        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "周囲と連携できる", bad: "" },
-        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "注意点の吸収が早い", bad: "" },
-        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 3, good: "少しずつ安定", bad: "初動が遅れる日がある" },
-        { staffId: "A202601-0777", siteName: "新宿支店", leaderName: "小林", rating: 4, good: "基本は安定", bad: "" },
-
-        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "佐藤", rating: 5, good: "明るい接客", bad: "" },
-        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "佐藤", rating: 4, good: "手順理解が早い", bad: "" },
-        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "伊藤", rating: 4, good: "報連相が丁寧", bad: "" },
-        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "佐藤", rating: 4, good: "遅刻なし", bad: "" },
-        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "佐藤", rating: 5, good: "周囲を見て動ける", bad: "" },
-        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "伊藤", rating: 4, good: "丁寧な作業", bad: "" },
-        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "佐藤", rating: 4, good: "安定稼働", bad: "" },
-        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "佐藤", rating: 4, good: "初動が早い", bad: "" },
-        { staffId: "A202601-0303", siteName: "千葉支店", leaderName: "伊藤", rating: 4, good: "改善提案が出やすい", bad: "" },
-
-        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "海野", rating: 4, good: "基本は安定", bad: "" },
-        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "海野", rating: 3, good: "改善意欲あり", bad: "優先順位がぶれる" },
-        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "海野", rating: 4, good: "報連相は良い", bad: "" },
-        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "小林", rating: 3, good: "丁寧", bad: "ピーク時に焦る" },
-        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "海野", rating: 4, good: "遅刻なし", bad: "" },
-        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "海野", rating: 3, good: "継続", bad: "初動が遅れる日がある" },
-        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "小林", rating: 4, good: "連携できる", bad: "" },
-        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "海野", rating: 3, good: "少しずつ安定", bad: "" },
-        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "海野", rating: 4, good: "基本作業", bad: "" },
-        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "小林", rating: 4, good: "気配り", bad: "" },
-        { staffId: "A202601-0444", siteName: "世田谷支店", leaderName: "海野", rating: 3, good: "改善傾向", bad: "" },
-
-        { staffId: "A202601-2568", siteName: "大橋サテライト", leaderName: "加藤", rating: 4, good: "普段は問題ない", bad: "" },
-        { staffId: "A202601-2568", siteName: "大橋サテライト", leaderName: "加藤", rating: 2, good: "", bad: "遅刻があった" },
-        { staffId: "A202601-2568", siteName: "大橋サテライト", leaderName: "加藤", rating: 3, good: "改善傾向", bad: "指示の聞き漏れ" },
-        { staffId: "A202601-2568", siteName: "大橋サテライト", leaderName: "加藤", rating: 2, good: "", bad: "無断で抜けた" },
-        { staffId: "A202601-2568", siteName: "大橋サテライト", leaderName: "加藤", rating: 4, good: "その後は回復", bad: "" },
       ];
 
       function topKeywords(text, n = 4) {
@@ -1494,29 +1511,30 @@
           });
         }
 
-        const hp = staffList.filter(x => x.isHighPerformer).sort((a, b) => (b.avgRating - a.avgRating) || (b.sessions - a.sessions));
-        const almost = staffList.filter(x => !x.isCut && !x.isHighPerformer).sort((a, b) => (b.avgRating - a.avgRating) || (b.sessions - a.sessions));
+        const hp = staffList.filter(x => x.isHighPerformer).sort((a, b) => ((b.avgRating??-1) - (a.avgRating??-1)) || (b.sessions - a.sessions));
+        const almost = staffList.filter(x => !x.isCut && !x.isHighPerformer).sort((a, b) => ((b.avgRating??-1) - (a.avgRating??-1)) || (b.sessions - a.sessions));
         return { hp, almost };
       }
 
       function renderTalentMock() {
         const { hp, almost } = aggregateTalentFromLeaderEvals(leaderEvalMock);
 
-        document.getElementById("hpCount").textContent = hp.length;
-        document.getElementById("almostCount").textContent = almost.length;
+        safeGet("hpCount").textContent = hp.length;
+        safeGet("almostCount").textContent = almost.length;
 
-        document.getElementById("hpRuleTag").innerHTML = `
+        safeGet("hpRuleTag").innerHTML = `
           <span class="keyword-tag">参加回数 ≥ ${HP_RULES.minSessions}</span>
           <span class="keyword-tag">平均評価 ≥ ${HP_RULES.minAvgRating}</span>
           <span class="keyword-tag">評価2が${HP_RULES.cutRatingCount}回以上は除外</span>
         `;
-        document.getElementById("almostTag").innerHTML = `
+        safeGet("almostTag").innerHTML = `
           <span class="keyword-tag">回数不足 / スコア不足 の候補</span>
           <span class="keyword-tag">育成でHP化</span>
         `;
 
-        const hpGrid = document.getElementById("hpGrid");
-        const almostGrid = document.getElementById("almostGrid");
+        const hpGrid = safeGet("hpGrid");
+        const almostGrid = safeGet("almostGrid");
+        if (!hpGrid || !almostGrid) return;
         hpGrid.innerHTML = "";
         almostGrid.innerHTML = "";
 
@@ -1555,13 +1573,11 @@
           almostGrid.appendChild(makeCard(p, "育成/要観察", "background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);", reason));
         }
 
-        const actions = document.getElementById("hpActions");
+        const actions = safeGet("hpActions");
+        if (!actions) return;
         actions.innerHTML = "";
-        const topHp = hpTop4.slice(0, 3);
-
         const lines = [
           `社員勧誘候補（表示: ${hpTop4.length}名 / 全体: ${hp.length}名）へ：面談打診テンプレを送付（モック）`,
-          `上位候補（${topHp.map(x => x.staffId).join(", ") || "—"}）は「職種希望/稼働希望」を追加ヒアリング`,
           `育成/要観察（表示: ${almostTop4.length}名 / 全体: ${almost.length}名）は未達理由（回数/スコア）に応じて目標設定`,
           `運用提案：評価が2のときは理由カテゴリを必須入力にする`
         ];
@@ -1594,6 +1610,7 @@
     function pillHtml(text, cls) { return `<span class="pill ${cls}">${escapeHtml(text)}</span>`; }
     function labelForClass(cls) { return cls==="blue"?"青":cls==="yellow"?"黄":cls==="red"?"赤":"—"; }
 
+    // site -> pref mapping (あなたの元リスト)
     const siteToPrefCode = new Map([
       ["大通公園サテライトセンター", 1],["札幌支店", 1],["新さっぽろサテライトセンター", 1],["清田支店", 1],
       ["仙台東口サテライトセンター", 4],["仙台南支店", 4],
@@ -1675,6 +1692,7 @@
       }
       return rows;
     }
+
     function getCol(row, names) {
       for (const name of names) {
         if (row[name] != null && String(row[name]).trim() !== "") return row[name];
@@ -1682,12 +1700,14 @@
       for (const name of names) if (row[name] != null) return row[name];
       return "";
     }
+
     function normJP(v) {
       return String(v ?? "")
         .trim()
         .replace(/[ 　]+/g, "")
         .replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
     }
+
     function parseReserveAnswer(raw) {
       const s = normJP(raw);
       if (!s) return { kind: "empty" };
@@ -1698,6 +1718,7 @@
       return { kind: "unknown" };
     }
 
+    // ★FIX: 次回予約/次の予約の両対応（ダミーでも実データでも next_den が0にならない）
     function aggregateSites(rows1_5, rows6_10) {
       const bySite = new Map();
       const get = (siteName) => {
@@ -1712,7 +1733,8 @@
         if (!site) continue;
         const a = get(site);
 
-        const parsed = parseReserveAnswer(r["次の予約"]);
+        const reserveRaw = getCol(r, ["次回予約","次の予約","次回の予約","予約"]);
+        const parsed = parseReserveAnswer(reserveRaw);
         if (parsed.kind === "yes") { a.next_den++; a.next_num++; }
         else if (parsed.kind === "no") { a.next_den++; }
 
@@ -1786,18 +1808,21 @@
     let statePrev2 = { byPref: new Map(), unknownSites: [] };
     let stateCurr2 = { byPref: new Map(), unknownSites: [] };
     let lastPrefPopupContext2 = null;
-    let activeSiteKey2 = null;
 
     async function loadJapanSvg2(url = "./japan.svg") {
-      const container = document.getElementById("mapContainer2");
-      const status = document.getElementById("mapStatus2");
+      const container = safeGet("mapContainer2");
+      const status = safeGet("mapStatus2");
+      if (!container || !status) throw new Error("mapContainer2/mapStatus2 not found");
+
       status.textContent = "地図を読み込み中…";
       const res = await fetch(url, { cache:"no-store" });
       if (!res.ok) {
-        status.textContent = `地図SVGの読み込みに失敗: ${res.status}`;
+        status.textContent = `地図SVGの読み込みに失敗: ${res.status} ${res.statusText}`;
         throw new Error(`fetch failed: ${res.status}`);
       }
       const svgText = await res.text();
+
+      container.querySelector("svg")?.remove();
       container.insertAdjacentHTML("afterbegin", svgText);
 
       const svg = container.querySelector("svg.geolonia-svg-map") || container.querySelector("svg");
@@ -1805,6 +1830,7 @@
       svg.style.width = "100%";
       svg.style.height = "100%";
       try { svg.setAttribute("viewBox", "80 40 860 860"); } catch(e) {}
+
       const n = svg.querySelectorAll(".prefecture").length;
       status.textContent = `地図読み込みOK（prefecture数: ${n}）`;
       return svg;
@@ -1816,6 +1842,7 @@
     }
 
     function paintMap2(svg, byPref, metricKey) {
+      if (!svg) return;
       const def = metricDefs[metricKey];
       svg.querySelectorAll(".prefecture").forEach(el => {
         const prefCode = Number(el.getAttribute("data-code"));
@@ -1825,14 +1852,18 @@
       });
     }
 
-    function hidePrefPopup2() { document.getElementById("prefPopup2").style.display = "none"; }
+    function hidePrefPopup2() {
+      const p = safeGet("prefPopup2");
+      if (p) p.style.display = "none";
+    }
 
     function showPrefPopup2({ prefEl, prefCode, prefAgg, metricKey, monthLabel, anchorEvent }) {
-      const popup = document.getElementById("prefPopup2");
-      const titleEl = document.getElementById("prefPopupTitle2");
-      const metaEl  = document.getElementById("prefPopupMeta2");
-      const sitesEl = document.getElementById("prefPopupSites2");
-      const moreEl  = document.getElementById("prefPopupMore2");
+      const popup = safeGet("prefPopup2");
+      const titleEl = safeGet("prefPopupTitle2");
+      const metaEl  = safeGet("prefPopupMeta2");
+      const sitesEl = safeGet("prefPopupSites2");
+      const moreEl  = safeGet("prefPopupMore2");
+      if (!popup || !titleEl || !metaEl || !sitesEl || !moreEl) return;
 
       const rawTitle = prefEl.querySelector("title")?.textContent?.trim() || `都道府県 ${prefCode}`;
       const prefName = rawTitle.split("/")[0].trim();
@@ -1874,7 +1905,7 @@
 
       moreEl.textContent = sites.length > 10 ? `他 ${sites.length - 10} 拠点…（先頭10件のみ表示）` : "";
 
-      const container = document.getElementById("mapContainer2");
+      const container = safeGet("mapContainer2");
       const rect = container.getBoundingClientRect();
       let x = rect.width * 0.5, y = rect.height * 0.3;
       if (anchorEvent?.clientX != null) { x = anchorEvent.clientX - rect.left; y = anchorEvent.clientY - rect.top; }
@@ -1893,158 +1924,16 @@
     }
 
     function openModal2() {
-      const m = document.getElementById("siteDetailModal2");
+      const m = safeGet("siteDetailModal2");
+      if (!m) return;
       m.classList.add("is-open");
       m.setAttribute("aria-hidden", "false");
     }
     function closeModal2() {
-      const m = document.getElementById("siteDetailModal2");
+      const m = safeGet("siteDetailModal2");
+      if (!m) return;
       m.classList.remove("is-open");
       m.setAttribute("aria-hidden", "true");
-    }
-
-    function buildAiMock2(site) {
-      const issues = [], causes = [], actions = [], trends = [];
-      if (site.nextReservationRate != null && site.nextReservationRate < 60) {
-        issues.push("予約率が低い（<60%）");
-        causes.push("初回体験の期待値調整不足、当日のコミュニケーション不足の可能性");
-        actions.push("終了5分前の予約提案トークを標準化（テンプレ＋QR案内）");
-        actions.push("当日中に予約できる導線（枠見える化）を強化");
-        trends.push("初回層の離脱が起きやすい構造になっている可能性");
-      } else if (site.nextReservationRate != null && site.nextReservationRate < 80) {
-        issues.push("予約率が中位（60〜80%）");
-        causes.push("予約導線はあるが、背中押しが弱い可能性");
-        actions.push("『次に来るメリット』を一言で伝える運用（稼ぎ/慣れ/人間関係）");
-        trends.push("運用改善で80%+に上げられる余地");
-      }
-      if (site.satisfactionAvg != null && site.satisfactionAvg < 3) {
-        issues.push("満足度が低い（<3.0）");
-        causes.push("指示の不明確さ、フォロー不足、備品/ユニフォーム不満が顕在化している可能性");
-        actions.push("作業開始前の5分ブリーフィング（流れ/注意点/質疑）を必須化");
-        actions.push("ユニフォーム状態のチェック＆交換サイクルの見直し");
-        trends.push("自由記述に不満系ワードが増える傾向");
-      } else if (site.satisfactionAvg != null && site.satisfactionAvg < 4) {
-        issues.push("満足度が中位（3.0〜4.0）");
-        causes.push("一定の満足はあるが、体験のムラが残る可能性");
-        actions.push("説明品質を均一化（チェックリスト運用）");
-        trends.push("改善要望は『連絡』『指示』に寄りやすい");
-      }
-      if (site.noGreetingRate != null && site.noGreetingRate >= 50) {
-        issues.push("挨拶（自己紹介）未実施率が高い（>=50%）");
-        causes.push("導入が省略されている/多忙/手順未整備の可能性");
-        actions.push("『自己紹介→今日の流れ→質問』の30秒導線を標準化");
-        actions.push("導入実施チェック（簡易チェック）");
-        trends.push("満足度/予約率にも波及しやすい");
-      } else if (site.noGreetingRate != null && site.noGreetingRate >= 20) {
-        issues.push("挨拶未実施率が中位（20〜50%）");
-        causes.push("ピーク時に導入が飛びやすい運用の可能性");
-        actions.push("忙しい日ほど導入を短縮しても必ず実施（10秒版）");
-        trends.push("時間帯/担当者で偏りが出やすい");
-      }
-      if (issues.length === 0) {
-        issues.push("大きな課題シグナルは強くない（指標上）");
-        causes.push("現状維持でも良いが、運用標準化で安定化余地");
-        actions.push("良い運用を他拠点に展開（テンプレ化）");
-        trends.push("母数増加時にブレが見える可能性");
-      }
-      return { issues, causes, actions, trends };
-    }
-
-    function renderSiteDetailModal2({ site, prefCode, monthLabel }) {
-      activeSiteKey2 = site.siteName;
-      document.getElementById("modalSubTitle2").textContent = `${monthLabel} / 都道府県コード ${prefCode} / ${site.siteName}`;
-
-      const st = (currentMonthMode2 === "prev") ? statePrev2 : stateCurr2;
-      const prefAgg = st.byPref.get(prefCode);
-      const sites = prefAgg?.sites ?? [];
-
-      const otherState = currentMonthMode2 === "prev" ? stateCurr2 : statePrev2;
-      const otherPref = otherState.byPref.get(prefCode);
-      const otherSite = otherPref?.sites?.find(s => s.siteName === site.siteName);
-
-      function deltaPct(curr, prev) {
-        if (curr == null || prev == null) return { text:"—", cls:"deltaFlat" };
-        const d = clamp(curr - prev, -8, 8); // ★保険：Δを-8〜+8ptにクランプ
-        const cls = d > 0.0001 ? "deltaUp" : d < -0.0001 ? "deltaDown" : "deltaFlat";
-        const sign = d > 0.0001 ? "+" : d < -0.0001 ? "" : "±";
-        return { text: `${sign}${d.toFixed(1)}%`, cls };
-      }
-      function deltaNum(curr, prev) {
-        if (curr == null || prev == null) return { text:"—", cls:"deltaFlat" };
-        const dRaw = curr - prev;
-        const d = clamp(dRaw, -0.8, 0.8); // ★満足度Δは±0.8に保険（要件Δ±8ptの趣旨に合わせた運用）
-        const cls = d > 0.0001 ? "deltaUp" : d < -0.0001 ? "deltaDown" : "deltaFlat";
-        const sign = d > 0.0001 ? "+" : d < -0.0001 ? "" : "±";
-        return { text: `${sign}${d.toFixed(2)}`, cls };
-      }
-
-      const dRes = deltaPct(site.nextReservationRate, otherSite?.nextReservationRate ?? null);
-      const dNg  = deltaPct(site.noGreetingRate, otherSite?.noGreetingRate ?? null);
-      const dSat = deltaNum(site.satisfactionAvg, otherSite?.satisfactionAvg ?? null);
-
-      const ai = buildAiMock2(site);
-
-      const body = document.getElementById("modalBody2");
-      body.innerHTML = `
-        <div class="selectBar">
-          <div class="muted" style="font-weight:800;">拠点</div>
-          <select id="siteSelect2"></select>
-        </div>
-
-        <div class="kpiGrid">
-          <div class="kpiCard">
-            <div class="kpiLabel">予約率（1〜5回目）</div>
-            <div class="kpiValue">${fmtPct(site.nextReservationRate)}</div>
-            <div class="kpiDelta ${dRes.cls}">${dRes.text}</div>
-            <div class="muted" style="margin-top:6px;font-size:12px;">回答数=${site.next_den}</div>
-          </div>
-          <div class="kpiCard">
-            <div class="kpiLabel">挨拶なし率</div>
-            <div class="kpiValue">${fmtPct(site.noGreetingRate)}</div>
-            <div class="kpiDelta ${dNg.cls}">${dNg.text}</div>
-            <div class="muted" style="margin-top:6px;font-size:12px;">回答数=${site.greet_den}</div>
-          </div>
-          <div class="kpiCard">
-            <div class="kpiLabel">満足度（平均）</div>
-            <div class="kpiValue">${fmtNum(site.satisfactionAvg,2)}</div>
-            <div class="kpiDelta ${dSat.cls}">${dSat.text}</div>
-            <div class="muted" style="margin-top:6px;font-size:12px;">回答数=${site.sat_cnt}</div>
-          </div>
-          <div class="kpiCard">
-            <div class="kpiLabel">（モック枠）</div>
-            <div class="kpiValue">—</div>
-            <div class="kpiDelta deltaFlat">—</div>
-            <div class="muted" style="margin-top:6px;font-size:12px;">※拡張用</div>
-          </div>
-        </div>
-
-        <div class="detailGrid">
-          <div class="panelW">
-            <div class="panelTitleW">課題</div>
-            <ul>${ai.issues.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>
-            <div class="panelTitleW" style="margin-top:12px;">原因</div>
-            <ul>${ai.causes.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>
-          </div>
-          <div class="panelW">
-            <div class="panelTitleW">改善施策</div>
-            <ol>${ai.actions.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ol>
-            <div class="panelTitleW" style="margin-top:12px;">傾向</div>
-            <ul>${ai.trends.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>
-          </div>
-        </div>
-      `;
-
-      const sel = body.querySelector("#siteSelect2");
-      sel.innerHTML = sites.map(s => {
-        const selected = s.siteName === site.siteName ? "selected" : "";
-        return `<option value="${escapeHtml(s.siteName)}" ${selected}>${escapeHtml(s.siteName)}</option>`;
-      }).join("");
-
-      sel.addEventListener("change", () => {
-        const nextSite = sites.find(s => s.siteName === sel.value);
-        if (!nextSite) return;
-        renderSiteDetailModal2({ site: nextSite, prefCode, monthLabel });
-      });
     }
 
     function openSiteDetailFromPopup2(siteName, prefCode) {
@@ -2069,20 +1958,19 @@
       if (!site) { alert("該当拠点の集計が見つかりません（TSVを読み込んでください）: " + siteName); return; }
       openModal2();
       renderSiteDetailModal2({ site, prefCode, monthLabel: currentMonthMode2 === "prev" ? "先月" : "今月" });
-      lastPrefPopupContext2 = { prefCode, anchor: null };
     }
 
     function wirePrefClick2(svg) {
-      document.getElementById("prefPopupClose2").addEventListener("click", hidePrefPopup2);
+      on(safeGet("prefPopupClose2"), "click", hidePrefPopup2);
 
-      document.getElementById("mapContainer2").addEventListener("click", (e) => {
+      on(safeGet("mapContainer2"), "click", (e) => {
         const isPref = e.target.closest && e.target.closest(".prefecture");
         const isPopup = e.target.closest && e.target.closest("#prefPopup2");
         if (!isPref && !isPopup) hidePrefPopup2();
       });
 
       svg.querySelectorAll(".prefecture").forEach(el => {
-        el.addEventListener("click", (e) => {
+        on(el, "click", (e) => {
           e.stopPropagation();
           const { byPref, metricKey, monthLabel } = getActiveState2();
           const prefCode = Number(el.getAttribute("data-code"));
@@ -2105,17 +1993,20 @@
     }
 
     function loadFromTextareas2(fromOverview=false) {
-      const id = (x)=>document.getElementById(x);
+      const id = (x)=>safeGet(x);
 
-      const prev1 = parseTable(id(fromOverview ? "ovTsvPrev1to5" : "tsvPrev1to5").value);
-      const prev6 = parseTable(id(fromOverview ? "ovTsvPrev6to10" : "tsvPrev6to10").value);
-      const curr1 = parseTable(id(fromOverview ? "ovTsvCurr1to5" : "tsvCurr1to5").value);
-      const curr6 = parseTable(id(fromOverview ? "ovTsvCurr6to10" : "tsvCurr6to10").value);
+      const prev1 = parseTable(id(fromOverview ? "ovTsvPrev1to5" : "tsvPrev1to5")?.value);
+      const prev6 = parseTable(id(fromOverview ? "ovTsvPrev6to10" : "tsvPrev6to10")?.value);
+      const curr1 = parseTable(id(fromOverview ? "ovTsvCurr1to5" : "tsvCurr1to5")?.value);
+      const curr6 = parseTable(id(fromOverview ? "ovTsvCurr6to10" : "tsvCurr6to10")?.value);
 
-      const topNextPrev = debugTopValues(prev1, "次の予約", 5);
-      const topNextCurr = debugTopValues(curr1, "次の予約", 5);
-      if (looksLikeWorkHoursTop(topNextPrev) || looksLikeWorkHoursTop(topNextCurr)) {
-        alert("TSVの列ズレの可能性：『次の予約』列に勤務時間（4時間以内 等）が入っています。データを確認してください。");
+      // 列ズレ検知（次回予約/次の予約どちらでも）
+      const topPrev = debugTopValues(prev1, "次回予約", 5);
+      const topCurr = debugTopValues(curr1, "次回予約", 5);
+      const topPrev2 = topPrev.length ? topPrev : debugTopValues(prev1, "次の予約", 5);
+      const topCurr2 = topCurr.length ? topCurr : debugTopValues(curr1, "次の予約", 5);
+      if (looksLikeWorkHoursTop(topPrev2) || looksLikeWorkHoursTop(topCurr2)) {
+        alert("TSVの列ズレの可能性：『次回予約（または次の予約）』列に勤務時間（4時間以内 等）が入っています。データを確認してください。");
       }
 
       const bySitePrev = aggregateSites(prev1, prev6);
@@ -2126,17 +2017,18 @@
       const msg =
         `読込: 先月 sites=${bySitePrev.size} / 今月 sites=${bySiteCurr.size}（漏れ 先月${statePrev2.unknownSites.length}・今月${stateCurr2.unknownSites.length}）`;
 
-      if (fromOverview) document.getElementById("ovLoadStatus").textContent = msg;
-      else document.getElementById("loadStatus").textContent = msg;
+      const stEl = safeGet(fromOverview ? "ovLoadStatus" : "loadStatus");
+      if (stEl) stEl.textContent = msg;
 
       const unknownAll = [...new Set([...statePrev2.unknownSites, ...stateCurr2.unknownSites])];
       const unknownMsg = unknownAll.length ? `⚠️ マッピング漏れ（最大20件）: ${unknownAll.slice(0,20).join(" / ")}${unknownAll.length>20?" ...":""}` : "";
-      const ub = document.getElementById("unknownBox");
+      const ub = safeGet("unknownBox");
       if (ub) ub.textContent = unknownMsg;
 
       if (svgRoot2) paintMap2(svgRoot2, getActiveState2().byPref, currentMetricKey2);
       hidePrefPopup2();
 
+      // ★必ずOverview更新
       refreshOverviewFromMapStates();
     }
 
@@ -2150,55 +2042,41 @@
       };
     }
     function pick(rng, arr) { return arr[Math.floor(rng() * arr.length)]; }
-    function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
-    function clampAvoidEdges(n, lo, hi, eps=1e-6){ return Math.max(lo+eps, Math.min(hi-eps, n)); }
-    function pad2(n){ return String(n).padStart(2,"0"); }
 
-    // =========================================================
-    // Dummy distribution requirements:
-    //  - 予約率 55–92%
-    //  - 満足度(平均) 3.6–4.7
-    //  - 挨拶なし率 1–18%
-    //  - Δ -8pt〜+8pt（表示側でもクランプ）
-    // =========================================================
+    // Dummy distribution requirements
     const DUMMY_RANGES = {
       reserveYesRate: { lo: 0.55, hi: 0.92 },
-      greetNoRate:    { lo: 0.01, hi: 0.18 }, // "なし率"
+      greetNoRate:    { lo: 0.01, hi: 0.18 }, // なし率
       satAvg:         { lo: 3.6,  hi: 4.7  },
       deltaPt:        { lo: -8,   hi: 8    }
     };
 
+    function pad2(n){ return String(n).padStart(2,"0"); }
+    function clampAvoidEdges(n, lo, hi, eps=1e-6){ return Math.max(lo+eps, Math.min(hi-eps, n)); }
+    function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
+
     function siteProfile2(siteName, monthLabel) {
-      // siteごとの中心を作る（安定）
       let h = 2166136261;
       for (let i=0;i<siteName.length;i++) h = Math.imul(h ^ siteName.charCodeAt(i), 16777619);
       const p = (h >>> 0) / 4294967296;
       const center = (p - 0.5);
 
-      const monthBias = monthLabel.startsWith("Jan") ? -0.012 : +0.010; // 小さめ（Δが暴れない）
+      const monthBias = monthLabel.startsWith("Jan") ? -0.012 : +0.010;
       const satBias   = monthLabel.startsWith("Jan") ? -0.04  : +0.035;
 
-      // 予約 yes率
       const reserve = clampAvoidEdges(0.74 + center * 0.22 + monthBias, DUMMY_RANGES.reserveYesRate.lo, DUMMY_RANGES.reserveYesRate.hi);
-
-      // 挨拶 "なし率" を直接作ってから yes率へ（1–18%厳守）
       const greetNo = clampAvoidEdges(0.08 - center * 0.06 - monthBias*0.5, DUMMY_RANGES.greetNoRate.lo, DUMMY_RANGES.greetNoRate.hi);
       const introYes = 1 - greetNo;
-
-      // 満足度平均（連続値の中心）
       const satCenter = clamp(4.10 + center * 0.45 + satBias, DUMMY_RANGES.satAvg.lo, DUMMY_RANGES.satAvg.hi);
 
       return { reserveYesRate: reserve, introYesRate: introYes, satCenter };
     }
 
-    // =========================================================
-    // Dummy (FAST): generate states directly without textarea
-    // =========================================================
+    // FAST state generator (3000)
     function generateDummyStatesDirect(monthLabel, { seed = 1, totalPerMonth = 3000 } = {}) {
       const rng = makeRng(seed);
       const sites = [...siteToPrefCode.keys()];
 
-      // 従来の比率(64:36)を踏襲
       const n1 = Math.round(totalPerMonth * 0.64);
       const n6 = totalPerMonth - n1;
 
@@ -2210,32 +2088,25 @@
         return bySite.get(siteName);
       };
 
-      // 1〜5回目：予約 + 満足 + 自己紹介
       for (let i=0;i<n1;i++) {
         const site = pick(rng, sites);
         const prof = siteProfile2(site, monthLabel);
         const a = get(site);
 
-        // reserve
         const nextYes = (rng() < prof.reserveYesRate);
         a.next_den++;
         if (nextYes) a.next_num++;
 
-        // satisfaction: 1〜5整数だが、平均が3.6〜4.7に寄るよう中心を設計
-        // 低評価(1,2)をほぼ出さない
         let sat = Math.round(prof.satCenter + (rng()-0.5)*0.70);
         sat = clamp(sat, 3, 5);
-        // たまに2を出すが極小
         if (sat === 3 && rng() < 0.03) sat = 2;
         a.sat_sum += sat; a.sat_cnt++;
 
-        // greet intro: yes率 = 1 - (なし率)
         const introYes = (rng() < prof.introYesRate);
         a.greet_den++;
         if (!introYes) a.greet_no++;
       }
 
-      // 6〜10回目：満足 + 自己紹介
       for (let i=0;i<n6;i++) {
         const site = pick(rng, sites);
         const prof = siteProfile2(site, monthLabel);
@@ -2254,10 +2125,7 @@
       return buildPrefView(bySite);
     }
 
-    // =========================================================
-    // TSV生成（generateDummyTSV(monthLabel, opts) を実運用に接続）
-    //  - opts.totalPerMonth が来たら 64:36 で n1/n6 を決める
-    // =========================================================
+    // TSV generator
     function generateDummyTSV(monthLabel, opts = {}) {
       const rng = makeRng(opts.seed ?? 1);
 
@@ -2268,14 +2136,14 @@
       const workHours = ["4時間以内","4〜6時間","6時間以上"];
       const smell = ["問題なし","普通","臭い"];
 
-      const totalPerMonth = Number(opts.totalPerMonth ?? 500); // TSVは巨大化しやすいので既定は500（stateは別で3000）
+      const totalPerMonth = Number(opts.totalPerMonth ?? 500);
       const n1 = Math.round(totalPerMonth * 0.64);
       const n6 = totalPerMonth - n1;
 
       const header1 = [
         "送信日時","month","勤務先","氏名（またはアルバイトコード）","出勤回数","職業","アートにきたきっかけ",
         "面接官の対応","面接官の対応の良かった理由","面接官の対応の悪かった理由","リーダー名","リーダーからの自己紹介",
-        "作業内容・一日の流れの話があったか","着る前のユニフォームの痛みや匂い","働いた時間","次の予約","予約を入れなかった理由",
+        "作業内容・一日の流れの話があったか","着る前のユニフォームの痛みや匂い","働いた時間","次回予約","予約を入れなかった理由",
         "リーダーとまた作業をしたいですか？","行きたい理由","行きたくない理由","満足度","その他ご意見"
       ];
 
@@ -2341,7 +2209,7 @@
           row[idx["作業内容・一日の流れの話があったか"]] = (rng() < 0.90) ? "はい" : "いいえ";
           row[idx["着る前のユニフォームの痛みや匂い"]] = pick(rng, smell);
           row[idx["働いた時間"]] = pick(rng, workHours);
-          row[idx["次の予約"]] = next;
+          row[idx["次回予約"]] = next;
           row[idx["予約を入れなかった理由"]] = notReserveReason;
           row[idx["リーダーとまた作業をしたいですか？"]] = (rng() < 0.80) ? "はい" : "いいえ";
           row[idx["行きたい理由"]] = pick(rng, ["稼げる","稼げる/慣れた","人間関係が良い","融通がきく"]);
@@ -2390,19 +2258,17 @@
       return { tsv1: rows1.join("\n"), tsv6: rows6.join("\n") };
     }
 
-    // =========================================================
-    // Dummy button behavior: ensure generateDummyTSV + textarea + load pipeline
-    // =========================================================
+    // Dummy button behavior
     function fillDummyToTextareasAndLoad({ fromOverview, totalPerMonthState = 3000, totalPerMonthTSV = 500 } = {}) {
       // 1) state高速生成（3000件）
       statePrev2 = generateDummyStatesDirect("Jan-26", { seed: 1, totalPerMonth: totalPerMonthState });
       stateCurr2 = generateDummyStatesDirect("Feb-26", { seed: 2, totalPerMonth: totalPerMonthState });
 
-      // 2) TSV生成（重くしないため500件既定。要件の「generateDummyTSV連携」満たす）
+      // 2) TSV生成（連携要件）
       const prev = generateDummyTSV("Jan-26", { seed: 1, totalPerMonth: totalPerMonthTSV });
       const curr = generateDummyTSV("Feb-26", { seed: 2, totalPerMonth: totalPerMonthTSV });
 
-      const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+      const setVal = (id, val) => { const el = safeGet(id); if (el) el.value = val; };
 
       if (fromOverview) {
         setVal("ovTsvPrev1to5", prev.tsv1);
@@ -2416,23 +2282,23 @@
         setVal("tsvCurr6to10", curr.tsv6);
       }
 
-      // 3) 貼付と同じ反映経路で統一
+      // 3) parse→state生成→overview refresh
       loadFromTextareas2(!!fromOverview);
     }
 
     function setMetric2(key) {
       currentMetricKey2 = key;
-      document.getElementById("metric-next").classList.toggle("primary", key==="next");
-      document.getElementById("metric-sat").classList.toggle("primary", key==="sat");
-      document.getElementById("metric-greet").classList.toggle("primary", key==="greet");
+      safeGet("metric-next")?.classList.toggle("primary", key==="next");
+      safeGet("metric-sat")?.classList.toggle("primary", key==="sat");
+      safeGet("metric-greet")?.classList.toggle("primary", key==="greet");
       if (svgRoot2) paintMap2(svgRoot2, getActiveState2().byPref, currentMetricKey2);
       refreshOverviewFromMapStates();
     }
 
     function setMonth2(mode) {
       currentMonthMode2 = mode;
-      document.getElementById("month-curr").classList.toggle("primary", mode==="curr");
-      document.getElementById("month-prev").classList.toggle("primary", mode==="prev");
+      safeGet("month-curr")?.classList.toggle("primary", mode==="curr");
+      safeGet("month-prev")?.classList.toggle("primary", mode==="prev");
       if (svgRoot2) paintMap2(svgRoot2, getActiveState2().byPref, currentMetricKey2);
       refreshOverviewFromMapStates();
     }
@@ -2443,9 +2309,8 @@
           svgRoot2 = await loadJapanSvg2("./japan.svg");
           wirePrefClick2(svgRoot2);
 
-          document.getElementById("prefPopupClose2").addEventListener("click", hidePrefPopup2);
-
-          document.getElementById("prefPopup2").addEventListener("click", (e) => {
+          // popup内の拠点ボタン → モーダルを開く
+          on(safeGet("prefPopup2"), "click", (e) => {
             const btn = e.target.closest?.(".popupSiteBtn");
             if (!btn) return;
             e.preventDefault();
@@ -2456,34 +2321,38 @@
             openSiteDetailFromPopup2(siteName, prefCode);
           });
 
-          document.getElementById("btnCloseModal2").addEventListener("click", () => closeModal2());
-          document.getElementById("siteDetailModal2").addEventListener("click", (e) => {
+          // モーダル閉じる
+          on(safeGet("btnCloseModal2"), "click", () => closeModal2());
+          on(safeGet("siteDetailModal2"), "click", (e) => {
             const close = e.target?.getAttribute?.("data-close");
-            if (close) document.getElementById("btnCloseModal2").click();
+            if (close) safeGet("btnCloseModal2")?.click();
           });
           window.addEventListener("keydown", (e) => {
             if (e.key === "Escape") {
-              const m = document.getElementById("siteDetailModal2");
-              if (m.classList.contains("is-open")) document.getElementById("btnCloseModal2").click();
+              const m = safeGet("siteDetailModal2");
+              if (m && m.classList.contains("is-open")) safeGet("btnCloseModal2")?.click();
             }
           });
 
-          document.getElementById("metric-next").addEventListener("click", ()=>setMetric2("next"));
-          document.getElementById("metric-sat").addEventListener("click", ()=>setMetric2("sat"));
-          document.getElementById("metric-greet").addEventListener("click", ()=>setMetric2("greet"));
-          document.getElementById("month-curr").addEventListener("click", ()=>setMonth2("curr"));
-          document.getElementById("month-prev").addEventListener("click", ()=>setMonth2("prev"));
+          // 指標・月
+          on(safeGet("metric-next"), "click", ()=>setMetric2("next"));
+          on(safeGet("metric-sat"), "click", ()=>setMetric2("sat"));
+          on(safeGet("metric-greet"), "click", ()=>setMetric2("greet"));
+          on(safeGet("month-curr"), "click", ()=>setMonth2("curr"));
+          on(safeGet("month-prev"), "click", ()=>setMonth2("prev"));
 
-          document.getElementById("btnLoad").addEventListener("click", () => {
+          // TSV更新
+          on(safeGet("btnLoad"), "click", () => {
             try { loadFromTextareas2(false); setMonth2("curr"); }
             catch (e) { console.error(e); alert("更新でエラー。F12→Consoleの赤い行を確認してください。"); }
           });
 
-          // Dummy: state(3000) + TSV(500) + load pipeline
-          document.getElementById("btnFillDummy").addEventListener("click", () => {
+          // ダミー
+          on(safeGet("btnFillDummy"), "click", () => {
             try {
               fillDummyToTextareasAndLoad({ fromOverview:false, totalPerMonthState:3000, totalPerMonthTSV:3000 });
-              document.getElementById("loadStatus").textContent = `ダミー生成: 各月3000件（高速） / TSV投入(各月3000件)`;
+              const ls = safeGet("loadStatus");
+              if (ls) ls.textContent = `ダミー生成: 各月3000件（高速） / TSV投入(各月500件)`;
               setMonth2("curr");
             } catch (e) {
               console.error(e);
@@ -2492,10 +2361,12 @@
           });
 
           paintMap2(svgRoot2, new Map(), currentMetricKey2);
-          document.getElementById("mapStatus2").textContent += "（TSVを貼り付けて『更新』してください。ダミー高速も可）";
+          const ms = safeGet("mapStatus2");
+          if (ms) ms.textContent += "（TSVを貼り付けて『更新』してください。ダミー高速も可）";
         } catch (e) {
           console.error(e);
-          document.getElementById("mapStatus2").textContent = "初期化エラー。F12→Consoleの赤い行を確認してください。";
+          const ms = safeGet("mapStatus2");
+          if (ms) ms.textContent = "地図の初期化に失敗しました。./japan.svg が同階層にあるか、SVGが壊れていないか確認してください。";
         }
       })();
     }
@@ -2507,21 +2378,22 @@
     let ovMonthMode = "curr";
 
     function initOverviewTab() {
-      document.getElementById("ov-metric-next").addEventListener("click", ()=>setOvMetric("next"));
-      document.getElementById("ov-metric-sat").addEventListener("click", ()=>setOvMetric("sat"));
-      document.getElementById("ov-metric-greet").addEventListener("click", ()=>setOvMetric("greet"));
-      document.getElementById("ov-month-curr").addEventListener("click", ()=>setOvMonth("curr"));
-      document.getElementById("ov-month-prev").addEventListener("click", ()=>setOvMonth("prev"));
+      on(safeGet("ov-metric-next"), "click", ()=>setOvMetric("next"));
+      on(safeGet("ov-metric-sat"), "click", ()=>setOvMetric("sat"));
+      on(safeGet("ov-metric-greet"), "click", ()=>setOvMetric("greet"));
+      on(safeGet("ov-month-curr"), "click", ()=>setOvMonth("curr"));
+      on(safeGet("ov-month-prev"), "click", ()=>setOvMonth("prev"));
 
-      document.getElementById("ovBtnLoad").addEventListener("click", () => {
+      on(safeGet("ovBtnLoad"), "click", () => {
         try { loadFromTextareas2(true); }
         catch (e) { console.error(e); alert("①の更新でエラー。F12→Consoleの赤い行を確認してください。"); }
       });
 
-      document.getElementById("ovBtnFillDummy").addEventListener("click", () => {
+      on(safeGet("ovBtnFillDummy"), "click", () => {
         try {
-          fillDummyToTextareasAndLoad({ fromOverview:true, totalPerMonthState:3000, totalPerMonthTSV:3000 });
-          document.getElementById("ovLoadStatus").textContent = `ダミー生成: 各月3000件（高速） / TSV投入(各月3000件)`;
+          fillDummyToTextareasAndLoad({ fromOverview:true, totalPerMonthState:3000, totalPerMonthTSV:500 });
+          const st = safeGet("ovLoadStatus");
+          if (st) st.textContent = `ダミー生成: 各月3000件（高速） / TSV投入(各月500件)`;
         } catch (e) {
           console.error(e);
           alert("①ダミー入力でエラー。F12→Consoleの赤い行を確認してください。");
@@ -2534,15 +2406,15 @@
 
     function setOvMetric(k){
       ovMetricKey = k;
-      document.getElementById("ov-metric-next").classList.toggle("active", k==="next");
-      document.getElementById("ov-metric-sat").classList.toggle("active", k==="sat");
-      document.getElementById("ov-metric-greet").classList.toggle("active", k==="greet");
+      safeGet("ov-metric-next")?.classList.toggle("active", k==="next");
+      safeGet("ov-metric-sat")?.classList.toggle("active", k==="sat");
+      safeGet("ov-metric-greet")?.classList.toggle("active", k==="greet");
       refreshOverviewFromMapStates();
     }
     function setOvMonth(m){
       ovMonthMode = m;
-      document.getElementById("ov-month-curr").classList.toggle("active", m==="curr");
-      document.getElementById("ov-month-prev").classList.toggle("active", m==="prev");
+      safeGet("ov-month-curr")?.classList.toggle("active", m==="curr");
+      safeGet("ov-month-prev")?.classList.toggle("active", m==="prev");
       refreshOverviewFromMapStates();
     }
 
@@ -2565,7 +2437,8 @@
       ];
 
       const fill = (id, arr) => {
-        const el = document.getElementById(id);
+        const el = safeGet(id);
+        if (!el) return;
         el.innerHTML = arr.map(x => `<li>${escapeHtml(x)}</li>`).join("");
       };
       fill("ovAiIssues", issues);
@@ -2576,7 +2449,7 @@
 
     function flattenSitesFromState(state){
       const out = [];
-      for (const p of state.byPref.values()){
+      for (const p of (state?.byPref?.values?.() ?? [])){
         for (const s of (p.sites || [])) out.push(s);
       }
       const m = new Map();
@@ -2601,152 +2474,48 @@
       if (metricKey === "sat") return v.toFixed(2);
       return v.toFixed(1) + "%";
     }
-    function deltaForMetric(metricKey, curr, prev){
-      if (curr == null || prev == null) return null;
-      return curr - prev;
-    }
     function improvementScore(metricKey, delta){
       if (delta == null) return null;
-      if (metricKey === "greet") return -delta;
+      if (metricKey === "greet") return -delta; // なし率は減少が改善
       return delta;
     }
 
+    // ★空でも必ずテーブル枠を描画する（「表示されない」を潰す）
     function renderSiteDeltaTable(elId, rows){
-      const el = document.getElementById(elId);
+      const el = safeGet(elId);
+      if (!el) return;
+
+      const body = (rows && rows.length) ? rows.map(r => `
+        <tr>
+          <td><span class="link" data-site="${escapeHtml(r.siteName)}">${escapeHtml(r.siteName)}</span></td>
+          <td>${escapeHtml(r.currText)}</td>
+          <td>${r.deltaText}</td>
+          <td>${r.n}</td>
+        </tr>
+      `).join("") : `<tr><td colspan="4" class="muted">該当データがありません（TSV未読込 / 回答数が閾値未満 / Δ算出不可）</td></tr>`;
+
       el.innerHTML = `
         <tr><th>拠点</th><th>今月</th><th>前月比(Δ)</th><th>回答数</th></tr>
-        ${rows.map(r => `
-          <tr>
-            <td><span class="link" data-site="${escapeHtml(r.siteName)}">${escapeHtml(r.siteName)}</span></td>
-            <td>${escapeHtml(r.currText)}</td>
-            <td>${r.deltaText}</td>
-            <td>${r.n}</td>
-          </tr>
-        `).join("")}
+        ${body}
       `;
+
       el.querySelectorAll("[data-site]").forEach(a => {
-        a.addEventListener("click", () => openSiteDetail(a.getAttribute("data-site")));
+        on(a, "click", () => openSiteDetail(a.getAttribute("data-site")));
       });
     }
 
     function setDeltaEl(id, d, mode){
-      const el = document.getElementById(id);
+      const el = safeGet(id);
+      if (!el) return;
       if (d == null) { el.textContent="—"; el.className="deltaFlat"; return; }
       if (d > 0.0001) { el.className="deltaUp"; el.textContent = (mode==="int"?`+${Math.round(d)}`:mode==="pct"?`+${d.toFixed(1)}%`:`+${d.toFixed(2)}`); return; }
       if (d < -0.0001) { el.className="deltaDown"; el.textContent = (mode==="int"?`${Math.round(d)}`:mode==="pct"?`${d.toFixed(1)}%`:`${d.toFixed(2)}`); return; }
       el.className="deltaFlat"; el.textContent = (mode==="int"?"±0":mode==="pct"?"±0.0%":"±0.00");
     }
 
-    function refreshOverviewFromMapStates(){
-      const monthLabel = ovMonthMode === "prev" ? "先月" : "今月";
-      document.getElementById("ovKpiMonthLabel").textContent = monthLabel;
-
-      const stCurr = stateCurr2;
-      const stPrev = statePrev2;
-      const hasAny = (stCurr.byPref && stCurr.byPref.size) || (stPrev.byPref && stPrev.byPref.size);
-
-      if (!hasAny) {
-        document.getElementById("ov-dataStatus").textContent = `（データ: TSV未読込なら—）`;
-        document.getElementById("ovKpiResponses").textContent = "—";
-        document.getElementById("ovKpiReserve").textContent = "—";
-        document.getElementById("ovKpiReserveN").textContent = "—";
-        document.getElementById("ovKpiSat").textContent = "—";
-        document.getElementById("ovKpiSatN").textContent = "—";
-        setDeltaEl("ovDeltaResponses", null, "int");
-        setDeltaEl("ovDeltaReserve", null, "pct");
-        setDeltaEl("ovDeltaSat", null, "num");
-        document.getElementById("ovImproveTop5").innerHTML = `<tr><th>拠点</th><th>今月</th><th>前月比</th><th>回答数</th></tr><tr><td colspan="4" class="muted">②または①でTSVを読み込みしてください（ダミー高速でもOK）</td></tr>`;
-        document.getElementById("ovWorst5").innerHTML = document.getElementById("ovImproveTop5").innerHTML;
-      } else {
-        const useState = ovMonthMode === "prev" ? stPrev : stCurr;
-        const sitesNow = flattenSitesFromState(useState);
-
-        const nResponses = sitesNow.reduce((a,s)=>a + (s.sat_cnt||0), 0);
-        document.getElementById("ovKpiResponses").textContent = nResponses ? nResponses.toLocaleString("ja-JP") : "—";
-
-        const aggCompany = (state) => {
-          let next_num=0,next_den=0,sat_sum=0,sat_cnt=0;
-          for (const p of state.byPref.values()){
-            next_num += p.next_num||0; next_den += p.next_den||0;
-            sat_sum += p.sat_sum||0; sat_cnt += p.sat_cnt||0;
-          }
-          return {
-            reserve: calcRate(next_num, next_den),
-            reserveN: next_den,
-            sat: calcAvg(sat_sum, sat_cnt),
-            satN: sat_cnt,
-            responsesApprox: sat_cnt
-          };
-        };
-
-        const compCurr = aggCompany(stCurr);
-        const compPrev = aggCompany(stPrev);
-        const compUse = (ovMonthMode==="prev") ? compPrev : compCurr;
-
-        document.getElementById("ovKpiReserve").textContent = compUse.reserve==null ? "—" : (compUse.reserve.toFixed(1)+"%");
-        document.getElementById("ovKpiReserveN").textContent = compUse.reserveN ? compUse.reserveN.toLocaleString("ja-JP") : "—";
-        document.getElementById("ovKpiSat").textContent = compUse.sat==null ? "—" : compUse.sat.toFixed(2);
-        document.getElementById("ovKpiSatN").textContent = compUse.satN ? compUse.satN.toLocaleString("ja-JP") : "—";
-
-        const dResp = (compCurr.responsesApprox && compPrev.responsesApprox) ? (compCurr.responsesApprox - compPrev.responsesApprox) : null;
-        const dReserveRaw = (compCurr.reserve!=null && compPrev.reserve!=null) ? (compCurr.reserve - compPrev.reserve) : null;
-        const dSatRaw = (compCurr.sat!=null && compPrev.sat!=null) ? (compCurr.sat - compPrev.sat) : null;
-
-        // Δは要件どおり保険クランプ（表示）
-        const dReserve = dReserveRaw == null ? null : clamp(dReserveRaw, DUMMY_RANGES.deltaPt.lo, DUMMY_RANGES.deltaPt.hi);
-        const dSat = dSatRaw == null ? null : clamp(dSatRaw, -0.8, 0.8);
-
-        setDeltaEl("ovDeltaResponses", dResp, "int");
-        setDeltaEl("ovDeltaReserve", dReserve, "pct");
-        setDeltaEl("ovDeltaSat", dSat, "num");
-
-        const currSites = flattenSitesFromState(stCurr);
-        const prevSites = flattenSitesFromState(stPrev);
-        const prevByName = new Map(prevSites.map(s=>[s.siteName, s]));
-
-        // 指標ごとのMIN回答数（根本対策）
-        const MIN_N_BY_METRIC = { next: 12, sat: 12, greet: 12 };
-        const MIN_N = MIN_N_BY_METRIC[ovMetricKey] ?? 12;
-
-        const rows = currSites.map(s => {
-          const prev = prevByName.get(s.siteName);
-          const currV = metricValue(s, ovMetricKey);
-          const prevV = prev ? metricValue(prev, ovMetricKey) : null;
-
-          let d = deltaForMetric(ovMetricKey, currV, prevV);
-          if (d != null) {
-            // Δ表示は-8〜+8ptにクランプ（満足度は±0.8運用）
-            if (ovMetricKey === "sat") d = clamp(d, -0.8, 0.8);
-            else d = clamp(d, DUMMY_RANGES.deltaPt.lo, DUMMY_RANGES.deltaPt.hi);
-          }
-
-          const n = metricDen(s, ovMetricKey) || 0;
-          if (n < MIN_N) return null;
-
-          const score = improvementScore(ovMetricKey, d);
-          const currText = formatMetric(ovMetricKey, currV);
-          const deltaText = (d==null) ? "—"
-            : (ovMetricKey==="sat"
-                ? ((d>=0?"+":"") + d.toFixed(2))
-                : ((d>=0?"+":"") + d.toFixed(1) + "%"));
-          return { siteName: s.siteName, currText, deltaText, n, score };
-        }).filter(Boolean).filter(r => r.score != null);
-
-        const improve = rows.slice().sort((a,b)=> (b.score - a.score) || (b.n - a.n)).slice(0,5);
-        const worst = rows.slice().sort((a,b)=> (a.score - b.score) || (b.n - a.n)).slice(0,5);
-
-        renderSiteDeltaTable("ovImproveTop5", improve);
-        renderSiteDeltaTable("ovWorst5", worst);
-
-        document.getElementById("ov-dataStatus").textContent =
-          `（指標:${metricDefs[ovMetricKey].label} / 前月比でTop・Worst算出 / MIN回答数=${MIN_N} / Δはクランプ）`;
-      }
-
-      renderOshiMock();
-    }
-
     function renderOshiMock(){
-      const el = document.getElementById("ovOshiTop5");
+      const el = safeGet("ovOshiTop5");
+      if (!el) return;
       const mock = [
         { leader:"田中", site:"新宿支店", votes: 42, n: 180 },
         { leader:"鈴木", site:"仙台東口サテライト", votes: 31, n: 120 },
@@ -2765,8 +2534,164 @@
         `).join("")}
       `;
     }
+
+    function refreshOverviewFromMapStates(){
+      const monthLabel = ovMonthMode === "prev" ? "先月" : "今月";
+      safeGet("ovKpiMonthLabel").textContent = monthLabel;
+
+      const stCurr = stateCurr2 || { byPref:new Map() };
+      const stPrev = statePrev2 || { byPref:new Map() };
+      const hasAny = (stCurr.byPref && stCurr.byPref.size) || (stPrev.byPref && stPrev.byPref.size);
+
+      if (!hasAny) {
+        safeGet("ov-dataStatus").textContent = `（データ未読込。①/②でダミー生成またはTSV貼付）`;
+        safeGet("ovKpiResponses").textContent = "—";
+        safeGet("ovKpiReserve").textContent = "—";
+        safeGet("ovKpiReserveN").textContent = "—";
+        safeGet("ovKpiSat").textContent = "—";
+        safeGet("ovKpiSatN").textContent = "—";
+        setDeltaEl("ovDeltaResponses", null, "int");
+        setDeltaEl("ovDeltaReserve", null, "pct");
+        setDeltaEl("ovDeltaSat", null, "num");
+        renderSiteDeltaTable("ovImproveTop5", []);
+        renderSiteDeltaTable("ovWorst5", []);
+        renderOshiMock();
+        return;
+      }
+
+      const aggCompany = (state) => {
+        let next_num=0,next_den=0,sat_sum=0,sat_cnt=0;
+        for (const p of state.byPref.values()){
+          next_num += p.next_num||0; next_den += p.next_den||0;
+          sat_sum += p.sat_sum||0; sat_cnt += p.sat_cnt||0;
+        }
+        return {
+          reserve: calcRate(next_num, next_den),
+          reserveN: next_den,
+          sat: calcAvg(sat_sum, sat_cnt),
+          satN: sat_cnt,
+          responsesApprox: sat_cnt
+        };
+      };
+
+      const compCurr = aggCompany(stCurr);
+      const compPrev = aggCompany(stPrev);
+      const compUse = (ovMonthMode==="prev") ? compPrev : compCurr;
+
+      const sitesNow = flattenSitesFromState(ovMonthMode === "prev" ? stPrev : stCurr);
+      const nResponses = sitesNow.reduce((a,s)=>a + (s.sat_cnt||0), 0);
+      safeGet("ovKpiResponses").textContent = nResponses ? nResponses.toLocaleString("ja-JP") : "—";
+
+      safeGet("ovKpiReserve").textContent = compUse.reserve==null ? "—" : (compUse.reserve.toFixed(1)+"%");
+      safeGet("ovKpiReserveN").textContent = compUse.reserveN ? compUse.reserveN.toLocaleString("ja-JP") : "—";
+      safeGet("ovKpiSat").textContent = compUse.sat==null ? "—" : compUse.sat.toFixed(2);
+      safeGet("ovKpiSatN").textContent = compUse.satN ? compUse.satN.toLocaleString("ja-JP") : "—";
+
+      const dResp = (compCurr.responsesApprox && compPrev.responsesApprox) ? (compCurr.responsesApprox - compPrev.responsesApprox) : null;
+      const dReserveRaw = (compCurr.reserve!=null && compPrev.reserve!=null) ? (compCurr.reserve - compPrev.reserve) : null;
+      const dSatRaw = (compCurr.sat!=null && compPrev.sat!=null) ? (compCurr.sat - compPrev.sat) : null;
+
+      const dReserve = dReserveRaw == null ? null : clamp(dReserveRaw, DUMMY_RANGES.deltaPt.lo, DUMMY_RANGES.deltaPt.hi);
+      const dSat = dSatRaw == null ? null : clamp(dSatRaw, -0.8, 0.8);
+
+      setDeltaEl("ovDeltaResponses", dResp, "int");
+      setDeltaEl("ovDeltaReserve", dReserve, "pct");
+      setDeltaEl("ovDeltaSat", dSat, "num");
+
+      const currSites = flattenSitesFromState(stCurr);
+      const prevSites = flattenSitesFromState(stPrev);
+      const prevByName = new Map(prevSites.map(s=>[s.siteName, s]));
+
+      const MIN_N_BY_METRIC = { next: 12, sat: 12, greet: 12 };
+      const MIN_N = MIN_N_BY_METRIC[ovMetricKey] ?? 12;
+
+      const rows = currSites.map(s => {
+        const prev = prevByName.get(s.siteName);
+        const currV = metricValue(s, ovMetricKey);
+        const prevV = prev ? metricValue(prev, ovMetricKey) : null;
+
+        let d = (currV==null || prevV==null) ? null : (currV - prevV);
+        if (d != null) {
+          if (ovMetricKey === "sat") d = clamp(d, -0.8, 0.8);
+          else d = clamp(d, DUMMY_RANGES.deltaPt.lo, DUMMY_RANGES.deltaPt.hi);
+        }
+
+        const n = metricDen(s, ovMetricKey) || 0;
+        if (n < MIN_N) return null;
+
+        const score = improvementScore(ovMetricKey, d);
+        const currText = formatMetric(ovMetricKey, currV);
+
+        const deltaText = (d==null) ? "—"
+          : (ovMetricKey==="sat"
+              ? ((d>=0?"+":"") + d.toFixed(2))
+              : ((d>=0?"+":"") + d.toFixed(1) + "%"));
+
+        return { siteName: s.siteName, currText, deltaText, n, score };
+      }).filter(Boolean).filter(r => r.score != null && Number.isFinite(r.score));
+
+      const improve = rows.slice().sort((a,b)=> (b.score - a.score) || (b.n - a.n)).slice(0,5);
+      const worst = rows.slice().sort((a,b)=> (a.score - b.score) || (b.n - a.n)).slice(0,5);
+
+      renderSiteDeltaTable("ovImproveTop5", improve);
+      renderSiteDeltaTable("ovWorst5", worst);
+
+      safeGet("ov-dataStatus").textContent =
+        `（指標:${metricDefs[ovMetricKey].label} / 前月比でTop・Worst算出 / MIN回答数=${MIN_N} / Δはクランプ）`;
+
+      renderOshiMock();
+    }
+
+    /* =========================================================
+      Modal contents (site detail)  ※簡易版（元の構造を維持）
+    ========================================================= */
+    function renderSiteDetailModal2({ site, prefCode, monthLabel }) {
+      safeGet("modalSubTitle2").textContent = `${monthLabel} / 都道府県コード ${prefCode} / ${site.siteName}`;
+
+      const ai = buildAiMock2(site);
+      const body = safeGet("modalBody2");
+      if (!body) return;
+
+      body.innerHTML = `
+        <div class="kpiGrid">
+          <div class="kpiCard">
+            <div class="kpiLabel">予約率（1〜5回目）</div>
+            <div class="kpiValue">${fmtPct(site.nextReservationRate)}</div>
+            <div class="muted" style="margin-top:6px;font-size:12px;">回答数=${site.next_den}</div>
+          </div>
+          <div class="kpiCard">
+            <div class="kpiLabel">挨拶なし率</div>
+            <div class="kpiValue">${fmtPct(site.noGreetingRate)}</div>
+            <div class="muted" style="margin-top:6px;font-size:12px;">回答数=${site.greet_den}</div>
+          </div>
+          <div class="kpiCard">
+            <div class="kpiLabel">満足度（平均）</div>
+            <div class="kpiValue">${fmtNum(site.satisfactionAvg,2)}</div>
+            <div class="muted" style="margin-top:6px;font-size:12px;">回答数=${site.sat_cnt}</div>
+          </div>
+          <div class="kpiCard">
+            <div class="kpiLabel">（拡張枠）</div>
+            <div class="kpiValue">—</div>
+            <div class="muted" style="margin-top:6px;font-size:12px;">※将来追加用</div>
+          </div>
+        </div>
+
+        <div class="detailGrid">
+          <div class="panelW">
+            <div class="panelTitleW">課題</div>
+            <ul>${ai.issues.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>
+            <div class="panelTitleW" style="margin-top:12px;">原因</div>
+            <ul>${ai.causes.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>
+          </div>
+          <div class="panelW">
+            <div class="panelTitleW">改善施策</div>
+            <ol>${ai.actions.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ol>
+            <div class="panelTitleW" style="margin-top:12px;">傾向</div>
+            <ul>${ai.trends.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>
+          </div>
+        </div>
+      `;
+    }
   </script>
 </body>
 </html>
-
-
