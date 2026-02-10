@@ -1501,6 +1501,8 @@
 
     /* =========================================================
       ⑤ Talent tab (mock)
+      - 4人固定表示（不足時はプレースホルダで4枚埋める）
+      - 「表示件数」→「表示人数」に統一（要件: n数→回答数、ついでに人は人数表記へ）
     ========================================================= */
     function initTalentTab() {
       const HP_RULES = { minSessions: 11, minAvgRating: 4.0, cutRatingValue: 2, cutRatingCount: 2 };
@@ -1574,29 +1576,53 @@
         return { hp, almost };
       }
 
+      function makePlaceholderCard(label){
+        const div = document.createElement("div");
+        div.className = "performer-card";
+        div.innerHTML = `
+          <div class="performer-badge" style="background: rgba(148,163,184,0.18); color: var(--foreground); border:1px solid rgba(148,163,184,0.25); text-transform:none;">
+            ${escapeHtml(label)}
+          </div>
+          <div class="performer-info" style="margin-top:.5rem;">
+            <div class="performer-name">—</div>
+            <div class="performer-detail">📍 —</div>
+            <div class="performer-detail">📅 参加（評価回数）: —</div>
+            <div class="performer-detail">⭐ 平均評価: —</div>
+            <div class="performer-detail">👤 評価者: —</div>
+            <div class="performer-detail">✅ 良い点: —</div>
+            <div class="performer-detail">🛠 悪い点: —</div>
+          </div>
+        `;
+        return div;
+      }
+
       function renderTalentMock() {
         const { hp, almost } = aggregateTalentFromLeaderEvals(leaderEvalMock);
 
         const hpTop4 = hp.slice(0, 4);
         const almostTop4 = almost.slice(0, 4);
 
-        // ★FIX: 画面の「表示件数」に合わせる（4人ずつ表示の整合）
+        // 4人固定表示：不足時はプレースホルダで埋める
+        const FIXED = 4;
+
         const hpCountEl = safeGet("hpCount");
         const almostCountEl = safeGet("almostCount");
-        if (hpCountEl) hpCountEl.textContent = hpTop4.length;
-        if (almostCountEl) almostCountEl.textContent = almostTop4.length;
+        if (hpCountEl) hpCountEl.textContent = FIXED;
+        if (almostCountEl) almostCountEl.textContent = FIXED;
 
         const hpTitle = safeGet("hpSectionTitle");
         const almostTitle = safeGet("almostSectionTitle");
-        if (hpTitle) hpTitle.textContent = `社員勧誘候補リスト（${hpTop4.length}名）`;
-        if (almostTitle) almostTitle.textContent = `育成/要観察（${almostTop4.length}名）`;
+        if (hpTitle) hpTitle.textContent = `社員勧誘候補リスト（${FIXED}名表示）`;
+        if (almostTitle) almostTitle.textContent = `育成/要観察（${FIXED}名表示）`;
 
-        safeGet("hpRuleTag").innerHTML = `
+        const hpRuleTag = safeGet("hpRuleTag");
+        const almostTag = safeGet("almostTag");
+        if (hpRuleTag) hpRuleTag.innerHTML = `
           <span class="keyword-tag">参加回数 ≥ ${HP_RULES.minSessions}</span>
           <span class="keyword-tag">平均評価 ≥ ${HP_RULES.minAvgRating}</span>
           <span class="keyword-tag">評価2が${HP_RULES.cutRatingCount}回以上は除外</span>
         `;
-        safeGet("almostTag").innerHTML = `
+        if (almostTag) almostTag.innerHTML = `
           <span class="keyword-tag">回数不足 / スコア不足 の候補</span>
           <span class="keyword-tag">育成でHP化</span>
         `;
@@ -1631,20 +1657,29 @@
           return div;
         };
 
+        // HP: 4枚
         for (const p of hpTop4) {
           hpGrid.appendChild(makeCard(p, "社員勧誘候補 (High Performer)", "background: linear-gradient(135deg, rgba(88,193,30,1) 0%, rgba(50,160,18,1) 100%);"));
         }
+        for (let i=hpTop4.length; i<FIXED; i++){
+          hpGrid.appendChild(makePlaceholderCard("社員勧誘候補（該当なし）"));
+        }
+
+        // Almost: 4枚
         for (const p of almostTop4) {
           const reason = p.almostReason ? `理由: ${p.almostReason}` : "";
           almostGrid.appendChild(makeCard(p, "育成/要観察", "background: linear-gradient(135deg, rgba(31,132,244,1) 0%, rgba(29,32,136,1) 100%);", reason));
+        }
+        for (let i=almostTop4.length; i<FIXED; i++){
+          almostGrid.appendChild(makePlaceholderCard("育成/要観察（該当なし）"));
         }
 
         const actions = safeGet("hpActions");
         if (!actions) return;
         actions.innerHTML = "";
         const lines = [
-          `社員勧誘候補（表示: ${hpTop4.length}名 / 全体: ${hp.length}名）へ：面談打診テンプレを送付（モック）`,
-          `育成/要観察（表示: ${almostTop4.length}名 / 全体: ${almost.length}名）は未達理由（回数/スコア）に応じて目標設定`,
+          `社員勧誘候補（表示: ${FIXED}名固定 / 全体: ${hp.length}名）へ：面談打診テンプレを送付（モック）`,
+          `育成/要観察（表示: ${FIXED}名固定 / 全体: ${almost.length}名）は未達理由（回数/スコア）に応じて目標設定`,
           `運用提案：評価が2のときは理由カテゴリを必須入力にする`
         ];
         for (const t of lines) {
@@ -1653,6 +1688,12 @@
           actions.appendChild(li);
         }
       }
+
+      // ★ラベル修正（表示件数→表示人数）
+      const hpLabel = document.querySelector("#talent #hpCount")?.closest(".analysis-card")?.querySelector(".analysis-label");
+      if (hpLabel) hpLabel.textContent = "社員勧誘候補（表示人数）";
+      const almostLabel = document.querySelector("#talent #almostCount")?.closest(".analysis-card")?.querySelector(".analysis-label");
+      if (almostLabel) almostLabel.textContent = "育成/要観察（表示人数）";
 
       renderTalentMock();
     }
@@ -2413,7 +2454,7 @@
             catch (e) { console.error(e); alert("更新でエラー。F12→Consoleの赤い行を確認してください。"); }
           });
 
-          // ダミー
+          // ダミー（要件: generateDummyTSV 呼ぶ & statePrev2/stateCurr2 作って refreshOverviewFromMapStates まで）
           on(safeGet("btnFillDummy"), "click", () => {
             try {
               fillDummyToTextareasAndLoad({ fromOverview:false, totalPerMonthState:3000, totalPerMonthTSV:3000 });
@@ -2439,6 +2480,8 @@
 
     /* =========================================================
       ① Overview tab
+      - 「n数」表記を「回答数」に統一（表/モーダル含む）
+      - Δはpt表示へ（予約率/挨拶なし率は % ではなく pt）
     ========================================================= */
     let ovMetricKey = "next";
     let ovMonthMode = "curr";
@@ -2455,6 +2498,7 @@
         catch (e) { console.error(e); alert("①の更新でエラー。F12→Consoleの赤い行を確認してください。"); }
       });
 
+      // 要件: ovBtnFillDummy 押下→ generateDummyTSV() 呼ぶ → statePrev2/stateCurr2 生成 → refreshOverviewFromMapStates()
       on(safeGet("ovBtnFillDummy"), "click", () => {
         try {
           fillDummyToTextareasAndLoad({ fromOverview:true, totalPerMonthState:3000, totalPerMonthTSV:3000 });
@@ -2570,13 +2614,33 @@
       });
     }
 
+    // Δ表示（予約率/挨拶なし率は pt、満足度は素値）
     function setDeltaEl(id, d, mode){
       const el = safeGet(id);
       if (!el) return;
       if (d == null) { el.textContent="—"; el.className="deltaFlat"; return; }
-      if (d > 0.0001) { el.className="deltaUp"; el.textContent = (mode==="int"?`+${Math.round(d)}`:mode==="pct"?`+${d.toFixed(1)}%`:`+${d.toFixed(2)}`); return; }
-      if (d < -0.0001) { el.className="deltaDown"; el.textContent = (mode==="int"?`${Math.round(d)}`:mode==="pct"?`${d.toFixed(1)}%`:`${d.toFixed(2)}`); return; }
-      el.className="deltaFlat"; el.textContent = (mode==="int"?"±0":mode==="pct"?"±0.0%":"±0.00");
+
+      const set = (cls, text) => { el.className = cls; el.textContent = text; };
+
+      if (mode === "pt"){
+        const v = d; // already (curr - prev) in percentage points
+        if (v > 0.0001) return set("deltaUp", `+${v.toFixed(1)}pt`);
+        if (v < -0.0001) return set("deltaDown", `${v.toFixed(1)}pt`);
+        return set("deltaFlat", "±0.0pt");
+      }
+
+      if (mode === "int"){
+        const v = Math.round(d);
+        if (v > 0) return set("deltaUp", `+${v}`);
+        if (v < 0) return set("deltaDown", `${v}`);
+        return set("deltaFlat", "±0");
+      }
+
+      // num
+      const v = d;
+      if (v > 0.0001) return set("deltaUp", `+${v.toFixed(2)}`);
+      if (v < -0.0001) return set("deltaDown", `${v.toFixed(2)}`);
+      return set("deltaFlat", "±0.00");
     }
 
     function renderOshiMock(){
@@ -2617,7 +2681,7 @@
         safeGet("ovKpiSat").textContent = "—";
         safeGet("ovKpiSatN").textContent = "—";
         setDeltaEl("ovDeltaResponses", null, "int");
-        setDeltaEl("ovDeltaReserve", null, "pct");
+        setDeltaEl("ovDeltaReserve", null, "pt");
         setDeltaEl("ovDeltaSat", null, "num");
         renderSiteDeltaTable("ovImproveTop5", []);
         renderSiteDeltaTable("ovWorst5", []);
@@ -2654,14 +2718,14 @@
       safeGet("ovKpiSatN").textContent = compUse.satN ? compUse.satN.toLocaleString("ja-JP") : "—";
 
       const dResp = (compCurr.responsesApprox && compPrev.responsesApprox) ? (compCurr.responsesApprox - compPrev.responsesApprox) : null;
-      const dReserveRaw = (compCurr.reserve!=null && compPrev.reserve!=null) ? (compCurr.reserve - compPrev.reserve) : null;
+      const dReserveRaw = (compCurr.reserve!=null && compPrev.reserve!=null) ? (compCurr.reserve - compPrev.reserve) : null; // pt
       const dSatRaw = (compCurr.sat!=null && compPrev.sat!=null) ? (compCurr.sat - compPrev.sat) : null;
 
       const dReserve = dReserveRaw == null ? null : clamp(dReserveRaw, DUMMY_RANGES.deltaPt.lo, DUMMY_RANGES.deltaPt.hi);
       const dSat = dSatRaw == null ? null : clamp(dSatRaw, -0.8, 0.8);
 
       setDeltaEl("ovDeltaResponses", dResp, "int");
-      setDeltaEl("ovDeltaReserve", dReserve, "pct");
+      setDeltaEl("ovDeltaReserve", dReserve, "pt");
       setDeltaEl("ovDeltaSat", dSat, "num");
 
       const currSites = flattenSitesFromState(stCurr);
@@ -2691,7 +2755,7 @@
         const deltaText = (d==null) ? "—"
           : (ovMetricKey==="sat"
               ? ((d>=0?"+":"") + d.toFixed(2))
-              : ((d>=0?"+":"") + d.toFixed(1) + "%"));
+              : ((d>=0?"+":"") + d.toFixed(1) + "pt"));
 
         return { siteName: s.siteName, currText, deltaText, n, score };
       }).filter(Boolean).filter(r => r.score != null && Number.isFinite(r.score));
