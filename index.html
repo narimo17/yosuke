@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DECA - アルバイト管理ダッシュボード / 統合版</title>
+  <title>DECA - アルバイト管理ダッシュボード / 全体傾向</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;900&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -272,6 +272,7 @@
     .kpi-subrow{ font-size: 12px; color: #9ca3af; display:flex; gap:12px; flex-wrap:wrap; margin-top: 6px; }
     .kpi-subrow b{ color: var(--text); }
 
+    /* 地図とサマリーを同じ高さで横並び */
     .top-grid{
       display:grid;
       grid-template-columns: 420px 1fr;
@@ -314,13 +315,14 @@
       padding-top: 2px;
     }
     .map-svg-wrap svg{ width: 340px; height: 380px; display:block; }
-    .prefecture{
+    .geolonia-svg-map .prefecture, svg .prefecture{
       stroke: #fff; stroke-width: 0.6; cursor: pointer; transition: var(--transition);
     }
-    .prefecture:hover{
+    .geolonia-svg-map .prefecture:hover, svg .prefecture:hover{
       opacity: .85; stroke-width: 1.6; stroke: var(--primary);
     }
 
+    /* 赤・黄・青・灰（グラデーションなし） */
     .pref-fill-blue{ fill: #3b82f6; }
     .pref-fill-yellow{ fill: #f59e0b; }
     .pref-fill-red{ fill: #ef4444; }
@@ -362,6 +364,7 @@
     }
     .moreRow .btn{ padding:6px 10px; }
 
+    /* 拠点横の赤黄青ラベル：要改善/要観察/健全 */
     .status-pill{
       display:inline-flex; align-items:center; gap:6px;
       height: 18px;
@@ -399,6 +402,7 @@
     }
     .status-pill.bad .dot{ background:#ef4444; }
 
+    /* サマリーをリッチ化 */
     .panel-summary{
       display:flex;
       flex-direction:column;
@@ -449,6 +453,7 @@
       white-space:nowrap;
     }
 
+    /* 指標別AIボイスマイニング（地図+サマリーの下） */
     .voice-panel{
       margin-top: 14px;
     }
@@ -528,6 +533,7 @@
       color: var(--text-secondary);
     }
 
+    /* ranking etc (kept) */
     .rank-screen{ display:none; margin-top: 12px; }
     .rank-screen.active{ display:block; }
 
@@ -746,6 +752,7 @@
       font-weight: 1100;
     }
 
+    /* other tabs css kept minimal (same as your base) */
     .period-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
     .period-tabs { display: flex; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
     .period-tab { padding: 8px 20px; font-size: 13px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: var(--transition); border: 1px solid var(--border); margin: -1px; user-select: none; }
@@ -905,135 +912,6 @@
     .memo-saved { font-size: 11px; color: var(--accent-green); font-weight: 1000; margin-left: 8px; opacity: 0; transition: opacity 0.3s; }
     .memo-saved.show { opacity: 1; }
 
-    .silent-card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      border-left: 4px solid var(--accent-orange);
-      padding: 18px 22px;
-      box-shadow: var(--shadow);
-      transition: var(--transition);
-      position: relative;
-      margin-bottom: 12px;
-    }
-    .silent-card:hover { box-shadow: var(--shadow-lg); }
-    .risk-meter {
-      position: absolute;
-      top: 16px;
-      right: 18px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-    }
-    .risk-circle {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'IBM Plex Sans';
-      font-weight: 700;
-      font-size: 16px;
-      color: #fff;
-    }
-    .risk-circle.high { background: linear-gradient(135deg, #ff4757, #ff6b81); }
-    .risk-circle.mid { background: linear-gradient(135deg, #ffa502, #ffc048); }
-    .risk-circle.low { background: linear-gradient(135deg, #00c48c, #00e6a0); }
-    .risk-label { font-size: 9px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.5px; }
-    .silent-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .person-name { font-size: 14px; font-weight: 700; color: var(--text); }
-    .person-branch { font-size: 11px; background: var(--primary-pale); color: var(--primary); padding: 2px 8px; border-radius: 4px; font-weight: 600; }
-    .signal-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-    .signal-tag { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
-    .signal-tag.orange { background: #fff3e0; color: #e67e22; }
-    .signal-tag.red { background: #ffe8ea; color: var(--accent-red); }
-    .silent-detail { font-size: 12px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 8px; max-width: calc(100% - 80px); }
-    .sparkline-row { display: flex; align-items: center; gap: 12px; margin-top: 6px; flex-wrap: wrap; }
-    .spark-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-secondary); }
-    .spark-label { font-weight: 600; min-width: 72px; }
-    .mini-bar-chart { display: flex; align-items: flex-end; gap: 2px; height: 24px; }
-    .mini-bar { width: 6px; border-radius: 2px 2px 0 0; transition: var(--transition); }
-
-    .compat-card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      border-left: 4px solid var(--accent-purple);
-      padding: 18px 22px;
-      box-shadow: var(--shadow);
-      transition: var(--transition);
-      margin-bottom: 12px;
-    }
-    .compat-card:hover { box-shadow: var(--shadow-lg); }
-    .compat-header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 14px;
-    }
-    .compat-pair {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .compat-person {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .compat-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 700;
-      color: #fff;
-    }
-    .compat-avatar.leader { background: linear-gradient(135deg, var(--primary), var(--primary-light)); }
-    .compat-avatar.staff { background: linear-gradient(135deg, var(--accent-purple), #8b7ff5); }
-    .compat-arrow { font-size: 18px; color: #d1d5db; }
-    .compat-person-info .cp-name { font-size: 13px; font-weight: 600; }
-    .compat-person-info .cp-role { font-size: 10px; color: var(--text-secondary); }
-    .compat-verdict {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 12px;
-      border-radius: 20px;
-      margin-left: auto;
-    }
-    .compat-verdict.mismatch { background: #ffe8ea; color: var(--accent-red); }
-    .compat-verdict.caution { background: #fff3e0; color: #e67e22; }
-    .compat-evidence {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-    .compat-stat {
-      background: #f9fafb;
-      border-radius: var(--radius-sm);
-      padding: 10px 14px;
-    }
-    .compat-stat .cs-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; font-weight: 500; }
-    .compat-stat .cs-value { font-family: 'IBM Plex Sans'; font-weight: 700; font-size: 20px; }
-    .compat-stat .cs-value.bad { color: var(--accent-red); }
-    .compat-stat .cs-value.good { color: var(--accent-green); }
-    .compat-stat .cs-compare { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
-    .compat-note { font-size: 12px; color: var(--text-secondary); line-height: 1.6; background: #faf8ff; border-radius: var(--radius-sm); padding: 10px 14px; border: 1px dashed #d5d0f0; }
-
     @media (max-width: 900px) { .content { padding: 16px; } }
 
     ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -1042,1055 +920,1896 @@
     ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
   </style>
 </head>
+
 <body>
+  <div class="toast" id="toast"></div>
 
-<header class="header">
-  <div class="header-logo">
-    <div><div class="logo-x">X</div><div class="logo-deca">DECA</div></div>
-    <span style="color:rgba(255,255,255,0.3);font-size:20px">|</span>
-    <span style="color:rgba(255,255,255,0.85);font-size:14px;font-weight:500">アルバイト管理ダッシュボード</span>
-  </div>
-  <div class="header-right">
-    <div class="notif-bell" title="未対応アクション: 8件">
-      <svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-      <div class="notif-badge">8</div>
+  <header class="header">
+    <div class="header-logo">
+      <div>
+        <div class="logo-x">X</div>
+        <div class="logo-deca">DECA</div>
+      </div>
+      <span style="color:rgba(255,255,255,0.3);font-size:20px">|</span>
+      <span style="color:rgba(255,255,255,0.85);font-size:14px;font-weight:500">アルバイト管理ダッシュボード</span>
     </div>
-    <span>2026年2月10日</span>
-    <div class="user-avatar">田</div>
-  </div>
-</header>
 
-<nav class="main-tabs">
-  <div class="main-tab active" data-tab="overall">全体傾向</div>
-  <div class="main-tab" data-tab="branch">拠点</div>
-  <div class="main-tab" data-tab="staff">アルバイト</div>
-  <div class="main-tab" data-tab="actions">アクション管理 <span class="tab-badge">8</span></div>
-</nav>
-
-<div class="content">
-
-<!-- TAB 1: 全体傾向 -->
-<div class="tab-content active" id="tab-overall">
-  <div class="top-switch-row">
-    <div class="month-switch">
-      <div class="btn" data-period="daily">日別</div>
-      <div class="btn active" data-period="weekly">週別</div>
-      <div class="btn" data-period="monthly">月別</div>
-      <div class="btn" data-period="yearly">年別</div>
-    </div>
-  </div>
-
-  <div class="sub-tabs" id="overall-subtabs">
-    <div class="sub-tab active" data-sub="reservation">次回予約率</div>
-    <div class="sub-tab" data-sub="interview">面接評価</div>
-    <div class="sub-tab" data-sub="leader">リーダー評価</div>
-    <div class="sub-tab" data-sub="baito">アルバイト評価</div>
-    <div class="sub-tab" data-sub="textmining">テキストマイニング</div>
-    <div class="sub-tab rank" data-sub="ranking">拠点ランキング</div>
-  </div>
-
-  <div class="kpi-grid">
-    <div class="kpi-card">
-      <div class="kpi-label">次回予約率</div>
-      <div class="kpi-subrow"><b>今月:</b>78.4% <b>先月:</b>75.2%</div>
-      <div class="kpi-value">78.4%</div>
-      <div style="color:var(--accent-green);font-size:12px;font-weight:900;margin-top:4px">↑ +3.2% 前週比</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">面接評価</div>
-      <div class="kpi-subrow"><b>初回ユーザーのみ</b></div>
-      <div class="kpi-value">4.2</div>
-      <div style="color:var(--accent-green);font-size:12px;font-weight:900;margin-top:4px">↑ +0.3 前週比</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">リーダー評価</div>
-      <div class="kpi-value">4.5</div>
-      <div style="color:var(--accent-green);font-size:12px;font-weight:900;margin-top:4px">↑ +0.1 前週比</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">アルバイト評価</div>
-      <div class="kpi-value">3.9</div>
-      <div style="color:var(--accent-red);font-size:12px;font-weight:900;margin-top:4px">↓ -0.2 前週比</div>
-    </div>
-    <div class="kpi-card" style="border-left:3px solid var(--accent-orange)">
-      <div class="kpi-label">サイレント離脱リスク</div>
-      <div class="kpi-subrow"><b>行動変容検知</b></div>
-      <div class="kpi-value" style="color:var(--accent-orange)">12名</div>
-      <div style="color:var(--accent-orange);font-size:12px;font-weight:900;margin-top:4px">↑ +4名 前週比</div>
-    </div>
-    <div class="kpi-card" style="border-left:3px solid var(--accent-purple)">
-      <div class="kpi-label">相性不一致ペア</div>
-      <div class="kpi-subrow"><b>自動検出</b></div>
-      <div class="kpi-value" style="color:var(--accent-purple)">5組</div>
-      <div style="color:var(--accent-purple);font-size:12px;font-weight:900;margin-top:4px">↑ +1組 前週比</div>
-    </div>
-  </div>
-
-  <div id="overall-sub-reservation" class="overall-sub-content">
-    <div class="top-grid">
-      <div class="map-container" id="mapContainer">
-        <h3>エリア別 次回予約率 <span class="badge">都道府県</span></h3>
-        <div class="map-svg-wrap" id="japanMap"></div>
-        <div class="prefPopup" id="prefPopup"></div>
+    <div class="header-right">
+      <div class="notif-bell" id="notifBell" title="未対応アクション">
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+        <div class="notif-badge" id="notifBadge">0</div>
       </div>
 
-      <div class="panel panel-summary">
-        <h3>全体サマリー <span class="badge pink">AI分析</span></h3>
-        <div class="summary-grid">
-          <div class="summary-box">
-            <div class="text">
-              今週の次回予約率は全体で<b>78.4%</b>となり、前週比+3.2%と改善傾向にあります。特に<b>関東エリア</b>では85.2%と高水準を維持しており、新宿支店と渋谷支店が牽引しています。一方、<b>北海道・東北エリア</b>では62.1%と全国平均を下回っており、札幌支店での予約率低下が顕著です。冬季の交通事情による欠勤が影響していると推測されます。
-            </div>
-            <div class="chip-row">
-              <div class="chip">拠点総数=122</div>
-              <div class="chip">県数=17</div>
-              <div class="chip">要改善=27</div>
-              <div class="chip">健全=52</div>
+      <span id="todayLabel"></span>
+      <div class="header-actions">
+        <button id="headerDummyBtn" class="ghost-btn pink" title="ダミーデータ（今月/先月）を即時反映（全体傾向）">ダミー投入</button>
+        <div class="user-avatar">田</div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="main-tabs" aria-label="Main Tabs">
+    <div class="main-tab active" data-tab="overall">全体傾向</div>
+    <div class="main-tab" data-tab="branch">拠点</div>
+    <div class="main-tab" data-tab="staff">アルバイト</div>
+    <div class="main-tab" data-tab="actions">アクション管理 <span class="tab-badge" id="actionsBadge">0</span></div>
+  </nav>
+
+  <div class="content">
+    <!-- =========================
+         TAB: Overall (UNCHANGED)
+         ========================= -->
+    <div class="tab-content active" id="tab-overall">
+      <div class="top-switch-row">
+        <div class="sub-tabs" id="overall-metric-tabs" aria-label="指標タブ">
+          <div class="sub-tab active" data-metric="next">次回予約率</div>
+          <div class="sub-tab" data-metric="sat">満足度</div>
+          <div class="sub-tab" data-metric="greet">挨拶なし率</div>
+          <div class="sub-tab rank" data-metric="rank">ランキング</div>
+        </div>
+
+        <div class="month-switch" aria-label="期間切替（今月/先月）">
+          <button id="btnMonthCurr" class="btn active">今月</button>
+          <button id="btnMonthPrev" class="btn">先月</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">回答数（満足度の回答数＝基準）</div>
+          <div class="kpi-value" id="kpiResponses">-</div>
+          <div class="kpi-subrow">
+            <span>今月：<b id="kpiResponsesCurr">-</b></span>
+            <span>先月：<b id="kpiResponsesPrev">-</b></span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">予約率（全体）</div>
+          <div class="kpi-value" id="kpiNext">-</div>
+          <div class="kpi-subrow">
+            <span>今月：<b id="kpiNextCurr">-</b></span>
+            <span>先月：<b id="kpiNextPrev">-</b></span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">満足度（平均）</div>
+          <div class="kpi-value" id="kpiSat">-</div>
+          <div class="kpi-subrow">
+            <span>今月：<b id="kpiSatCurr">-</b></span>
+            <span>先月：<b id="kpiSatPrev">-</b></span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">挨拶なし率（全体）</div>
+          <div class="kpi-value" id="kpiGreet">-</div>
+          <div class="kpi-subrow">
+            <span>今月：<b id="kpiGreetCurr">-</b></span>
+            <span>先月：<b id="kpiGreetPrev">-</b></span>
+          </div>
+        </div>
+      </div>
+
+      <div id="metric-map" class="metric-content">
+        <div class="top-grid">
+          <div class="map-container">
+            <h3>
+              <span>エリア別 指標（都道府県）</span>
+              <span style="font-size:12px;color:var(--text-secondary);font-weight:1000;">
+                指標：<span id="mapMetricLabel">次回予約率</span>
+              </span>
+            </h3>
+
+            <div class="map-svg-wrap" id="mapWrap">
+              <div id="prefPopup" class="prefPopup">
+                <h4>
+                  <span id="prefPopupTitle">-</span>
+                  <button id="prefPopupClose" class="btn" style="padding:6px 10px;">閉じる</button>
+                </h4>
+                <div id="prefPopupMeta" class="kv"></div>
+                <div id="prefPopupSites" class="popupSite"></div>
+                <div id="prefPopupMore"></div>
+              </div>
             </div>
           </div>
-          <div class="summary-kpis">
-            <div class="summary-kpi">
-              <div class="k">拠点総数（mapping）</div>
-              <div class="v">122</div>
-              <div class="h">全国展開中</div>
+
+          <div class="panel panel-summary">
+            <h3>全体サマリー <span class="badge">AI分析</span></h3>
+
+            <div class="summary-grid">
+              <div class="summary-box">
+                <div class="text" id="summaryText">右上の「ダミー投入」でデータを投入してください。</div>
+                <div class="chip-row" id="summaryChips"></div>
+              </div>
+
+              <div class="summary-kpis">
+                <div class="summary-kpi">
+                  <div class="k">拠点総数（= mapping）</div>
+                  <div class="v" id="sumTotalSites">-</div>
+                  <div class="h">サマリー/県別/ポップアップで一致</div>
+                </div>
+                <div class="summary-kpi">
+                  <div class="k">県数（拠点あり）</div>
+                  <div class="v" id="sumPrefWithSites">-</div>
+                  <div class="h">拠点がある県は必ず色がつく</div>
+                </div>
+                <div class="summary-kpi">
+                  <div class="k">要改善（拠点数）</div>
+                  <div class="v" id="sumBad">-</div>
+                  <div class="h">赤=要改善</div>
+                </div>
+                <div class="summary-kpi">
+                  <div class="k">健全（拠点数）</div>
+                  <div class="v" id="sumGood">-</div>
+                  <div class="h">青=健全</div>
+                </div>
+              </div>
             </div>
-            <div class="summary-kpi">
-              <div class="k">県数（拠点あり）</div>
-              <div class="v">17</div>
-              <div class="h">拠点がある県は必ず色つき</div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:2px;">
+              <span class="status-pill bad"><span class="dot"></span>要改善</span>
+              <span class="status-pill mid"><span class="dot"></span>要観察</span>
+              <span class="status-pill good"><span class="dot"></span>健全</span>
+              <span style="font-size:12px;color:var(--text-secondary);font-weight:900;">（拠点横の赤黄青ラベルはこの意味に統一）</span>
             </div>
-            <div class="summary-kpi">
-              <div class="k">要改善（拠点数）</div>
-              <div class="v" style="color:var(--bad)">27</div>
-              <div class="h">赤=要改善</div>
+          </div>
+        </div>
+
+        <div class="panel voice-panel">
+          <h3>AIボイスマイニング（指標別） <span class="badge">AI分析</span></h3>
+          <div style="font-size:12px;color:var(--text-secondary);font-weight:900;line-height:1.6;">
+            指標（次回予約率 / 満足度 / 挨拶なし率）に紐づきやすいコメントを分類（モック）。※ダミー投入で更新
+          </div>
+
+          <div class="vm-grid">
+            <div class="vm-card">
+              <div class="vm-title">ポジティブ</div>
+              <div class="vm-num" id="vmPosNum">-</div>
+              <div class="vm-sub">頻出タグ</div>
+              <div class="tag-row" id="vmPosTags"></div>
             </div>
-            <div class="summary-kpi">
-              <div class="k">健全（拠点数）</div>
-              <div class="v" style="color:var(--good)">52</div>
-              <div class="h">青=健全</div>
+            <div class="vm-card">
+              <div class="vm-title">改善要望</div>
+              <div class="vm-num" id="vmReqNum">-</div>
+              <div class="vm-sub">頻出タグ</div>
+              <div class="tag-row" id="vmReqTags"></div>
             </div>
+            <div class="vm-card">
+              <div class="vm-title">ネガティブ</div>
+              <div class="vm-num" id="vmNegNum">-</div>
+              <div class="vm-sub">頻出タグ</div>
+              <div class="tag-row" id="vmNegTags"></div>
+            </div>
+          </div>
+
+          <h3 style="margin-top:6px;">AIによる自動分類結果 <span class="badge">モック</span></h3>
+          <div class="ai-findings" id="vmFindings"></div>
+        </div>
+      </div>
+
+      <div id="metric-rank" class="rank-screen">
+        <div class="rank-head-row">
+          <div>
+            <div class="rank-title">ランキング</div>
+            <div class="rank-sub">期間：<b id="rankMonthLabel">今月</b> ／ 指標：<b id="rankMetricLabel">次回予約率</b></div>
+          </div>
+
+          <div class="rank-metric-switch" aria-label="ランキング指標切替（3指標）">
+            <button class="pillbtn active" data-rankmetric="next">次回予約率</button>
+            <button class="pillbtn" data-rankmetric="sat">満足度</button>
+            <button class="pillbtn" data-rankmetric="greet">挨拶なし率</button>
+          </div>
+        </div>
+
+        <div class="rank-card">
+          <div class="rank-card-hd">
+            <div class="h">拠点ランキング（Good / Bad）</div>
+            <span class="badge">自動集計</span>
+          </div>
+
+          <div class="rank-grid">
+            <div class="rank-col">
+              <div class="rank-col-hd good">
+                <span>Good - 上位10拠点</span>
+                <span id="rankGoodHint">（高いほど良い）</span>
+              </div>
+              <div class="rank-list" id="rankGoodList"></div>
+            </div>
+
+            <div class="rank-col">
+              <div class="rank-col-hd bad">
+                <span>Bad - 下位10拠点</span>
+                <span id="rankBadHint">（低いほど悪い）</span>
+              </div>
+              <div class="rank-list" id="rankBadList"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rank-card">
+          <div class="rank-card-hd">
+            <div class="h">推しリーダー Top5</div>
+            <span class="badge">自動集計</span>
+          </div>
+
+          <div class="oshi-wrap">
+            <div class="oshi-hd">
+              <div class="oshi-title">リーダー別（予約率 × 満足度）</div>
+              <span class="badge">Top5</span>
+            </div>
+            <div class="oshi-grid" id="oshiGrid"></div>
+          </div>
+
+          <div style="margin-top:10px;color:var(--text-secondary);font-size:12px;">
+            ※回答数(n)は「満足度の回答数(sat_cnt)」で統一
           </div>
         </div>
       </div>
     </div>
 
-    <div class="voice-panel">
-      <div class="panel">
-        <h3>AIボイスマイニング（指標別） <span class="badge pink">AI分析</span></h3>
-        <div class="text" style="margin-bottom:10px">指標（次回予約率 / 満足度 / 挨拶なし率）に紐づきやすいコメントを分類（モック）。※ダミー投入で更新</div>
-      </div>
-      <div class="vm-grid">
-        <div class="vm-card">
-          <div class="vm-title">ポジティブ</div>
-          <div class="vm-num">104</div>
-          <div class="vm-sub">頻出タグ</div>
-          <div class="tag-row">
-            <div class="tag">丁寧な対応</div>
-            <div class="tag">働きやすい</div>
-            <div class="tag">研修充実</div>
-          </div>
+    <!-- =========================
+         TAB: Branch (RESTORED)
+         ========================= -->
+    <div class="tab-content" id="tab-branch">
+      <div class="period-row">
+        <div class="period-tabs" aria-label="期間（拠点）">
+          <div class="period-tab active" data-period="monthly">月別</div>
+          <div class="period-tab" data-period="weekly">週別</div>
+          <div class="period-tab" data-period="daily">日別</div>
+          <div class="period-tab" data-period="yearly">年別</div>
         </div>
-        <div class="vm-card">
-          <div class="vm-title">改善要望</div>
-          <div class="vm-num">79</div>
-          <div class="vm-sub">頻出タグ</div>
-          <div class="tag-row">
-            <div class="tag">シフト調整</div>
-            <div class="tag">待ち時間</div>
-            <div class="tag">連絡遅い</div>
-          </div>
-        </div>
-        <div class="vm-card">
-          <div class="vm-title">ネガティブ</div>
-          <div class="vm-num">24</div>
-          <div class="vm-sub">頻出タグ</div>
-          <div class="tag-row">
-            <div class="tag">態度悪い</div>
-            <div class="tag">指示不明確</div>
-          </div>
+        <div style="margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <span style="font-size:12px;color:var(--text-secondary);font-weight:900;">※ここはモック（Chart.jsで推移を表示）</span>
         </div>
       </div>
 
-      <div class="ai-findings">
+      <div class="sub-tabs-rect" id="branch-subtabs">
+        <div class="sub-tab-rect active" data-sub="b-reservation">次回予約率</div>
+        <div class="sub-tab-rect" data-sub="b-interview">面接評価</div>
+        <div class="sub-tab-rect" data-sub="b-leader">リーダー評価</div>
+        <div class="sub-tab-rect" data-sub="b-baito">アルバイト評価</div>
+        <div class="sub-tab-rect" data-sub="b-textmining">テキストマイニング</div>
+      </div>
+
+      <div class="location-select-panel">
+        <h3>拠点選択 <span style="font-size:11px;color:var(--text-secondary);font-weight:800">（複数選択で比較可能）</span></h3>
+        <div id="branchSelector"></div>
+      </div>
+
+      <div class="chart-panel" id="branchChartPanel">
+        <h3 id="branchChartTitle">次回予約率 推移</h3>
+        <div class="chart-area">
+          <canvas id="branchChart"></canvas>
+        </div>
+      </div>
+
+      <div id="branchTextMining" style="display:none">
+        <div class="panel">
+          <h3>テキストマイニング <span class="badge">AI分析</span></h3>
+          <div class="text">
+            <p><b>【全体傾向】</b>選択拠点の自由記述をAI風に要約します（モック）。</p>
+            <p>・Good：研修/チームワーク/シフト相談しやすい</p>
+            <p>・Bad：繁忙期の人手不足/備品老朽化/マニュアルが古い</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================
+         TAB: Staff (RESTORED)
+         ========================= -->
+    <div class="tab-content" id="tab-staff">
+      <div class="period-row">
+        <div class="period-tabs" aria-label="期間（アルバイト）">
+          <div class="period-tab active" data-period="monthly">月別</div>
+          <div class="period-tab" data-period="weekly">週別</div>
+          <div class="period-tab" data-period="daily">日別</div>
+          <div class="period-tab" data-period="yearly">年別</div>
+        </div>
+      </div>
+
+      <div class="sub-tabs-rect" id="staff-subtabs">
+        <div class="sub-tab-rect highlight active" data-sub="s-alert">離脱アラート</div>
+        <div class="sub-tab-rect warn" data-sub="s-silent">サイレント不満検知 <span class="dot-new"></span></div>
+        <div class="sub-tab-rect purple" data-sub="s-compat">相性分析 <span class="dot-new"></span></div>
+        <div class="sub-tab-rect" data-sub="s-higheval">高評価アルバイト</div>
+        <div class="sub-tab-rect" data-sub="s-textmining">テキストマイニング</div>
+      </div>
+
+      <div class="location-select-panel">
+        <h3>拠点選択</h3>
+        <div id="staffBranchSelector"></div>
+      </div>
+
+      <div id="staff-sub-s-alert" class="staff-sub-content">
+        <div class="panel">
+          <h3>離脱アラート <span class="badge red">要対応</span></h3>
+          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;font-weight:800;">アンケートから各拠点でのトラブルやクレームを抽出（モック）</p>
+          <div class="alert-list" id="alertList"></div>
+        </div>
+      </div>
+
+      <div id="staff-sub-s-silent" class="staff-sub-content" style="display:none">
+        <div class="panel">
+          <h3>サイレント不満検知 <span class="badge orange">行動変容AI解析</span></h3>
+          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;font-weight:800;">
+            数値評価は低くないが、<b>回答文字数の急減</b>・<b>次回予約の未登録</b>・<b>回答速度の変化</b>など行動パターンの異変をAIで検知し、顕在化前の離脱リスクをアラートします（モック）。
+          </p>
+          <div class="filter-row" style="margin-top:12px">
+            <span style="font-size:12px;font-weight:900;color:var(--text-secondary)">リスクレベル:</span>
+            <div class="filter-chip active" data-filter="all">すべて</div>
+            <div class="filter-chip" data-filter="high" style="border-color:#ff4757;color:#ff4757">高リスク</div>
+            <div class="filter-chip" data-filter="mid" style="border-color:#ffa502;color:#ffa502">中リスク</div>
+          </div>
+          <div class="alert-list" id="silentList" style="margin-top:16px"></div>
+        </div>
+      </div>
+
+      <div id="staff-sub-s-compat" class="staff-sub-content" style="display:none">
+        <div class="panel">
+          <h3>リーダー×アルバイト 相性分析 <span class="badge purple">パターン自動抽出</span></h3>
+          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;font-weight:800;">
+            特定リーダーの下でのみ評価が低下・離脱率が上昇するパターンをAIで自動検出（モック）。<b>相性</b>か<b>資質</b>かを判別します。
+          </p>
+          <div class="alert-list" id="compatList"></div>
+        </div>
+      </div>
+
+      <div id="staff-sub-s-higheval" class="staff-sub-content" style="display:none">
+        <div class="panel">
+          <h3>高評価アルバイト <span class="badge green">社員化・昇給候補</span></h3>
+          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;font-weight:800;">高評価なアルバイトを拠点ごとに抽出（モック）</p>
+          <div class="alert-list" id="highEvalList"></div>
+        </div>
+      </div>
+
+      <div id="staff-sub-s-textmining" class="staff-sub-content" style="display:none">
+        <div class="panel">
+          <h3>テキストマイニング <span class="badge">AI分析</span></h3>
+          <div class="text">
+            <p><b>【全体傾向】</b>参加回数が増えるほどGood割合が上昇、初期（1〜5回）での離脱防止が最重要（モック）。</p>
+            <p><b>Good：</b>「段取りが分かった」「任される仕事が増えた」「同僚と連携できる」</p>
+            <p><b>Bad：</b>「初回説明が不十分」「聞きづらい雰囲気」「急なシフト変更」</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================
+         TAB: Actions (RESTORED)
+         ========================= -->
+    <div class="tab-content" id="tab-actions">
+      <h2 style="font-size:18px;font-weight:1000;margin-bottom:4px">アクション管理</h2>
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;font-weight:800;">
+        アラート・検知結果から自動生成されたタスク（モック）。面談実施チェックとメモで「見て終わり」を防ぎます。
+      </p>
+
+      <div class="action-stats" id="actionStats"></div>
+
+      <div class="filter-row">
+        <span style="font-size:12px;font-weight:900;color:var(--text-secondary)">ステータス:</span>
+        <div class="filter-chip active" data-afilter="all">すべて</div>
+        <div class="filter-chip" data-afilter="pending">未対応</div>
+        <div class="filter-chip" data-afilter="done">対応済</div>
+      </div>
+
+      <div class="filter-row" style="margin-top:-8px">
+        <span style="font-size:12px;font-weight:900;color:var(--text-secondary)">種別:</span>
+        <div class="filter-chip active" data-tfilter="all">すべて</div>
+        <div class="filter-chip" data-tfilter="urgent" style="border-color:var(--accent-red);color:var(--accent-red)">離脱アラート</div>
+        <div class="filter-chip" data-tfilter="follow" style="border-color:var(--accent-orange);color:var(--accent-orange)">サイレント不満</div>
+        <div class="filter-chip" data-tfilter="compat" style="border-color:var(--accent-purple);color:var(--accent-purple)">相性不一致</div>
+        <div class="filter-chip" data-tfilter="praise" style="border-color:var(--accent-green);color:var(--accent-green)">高評価フォロー</div>
+      </div>
+
+      <div class="alert-list" id="actionList" style="margin-top:16px"></div>
+    </div>
+  </div>
+
+  <script>
+    /********************
+     * Helpers
+     ********************/
+    const $ = (sel, root=document)=> root.querySelector(sel);
+    const $$ = (sel, root=document)=> Array.from(root.querySelectorAll(sel));
+
+    function fmtNum(n, d=0){
+      if(n==null || !isFinite(n)) return "-";
+      return Number(n).toLocaleString("ja-JP", { maximumFractionDigits:d, minimumFractionDigits:d });
+    }
+    function fmtPct(x, d=1){
+      if(x==null || !isFinite(x)) return "-";
+      return (Number(x)*100).toLocaleString("ja-JP",{maximumFractionDigits:d, minimumFractionDigits:d}) + "%";
+    }
+    function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+    function showToast(msg, ms=1400){
+      const t = $("#toast");
+      if(!t) return;
+      t.textContent = msg;
+      t.style.display = "block";
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(()=> t.style.display="none", ms);
+    }
+
+    /********************
+     * Normalization
+     ********************/
+    function normJP(v) {
+      return String(v ?? "")
+        .trim()
+        .replace(/[ 　]+/g, "")
+        .replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+    }
+    function normalizeSiteNameForMatch(rawName){
+      const s0 = String(rawName ?? "").trim();
+      if(!s0) return "";
+      const m = s0.match(/（(.+?)）/);
+      let s = (m ? m[1] : s0);
+      s = normJP(s);
+
+      s = s
+        .replace(/ｾﾝﾀｰ/g, "センター")
+        .replace(/ｻﾃﾗｲﾄ/g, "サテライト")
+        .replace(/センタ/g, "センター");
+
+      if (s.includes("サテライト") && !s.includes("サテライトセンター")){
+        s = s.replace(/サテライト$/, "サテライトセンター");
+      }
+      s = s.replace(/サテライトセンタ$/, "サテライトセンター");
+      return s;
+    }
+    function normalizeSiteNameForDisplay(rawName){
+      const s0 = String(rawName ?? "").trim();
+      if(!s0) return "";
+      const m = s0.match(/（(.+?)）/);
+      return (m ? m[1] : s0).trim();
+    }
+
+    /********************
+     * Mapping (user-posted)
+     ********************/
+    const siteToPrefCode = new Map([
+      ["大通公園サテライトセンター", 1],["札幌支店", 1],["新さっぽろサテライトセンター", 1],["清田支店", 1],
+      ["仙台東口サテライトセンター", 4],["仙台南支店", 4],
+      ["土浦サテライトセンター", 8],["つくば支店", 8],
+      ["宇都宮サテライトセンター", 9],["栃木支店", 9],
+      ["大宮サテライトセンター", 11],["さいたま支店", 11],["熊谷サテライトセンター", 11],["熊谷支店", 11],
+      ["所沢サテライトセンター", 11],["所沢支店", 11],["川越サテライトセンター", 11],["川越支店", 11],
+      ["船橋サテライトセンター", 12],["千葉支店", 12],["津田沼サテライトセンター", 12],["八千代支店", 12],
+      ["柏サテライトセンター", 12],["柏支店", 12],["新松戸サテライトセンター", 12],["松戸支店", 12],
+      ["千葉サテライトセンター", 12],["千葉南支店", 12],
+      ["新宿サテライトセンター", 13],["東京北支店", 13],["池袋サテライトセンター", 13],["練馬支店", 13],
+      ["赤羽サテライトセンター", 13],["京北支店", 13],["高田馬場サテライトセンター", 13],["新宿支店", 13],
+      ["下北沢サテライトセンター", 13],["世田谷支店", 13],["立川サテライトセンター", 13],["国立支店", 13],
+      ["八王子サテライトセンター", 13],["八王子支店", 13],
+      ["多摩支店", 13],["拝島サテライトセンター", 13],["東大和支店", 13],["吉祥寺サテライトセンター", 13],
+      ["西東京支店", 13],["渋谷サテライトセンター", 13],["自由が丘サテライトセンター", 13],
+      ["五反田サテライトセンター", 13],["港支店", 13],["蒲田サテライトセンター", 13],["東京南支店", 13],
+      ["目黒支店", 13],["錦糸町サテライトセンター", 13],["墨田支店", 13],["秋葉原サテライトセンター", 13],
+      ["江東支店", 13],["北千住サテライトセンター", 13],["足立支店", 13],["葛西サテライトセンター", 13],["葛西支店", 13],
+      ["町田サテライトセンター", 13],
+
+      ["登戸サテライトセンター", 14],["東京支店", 14],["川崎サテライトセンター", 14],["川崎支店", 14],
+      ["溝の口サテライトセンター", 14],["横浜支店", 14],["藤沢サテライトセンター", 14],["湘南支店", 14],
+      ["厚木サテライトセンター", 14],["厚木支店", 14],["平塚サテライトセンター", 14],["小田原支店", 14],
+      ["上大岡サテライトセンター", 14],["横浜南支店", 14],["横浜サテライトセンター", 14],["新横浜支店", 14],
+      ["横浜都筑支店", 14],["横須賀サテライトセンター", 14],["横須賀支店", 14],
+
+      ["金沢鼓門サテライトセンター", 17],["金沢支店", 17],
+      ["静岡サテライトセンター", 22],["静岡支店", 22],["浜松サテライトセンター", 22],["浜松支店", 22],
+      ["名駅サテライトセンター", 23],["名古屋支店", 23],["大曽根サテライトセンター", 23],["名東支店", 23],
+      ["天白支店", 23],["一宮サテライトセンター", 23],["北名古屋支店", 23],
+      ["京都駅前サテライトセンター", 26],["京都北支店", 26],
+      ["京橋サテライトセンター", 27],["大阪中央支店", 27],["難波サテライトセンター", 27],["西大阪支店", 27],
+      ["北大阪支店", 27],["十三サテライトセンター", 27],["大阪支店", 27],["梅田サテライトセンター", 27],["吹田支店", 27],
+      ["伊丹サテライトセンター", 28],["三宮サテライトセンター", 28],["神戸東支店", 28],["神戸支店", 28],
+      ["西宮北口サテライトセンター", 28],["西宮支店", 28],["姫路サテライトセンター", 28],["姫路支店", 28],
+      ["広島駅前サテライトセンター", 34],["広島南支店", 34],
+      ["瓦町サテライトセンター", 37],["高松支店", 37],
+      ["福岡中央サテライトセンター", 40],["福岡支店", 40],["大橋サテライトセンター", 40],["福岡南支店", 40],
+    ]);
+
+    /********************
+     * Pref names
+     ********************/
+    const PREF_NAME = {
+      1:"北海道",2:"青森県",3:"岩手県",4:"宮城県",5:"秋田県",6:"山形県",7:"福島県",
+      8:"茨城県",9:"栃木県",10:"群馬県",11:"埼玉県",12:"千葉県",13:"東京都",14:"神奈川県",
+      15:"新潟県",16:"富山県",17:"石川県",18:"福井県",19:"山梨県",20:"長野県",
+      21:"岐阜県",22:"静岡県",23:"愛知県",24:"三重県",
+      25:"滋賀県",26:"京都府",27:"大阪府",28:"兵庫県",29:"奈良県",30:"和歌山県",
+      31:"鳥取県",32:"島根県",33:"岡山県",34:"広島県",35:"山口県",
+      36:"徳島県",37:"香川県",38:"愛媛県",39:"高知県",
+      40:"福岡県",41:"佐賀県",42:"長崎県",43:"熊本県",44:"大分県",45:"宮崎県",46:"鹿児島県",47:"沖縄県"
+    };
+
+    /********************
+     * State
+     ********************/
+    let currentMetricKey2 = "next";
+    let currentMonthMode2 = "curr";
+    let lastMapMetricKey2 = "next";
+    let rankMetricKey = "next";
+
+    let statePrev2 = { byPref: new Map(), sites: [] };
+    let stateCurr2 = { byPref: new Map(), sites: [] };
+    let mapSvg = null;
+
+    const prefPopupExpanded = new Map();
+
+    function currentActiveState(){ return currentMonthMode2==="prev" ? statePrev2 : stateCurr2; }
+    function currentMonthLabel(){ return currentMonthMode2==="prev" ? "先月" : "今月"; }
+
+    /********************
+     * Enrich / aggregate
+     ********************/
+    function enrichSite(row){
+      const nextRate = row.next_den>0 ? row.next_num/row.next_den : null;
+      const satAvg   = row.sat_cnt>0 ? row.sat_sum/row.sat_cnt : null;
+      const greetNo  = row.greet_den>0 ? row.greet_ng/row.greet_den : null;
+
+      const siteNameRaw = row.siteName;
+      const siteNameNorm = normalizeSiteNameForMatch(siteNameRaw);
+      const siteNameDisp = normalizeSiteNameForDisplay(siteNameRaw);
+
+      const mappedPref = siteToPrefCode.get(siteNameNorm);
+
+      return {
+        ...row,
+        siteNameRaw,
+        siteNameNorm,
+        siteNameDisp,
+        prefCode: mappedPref || row.prefCode,
+        nextReservationRate: nextRate,
+        satisfactionAvg: satAvg,
+        noGreetingRate: greetNo
+      };
+    }
+
+    function aggregateByPref(sites){
+      const byPref = new Map();
+      for(const s0 of sites){
+        const s = enrichSite(s0);
+        const code = Number(s.prefCode);
+        if(!Number.isFinite(code) || code<=0) continue;
+
+        if(!byPref.has(code)){
+          byPref.set(code, { prefCode: code, sites: [], next_num:0,next_den:0,sat_sum:0,sat_cnt:0,greet_ng:0,greet_den:0, comments:[] });
+        }
+        const a = byPref.get(code);
+        a.sites.push(s);
+
+        a.next_num += s.next_num; a.next_den += s.next_den;
+        a.sat_sum  += s.sat_sum;  a.sat_cnt  += s.sat_cnt;
+        a.greet_ng += s.greet_ng; a.greet_den += s.greet_den;
+
+        if (s.comments && Array.isArray(s.comments)) a.comments.push(...s.comments);
+      }
+
+      for(const a of byPref.values()){
+        a.nextReservationRate = a.next_den>0 ? (100*a.next_num/a.next_den) : null;
+        a.satisfactionAvg     = a.sat_cnt>0 ? (a.sat_sum/a.sat_cnt) : null;
+        a.noGreetingRate      = a.greet_den>0 ? (100*a.greet_ng/a.greet_den) : null;
+      }
+      return byPref;
+    }
+
+    function sumAllKpi(state){
+      let next_num=0,next_den=0,sat_sum=0,sat_cnt=0,greet_ng=0,greet_den=0;
+      for(const s0 of state.sites){
+        const s = enrichSite(s0);
+        next_num += s.next_num; next_den += s.next_den;
+        sat_sum  += s.sat_sum;  sat_cnt  += s.sat_cnt;
+        greet_ng += s.greet_ng; greet_den += s.greet_den;
+      }
+      return {
+        responses: sat_cnt,
+        nextRate: next_den>0 ? (next_num/next_den) : null,
+        satAvg: sat_cnt>0 ? (sat_sum/sat_cnt) : null,
+        greetNoRate: greet_den>0 ? (greet_ng/greet_den) : null
+      };
+    }
+
+    /********************
+     * Status logic (single source)
+     ********************/
+    function allMappedSiteNames(){
+      return Array.from(siteToPrefCode.keys()).slice().sort((a,b)=>a.localeCompare(b,"ja-JP"));
+    }
+
+    function mappedSiteCountTotal(){
+      return siteToPrefCode.size;
+    }
+
+    function mappedSitesByPref(){
+      const m = new Map();
+      for(const [name, pref] of siteToPrefCode.entries()){
+        if(!m.has(pref)) m.set(pref, []);
+        m.get(pref).push(name);
+      }
+      for(const [pref, arr] of m.entries()){
+        arr.sort((a,b)=>a.localeCompare(b,"ja-JP"));
+      }
+      return m;
+    }
+
+    function overallClassForSite(siteObj){
+      const fakeAgg = {
+        sites:[siteObj],
+        nextReservationRate: siteObj.nextReservationRate==null ? null : siteObj.nextReservationRate*100,
+        satisfactionAvg: siteObj.satisfactionAvg,
+        noGreetingRate: siteObj.noGreetingRate==null ? null : siteObj.noGreetingRate*100
+      };
+      const c1 = classForMetric("next", fakeAgg);
+      const c2 = classForMetric("sat", fakeAgg);
+      const c3 = classForMetric("greet", fakeAgg);
+      if([c1,c2,c3].includes("red")) return "bad";
+      if([c1,c2,c3].includes("yellow")) return "mid";
+      if([c1,c2,c3].includes("blue")) return "good";
+      return "gray";
+    }
+
+    function statusPillHTML(cls){
+      if(cls==="bad") return `<span class="status-pill bad"><span class="dot"></span>要改善</span>`;
+      if(cls==="mid") return `<span class="status-pill mid"><span class="dot"></span>要観察</span>`;
+      if(cls==="good") return `<span class="status-pill good"><span class="dot"></span>健全</span>`;
+      return `<span class="status-pill"><span class="dot"></span>—</span>`;
+    }
+
+    /********************
+     * Map color logic
+     ********************/
+    function classForMetric(metricKey, agg){
+      if(!agg || !(agg.sites?.length>0)) return "gray";
+
+      if(metricKey==="next"){
+        const v = agg.nextReservationRate;
+        if(v==null) return "gray";
+        return v>=80 ? "blue" : v>=60 ? "yellow" : "red";
+      }
+      if(metricKey==="sat"){
+        const v = agg.satisfactionAvg;
+        if(v==null) return "gray";
+        return v>=4 ? "blue" : v>=3 ? "yellow" : "red";
+      }
+      if(metricKey==="greet"){
+        const v = agg.noGreetingRate;
+        if(v==null) return "gray";
+        return v>=50 ? "red" : v>=20 ? "yellow" : "blue";
+      }
+      return "gray";
+    }
+
+    function paintMap(svg, byPref, metricKey){
+      if(!svg) return;
+      svg.querySelectorAll(".prefecture").forEach(el=>{
+        const code = Number(el.getAttribute("data-code"));
+        const agg = byPref.get(code);
+        const c = classForMetric(metricKey, agg);
+
+        el.classList.remove("pref-fill-blue","pref-fill-yellow","pref-fill-red","pref-fill-gray");
+        el.classList.add(
+          c==="blue" ? "pref-fill-blue" :
+          c==="yellow" ? "pref-fill-yellow" :
+          c==="red" ? "pref-fill-red" : "pref-fill-gray"
+        );
+      });
+    }
+
+    function hidePopup(){ const p=$("#prefPopup"); if(p) p.style.display="none"; }
+
+    function renderPopupSites(prefAgg, prefCode){
+      const sitesEl = $("#prefPopupSites");
+      const moreEl = $("#prefPopupMore");
+      if(!sitesEl || !moreEl) return;
+
+      const sites = (prefAgg?.sites ?? []).slice()
+        .sort((a,b)=>(b.sat_cnt+b.next_den+b.greet_den)-(a.sat_cnt+a.next_den+a.greet_den));
+
+      const LIMIT = 10;
+      const expanded = !!prefPopupExpanded.get(prefCode);
+      const shown = expanded ? sites : sites.slice(0, LIMIT);
+
+      sitesEl.innerHTML = shown.length ? shown.map(s=>{
+        const disp = s.siteNameDisp || s.siteNameNorm || s.siteNameRaw || "";
+        const pill = statusPillHTML(overallClassForSite(s));
+        return `
+          <div class="siteRow">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <div style="font-weight:1000;color:var(--text);">${escapeHtml(disp)}</div>
+              ${pill}
+            </div>
+            <div style="color:var(--text-secondary);font-size:12px;margin-top:2px;">${escapeHtml(s.leaderName || "（リーダー未設定）")}</div>
+            <div style="color:var(--text-secondary);font-size:12px;margin-top:6px;">
+              予約率：${fmtPct(s.nextReservationRate)}（n=${fmtNum(s.next_den)}）
+              ／ 満足度：${fmtNum(s.satisfactionAvg,2)}（n=${fmtNum(s.sat_cnt)}）
+              ／ 挨拶なし率：${fmtPct(s.noGreetingRate)}（n=${fmtNum(s.greet_den)}）
+            </div>
+          </div>
+        `;
+      }).join("") : `<div style="color:var(--text-secondary);">拠点がありません（未集計）</div>`;
+
+      if(sites.length > LIMIT){
+        const rest = sites.length - LIMIT;
+        moreEl.innerHTML = `
+          <div class="moreRow">
+            <span>${expanded ? `全${sites.length}拠点を表示中` : `他 ${rest} 拠点…（先頭${LIMIT}件のみ表示）`}</span>
+            <span style="flex:1"></span>
+            ${expanded
+              ? `<button class="btn" type="button" id="popupCollapseBtn">折りたたむ</button>`
+              : `<button class="btn active" type="button" id="popupExpandBtn">もっと見る（全件）</button>`
+            }
+          </div>
+        `;
+        $("#popupExpandBtn")?.addEventListener("click",(e)=>{
+          e.preventDefault(); e.stopPropagation();
+          prefPopupExpanded.set(prefCode, true);
+          renderPopupSites(prefAgg, prefCode);
+        });
+        $("#popupCollapseBtn")?.addEventListener("click",(e)=>{
+          e.preventDefault(); e.stopPropagation();
+          prefPopupExpanded.set(prefCode, false);
+          renderPopupSites(prefAgg, prefCode);
+        });
+      }else{
+        moreEl.textContent = "";
+      }
+    }
+
+    function showPopup({prefEl, prefCode, prefAgg, anchorEvent}){
+      const popup = $("#prefPopup");
+      if(!popup) return;
+
+      const title = $("#prefPopupTitle");
+      const meta = $("#prefPopupMeta");
+
+      const raw = prefEl.querySelector("title")?.textContent?.trim() || (PREF_NAME[prefCode]||`都道府県 ${prefCode}`);
+      const name = raw.split("/")[0].trim();
+      title.textContent = `${currentMonthLabel()}：${name}`;
+
+      const siteCount = Number(prefAgg?.sites?.length ?? 0);
+
+      const cls = classForMetric(lastMapMetricKey2, prefAgg);
+      const clsLabel = cls==="red" ? "要改善" : cls==="yellow" ? "要観察" : cls==="blue" ? "健全" : "—";
+      const clsDot = cls==="red" ? "#ef4444" : cls==="yellow" ? "#f59e0b" : cls==="blue" ? "#3b82f6" : "#94a3b8";
+
+      meta.innerHTML = `
+        <span class="status-pill ${cls==="red"?"bad":cls==="yellow"?"mid":cls==="blue"?"good":""}">
+          <span class="dot" style="background:${clsDot}"></span>${clsLabel}
+        </span>
+        <span>予約率：<b>${prefAgg?.nextReservationRate==null?"-":prefAgg.nextReservationRate.toFixed(1)+"%"}</b></span>
+        <span>満足度：<b>${prefAgg?.satisfactionAvg==null?"-":prefAgg.satisfactionAvg.toFixed(2)}</b></span>
+        <span>挨拶なし率：<b>${prefAgg?.noGreetingRate==null?"-":prefAgg.noGreetingRate.toFixed(1)+"%"}</b></span>
+        <span>拠点：<b>${fmtNum(siteCount)}</b></span>
+      `;
+
+      if(!prefPopupExpanded.has(prefCode)) prefPopupExpanded.set(prefCode, false);
+      renderPopupSites(prefAgg, prefCode);
+
+      const wrap = $("#mapWrap");
+      const r = wrap.getBoundingClientRect();
+      let x = r.width*0.55, y = r.height*0.20;
+      if(anchorEvent?.clientX!=null){
+        x = anchorEvent.clientX - r.left;
+        y = anchorEvent.clientY - r.top;
+      }
+
+      popup.style.display="block";
+      popup.style.left="0px"; popup.style.top="0px";
+      const pw = popup.offsetWidth, ph = popup.offsetHeight;
+      let left = x + 12, top = y + 12;
+      if(left + pw > r.width) left = Math.max(8, x - pw - 12);
+      if(top + ph > r.height) top = Math.max(8, y - ph - 12);
+      popup.style.left = left + "px";
+      popup.style.top  = top + "px";
+    }
+
+    function wireMapEvents(svg){
+      $("#prefPopupClose")?.addEventListener("click", hidePopup);
+      $("#mapWrap")?.addEventListener("click", (e)=>{
+        const isPref = e.target.closest && e.target.closest(".prefecture");
+        const isPopup = e.target.closest && e.target.closest("#prefPopup");
+        if(!isPref && !isPopup) hidePopup();
+      });
+
+      svg.querySelectorAll(".prefecture").forEach(el=>{
+        el.addEventListener("click",(e)=>{
+          e.stopPropagation();
+          const code = Number(el.getAttribute("data-code"));
+          const st = currentActiveState();
+          const agg = st.byPref.get(code);
+          prefPopupExpanded.set(code, false);
+          showPopup({ prefEl: el, prefCode: code, prefAgg: agg, anchorEvent: e });
+        });
+      });
+    }
+
+    async function loadJapanSvg2(targetEl){
+      const wrap = targetEl;
+      try{
+        const res = await fetch("./japan.svg", { cache:"no-store" });
+        if(!res.ok) throw new Error("fetch failed: "+res.status);
+        const svgText = await res.text();
+        wrap.querySelector("svg")?.remove();
+        wrap.insertAdjacentHTML("afterbegin", svgText);
+        const svg = wrap.querySelector("svg.geolonia-svg-map") || wrap.querySelector("svg");
+        if(!svg) throw new Error("svg not found");
+        return svg;
+      }catch(e){
+        console.warn("map load failed", e);
+        wrap.insertAdjacentHTML("afterbegin", `<div style="color:var(--text-secondary);font-size:12px;">./japan.svg の読み込みに失敗しました</div>`);
+        return null;
+      }
+    }
+
+    /********************
+     * Dummy generator (mapping 1:1)
+     ********************/
+    function mulberry32(seed){
+      let a = seed >>> 0;
+      return function(){
+        a |= 0; a = a + 0x6D2B79F5 | 0;
+        let t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ a >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+    function randRange(rng, a, b){ return a + (b-a)*rng(); }
+    function pick(arr, rng){ return arr[Math.floor(rng()*arr.length)]; }
+
+    function statusTargetsForAllSites(seed){
+      const rng = mulberry32(seed);
+      const names = allMappedSiteNames();
+      for(let i=names.length-1;i>0;i--){
+        const j = Math.floor(rng()*(i+1));
+        [names[i],names[j]]=[names[j],names[i]];
+      }
+      const total = names.length;
+      const nBad = Math.max(1, Math.round(total*0.22));
+      const nMid = Math.max(1, Math.round(total*0.34));
+      const nGood = total - nBad - nMid;
+
+      const plan = new Map();
+      names.forEach((nm, idx)=>{
+        const st = idx < nBad ? "bad" : (idx < nBad+nMid ? "mid" : "good");
+        plan.set(nm, st);
+      });
+      return plan;
+    }
+
+    function genValuesByStatus(rng, status, monthDelta){
+      let nextPct, satAvg, greetNoPct;
+      if(status==="good"){
+        nextPct = randRange(rng, 78, 92) + monthDelta*1.2;
+        satAvg  = randRange(rng, 4.05, 4.70) + monthDelta*0.03;
+        greetNoPct = randRange(rng, 4, 14) - monthDelta*0.7;
+      }else if(status==="mid"){
+        nextPct = randRange(rng, 60, 77.9) + monthDelta*0.9;
+        satAvg  = randRange(rng, 3.15, 3.95) + monthDelta*0.02;
+        greetNoPct = randRange(rng, 16, 32) - monthDelta*0.5;
+      }else{
+        nextPct = randRange(rng, 35, 59.9) + monthDelta*0.6;
+        satAvg  = randRange(rng, 2.40, 3.05) + monthDelta*0.02;
+        greetNoPct = randRange(rng, 34, 65) - monthDelta*0.4;
+      }
+      return {
+        nextPct: clamp(nextPct, 5, 98),
+        satAvg: clamp(satAvg, 1.0, 5.0),
+        greetNoPct: clamp(greetNoPct, 0, 95),
+      };
+    }
+
+    const LEX = {
+      good: ["丁寧", "安心", "説明が分かりやすい", "親切", "気配り", "雰囲気が良い", "段取りが良い", "声かけが早い"],
+      bad:  ["挨拶がない", "無視された", "待ち時間が長い", "説明がない", "指示が不明確", "予約の提案がない", "冷たい対応", "雑"],
+      next: ["次回の案内", "予約の提案", "候補日提示", "変更方法の説明", "終了前の声かけ"],
+      neutral: ["特になし", "普通", "問題なし", "まあまあ"]
+    };
+    function makeComment(rng, status){
+      const good = ()=> "良かった：" + pick(LEX.good, rng) + "。";
+      const bad  = ()=> "改善：" + pick(LEX.bad, rng) + "。";
+      if(status==="good"){
+        return rng()<0.75 ? good() : (good()+ " " + "改善：" + pick(LEX.next,rng) + "がもっとあると良い。");
+      }
+      if(status==="mid"){
+        return rng()<0.50 ? (good()+ " " + bad()) : (bad()+ " " + "改善：" + pick(LEX.next,rng) + "を徹底。");
+      }
+      return bad() + "改善：" + pick(LEX.next,rng) + "が弱い。";
+    }
+
+    function generateDummySitesFromMapping({seed=1, totalResponses=3000, monthDelta=0}={}){
+      const rng = mulberry32(seed);
+      const names = allMappedSiteNames();
+      const plan = statusTargetsForAllSites(seed ^ 0xA53A);
+
+      const base = Math.floor(totalResponses / names.length);
+      let rem = totalResponses - base*names.length;
+
+      const leaderLastNames = ["佐藤","鈴木","高橋","田中","伊藤","渡辺","山本","中村","小林","加藤","吉田","山田","佐々木","山口","松本","井上","木村","清水","斎藤","森"];
+      const leaderPlaces = ["新宿支店","渋谷支店","池袋支店","横浜支店","名古屋支店","大阪支店","千葉支店","札幌支店","金沢支店","福岡支店","広島支店"];
+
+      const rows = [];
+      for(const siteName of names){
+        const sat_cnt = base + (rem>0 ? 1 : 0);
+        if(rem>0) rem--;
+
+        const prefCode = siteToPrefCode.get(siteName);
+
+        const status = plan.get(siteName) || "mid";
+        const vals = genValuesByStatus(rng, status, monthDelta);
+
+        const next_den = Math.max(1, Math.round(sat_cnt * randRange(rng, 0.85, 1.10)));
+        const greet_den= Math.max(1, Math.round(sat_cnt * randRange(rng, 0.80, 1.10)));
+
+        const next_num = Math.round((vals.nextPct/100)*next_den);
+        const greet_ng = Math.round((vals.greetNoPct/100)*greet_den);
+        const sat_sum = vals.satAvg * sat_cnt;
+
+        const comments = [];
+        const commentN = Math.max(1, Math.round(sat_cnt/30));
+        for(let i=0;i<commentN;i++){
+          comments.push(makeComment(rng, status));
+        }
+
+        const leaderName = `${pick(leaderLastNames,rng)}（${pick(leaderPlaces,rng)}）`;
+
+        rows.push({
+          prefCode,
+          siteName,
+          leaderName,
+          next_num, next_den,
+          sat_sum, sat_cnt,
+          greet_ng, greet_den,
+          comments
+        });
+      }
+
+      return rows;
+    }
+
+    function generateDummyStates(){
+      const prevSites = generateDummySitesFromMapping({seed: 1111, totalResponses: 3000, monthDelta: -1.1});
+      const currSites = generateDummySitesFromMapping({seed: 2222, totalResponses: 3000, monthDelta: +1.1});
+      statePrev2 = { sites: prevSites, byPref: aggregateByPref(prevSites) };
+      stateCurr2 = { sites: currSites, byPref: aggregateByPref(currSites) };
+    }
+
+    /********************
+     * Summary
+     ********************/
+    function buildSiteAgg(sites){
+      const m = new Map();
+      for(const s0 of sites){
+        const s = enrichSite(s0);
+        const key = s.siteNameNorm || s.siteNameRaw || s.siteName;
+        if(!m.has(key)){
+          m.set(key,{ siteName:key, siteDisp:s.siteNameDisp||key, next_num:0,next_den:0, sat_sum:0,sat_cnt:0, greet_ng:0,greet_den:0, leaderName:s.leaderName });
+        }
+        const a = m.get(key);
+        a.next_num += s.next_num; a.next_den += s.next_den;
+        a.sat_sum += s.sat_sum; a.sat_cnt += s.sat_cnt;
+        a.greet_ng += s.greet_ng; a.greet_den += s.greet_den;
+        if(!a.leaderName) a.leaderName = s.leaderName;
+      }
+      return Array.from(m.values()).map(a=>{
+        return {
+          siteName:a.siteName,
+          siteDisp:a.siteDisp,
+          leaderName:a.leaderName,
+          nextRate: a.next_den>0 ? a.next_num/a.next_den : null,
+          satAvg: a.sat_cnt>0 ? a.sat_sum/a.sat_cnt : null,
+          greetNoRate: a.greet_den>0 ? a.greet_ng/a.greet_den : null,
+          nSat: a.sat_cnt
+        };
+      });
+    }
+
+    function countOverallStatusesForState(st){
+      let bad=0, mid=0, good=0;
+      for(const s0 of st.sites){
+        const s = enrichSite(s0);
+        const cls = overallClassForSite(s);
+        if(cls==="bad") bad++;
+        else if(cls==="mid") mid++;
+        else if(cls==="good") good++;
+      }
+      return {bad, mid, good};
+    }
+
+    function renderAIishSummary(){
+      const curr = stateCurr2, prev = statePrev2;
+      const kPrev = sumAllKpi(prev);
+      const kCurr = sumAllKpi(curr);
+
+      const nextDiff = (kCurr.nextRate!=null && kPrev.nextRate!=null) ? (kCurr.nextRate - kPrev.nextRate) : null;
+
+      const bySitePrev = buildSiteAgg(prev.sites);
+      const bySiteCurr = buildSiteAgg(curr.sites);
+      const mapPrev = new Map(bySitePrev.map(x=>[x.siteName, x]));
+      const deltas = [];
+      for(const c of bySiteCurr){
+        const p = mapPrev.get(c.siteName);
+        if(!p) continue;
+        const cv = c.nextRate==null?null:c.nextRate*100;
+        const pv = p.nextRate==null?null:p.nextRate*100;
+        if(cv==null || pv==null) continue;
+        deltas.push({ disp: c.siteDisp || c.siteName, cv, pv, delta: cv-pv });
+      }
+      deltas.sort((a,b)=> a.delta-b.delta);
+      const worst1 = deltas[0] || null;
+      deltas.sort((a,b)=> b.delta-a.delta);
+      const best1  = deltas[0] || null;
+
+      const {bad, mid, good} = countOverallStatusesForState(currentActiveState());
+
+      $("#sumTotalSites").textContent = fmtNum(mappedSiteCountTotal());
+      $("#sumPrefWithSites").textContent = fmtNum(mappedSitesByPref().size);
+      $("#sumBad").textContent = fmtNum(bad);
+      $("#sumGood").textContent = fmtNum(good);
+
+      const bestDeltaText = best1 ? ((best1.delta>=0?"+":"")+best1.delta.toFixed(1)+"pt") : "-";
+
+      const html = `
+        <p>
+          ⚠ 全体　今月の予約率は <b>${fmtPct(kCurr.nextRate)}</b>（先月 <b>${fmtPct(kPrev.nextRate)}</b>）で、差分は
+          <b>${nextDiff==null?"-":(nextDiff>=0?"+":"")+((nextDiff*100).toFixed(1))}pt</b>（${nextDiff!=null && nextDiff<0 ? "悪化" : "改善"}）です。
+        </p>
+
+        <p>
+          ↘ <b>低下</b>　${worst1 ? `${escapeHtml(worst1.disp)}（今月 ${worst1.cv.toFixed(1)}% / 先月 ${worst1.pv.toFixed(1)}% 、差分 <b>${(worst1.delta>=0?"+":"")+worst1.delta.toFixed(1)}pt</b>）` : "（算出中）"}
+        </p>
+
+        <p>
+          ↗ <b>改善</b>　${best1 ? `${escapeHtml(best1.disp)}（今月 ${best1.cv.toFixed(1)}% / 先月 ${best1.pv.toFixed(1)}% 、差分 <b>${escapeHtml(bestDeltaText)}</b>）` : "（算出中）"}
+        </p>
+
+        <p>
+          ※ 参考　満足度（今月 <b>${kCurr.satAvg==null?"-":kCurr.satAvg.toFixed(2)}</b> / 先月 <b>${kPrev.satAvg==null?"-":kPrev.satAvg.toFixed(2)}</b>）、
+          挨拶なし率（今月 <b>${fmtPct(kCurr.greetNoRate)}</b> / 先月 <b>${fmtPct(kPrev.greetNoRate)}</b>）。
+        </p>
+
+        <p>
+          ★ <b>推奨</b>　低下拠点から優先して、<b>次回提案トーク（型）</b> と <b>ピーク帯導線（受付→案内→提案）</b> を15分で棚卸し→当日中に是正
+        </p>
+        <ul>
+          <li>（チェック）予約提案の“きっかけ”が入っているか（終了前/会計前/退店前）</li>
+          <li>（チェック）提案時の選択肢提示（候補日×2、所要時間、変更方法）</li>
+          <li>（チェック）挨拶なし率が高い拠点は、初動10秒の声かけから是正</li>
+        </ul>
+      `;
+      $("#summaryText").innerHTML = html;
+
+      const chips = [
+        `拠点総数=${mappedSiteCountTotal()}`,
+        `要改善=${bad}`,
+        `要観察=${mid}`,
+        `健全=${good}`,
+        `期間=${currentMonthLabel()}`
+      ];
+      $("#summaryChips").innerHTML = chips.map(c=>`<span class="chip">${escapeHtml(c)}</span>`).join("");
+    }
+
+    /********************
+     * Voice mining
+     ********************/
+    function metricLex(metricKey){
+      if(metricKey==="next"){
+        return {
+          pos:["次回提案が自然","候補日提示","予約の案内","終了前の声かけ","変更方法の説明","丁寧","安心"],
+          neg:["予約の提案がない","次回の案内がない","候補日が出ない","急かされた","説明がない","雑"],
+          tags:["予約","提案","候補日","終了前","変更方法","案内"]
+        };
+      }
+      if(metricKey==="sat"){
+        return {
+          pos:["丁寧","安心","親切","気配り","段取りが良い","雰囲気が良い"],
+          neg:["雑","怖い","不親切","説明がない","待ち時間が長い","指示が不明確"],
+          tags:["丁寧","安心","説明","待ち時間","指示","雰囲気"]
+        };
+      }
+      return {
+        pos:["挨拶があった","声かけが早い","感じが良い","明るい雰囲気","親切"],
+        neg:["挨拶がない","無視された","目も合わない","冷たい対応","声かけがない"],
+        tags:["挨拶","無視","声かけ","冷たい対応","雰囲気"]
+      };
+    }
+
+    function renderVoiceMiningFromComments(){
+      const st = currentActiveState();
+      const metric = lastMapMetricKey2;
+
+      const lex = metricLex(metric);
+
+      const comments = [];
+      for(const s0 of st.sites){
+        const s = enrichSite(s0);
+        const cs = Array.isArray(s.comments) ? s.comments : [];
+        for(const c of cs) comments.push(String(c||""));
+      }
+
+      if(!comments.length){
+        $("#vmPosNum").textContent = "-";
+        $("#vmReqNum").textContent = "-";
+        $("#vmNegNum").textContent = "-";
+        $("#vmPosTags").innerHTML = "";
+        $("#vmReqTags").innerHTML = "";
+        $("#vmNegTags").innerHTML = "";
+        $("#vmFindings").innerHTML = `<div class="row"><div class="leftbar"></div><div><div class="label">（未投入）</div><div class="body">ダミー投入後に表示します。</div></div></div>`;
+        return;
+      }
+
+      const isPos = (t)=> lex.pos.some(k=>t.includes(k)) || t.includes("良かった");
+      const isNeg = (t)=> lex.neg.some(k=>t.includes(k));
+      const isReq = (t)=> t.includes("改善");
+
+      let pos=0, neg=0, req=0;
+      const tagFreqPos = new Map();
+      const tagFreqNeg = new Map();
+      const tagFreqReq = new Map();
+
+      function addTag(map, tag){ map.set(tag, (map.get(tag)||0)+1); }
+      function scanTags(t, map){
+        for(const k of lex.tags){
+          if(t.includes(k)) addTag(map, k);
+        }
+      }
+
+      for(const t of comments){
+        if(isPos(t)){ pos++; scanTags(t, tagFreqPos); }
+        if(isReq(t)){ req++; scanTags(t, tagFreqReq); }
+        if(isNeg(t)){ neg++; scanTags(t, tagFreqNeg); }
+      }
+
+      const topTags = (m, n=4)=> [...m.entries()].sort((a,b)=>b[1]-a[1]).slice(0,n).map(([k])=>k);
+
+      $("#vmPosNum").textContent = fmtNum(pos);
+      $("#vmReqNum").textContent = fmtNum(req);
+      $("#vmNegNum").textContent = fmtNum(neg);
+
+      $("#vmPosTags").innerHTML = topTags(tagFreqPos).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join("") || `<span style="color:var(--text-secondary);font-size:12px;">—</span>`;
+      $("#vmReqTags").innerHTML = topTags(tagFreqReq).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join("") || `<span style="color:var(--text-secondary);font-size:12px;">—</span>`;
+      $("#vmNegTags").innerHTML = topTags(tagFreqNeg).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join("") || `<span style="color:var(--text-secondary);font-size:12px;">—</span>`;
+
+      const findings = [];
+      const metricName = metric==="next"?"次回予約率":metric==="sat"?"満足度":"挨拶なし率";
+      findings.push({
+        label:"改善要望アクション",
+        body:`${metricName}に紐づく「改善」コメントが増加。赤（要改善）拠点から「型（チェックリスト）」を当て、翌週再計測。`,
+        hint:"対象: 赤→黄→青の順で横展開"
+      });
+      findings.push({
+        label:"褒め",
+        body:"青（健全）拠点の良い運用（声かけタイミング・説明テンプレ）を“再現可能な手順”として残す。",
+        hint:"対象: 青拠点の運用棚卸し"
+      });
+
+      $("#vmFindings").innerHTML = findings.map(f=>`
         <div class="row">
           <div class="leftbar"></div>
-          <div>
-            <div class="label">⚠️ 推奨：低下拠点からの次回調査トーク（型）とピーク帯導線（受付〜案内〜提案）を15分で調整し→当日中に是正</div>
-            <div class="body">予約提案の「さりげなさ」が入っているか（終了会計前/退店前）、所要時間×2、予算感</div>
-            <div class="hint">（チェック）挨拶なし率が高い拠点は、初動10秒の声かけから見直し</div>
+          <div style="min-width:0;">
+            <div class="label">${escapeHtml(f.label)}</div>
+            <div class="body">✅ ${escapeHtml(f.body)}</div>
+            <div class="hint">${escapeHtml(f.hint)}</div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
+      `).join("");
+    }
 
-  <div id="overall-sub-ranking" class="overall-sub-content rank-screen">
-    <div class="rank-head-row">
-      <div>
-        <div class="rank-title">ランキング</div>
-        <div class="rank-sub">期間：<b>今月</b> ／ 指標：<b>次回予約率</b></div>
-      </div>
-      <div class="rank-metric-switch">
-        <div class="pillbtn active">次回予約率</div>
-        <div class="pillbtn">満足度</div>
-        <div class="pillbtn">挨拶なし率</div>
-      </div>
-    </div>
+    /********************
+     * KPI + Map
+     ********************/
+    function refreshKPIs(){
+      const kPrev = sumAllKpi(statePrev2);
+      const kCurr = sumAllKpi(stateCurr2);
 
-    <div class="rank-card">
-      <div class="rank-card-hd">
-        <div class="h">拠点ランキング（Good / Bad） <span class="badge">自動集計</span></div>
-      </div>
-      <div class="rank-grid">
-        <div class="rank-col">
-          <div class="rank-col-hd good">Good - 上位10拠点 <span style="font-weight:900">（高いほど良い）</span></div>
-          <div class="rank-list">
-            <div class="rank-item">
-              <div class="rank-left">
-                <div class="rank-num good">1</div>
-                <div class="rank-name">柏サテライトセンター <span class="status-pill good"><span class="dot"></span>健全</span></div>
-              </div>
-              <div class="rank-val good">91.3%</div>
-            </div>
-            <div class="rank-item">
-              <div class="rank-left">
-                <div class="rank-num good">2</div>
-                <div class="rank-name">渋谷支店 <span class="status-pill good"><span class="dot"></span>健全</span></div>
-              </div>
-              <div class="rank-val good">89.7%</div>
-            </div>
-            <div class="rank-item">
-              <div class="rank-left">
-                <div class="rank-num good">3</div>
-                <div class="rank-name">新宿支店 <span class="status-pill good"><span class="dot"></span>健全</span></div>
-              </div>
-              <div class="rank-val good">87.2%</div>
-            </div>
-            <div class="rank-item">
-              <div class="rank-left">
-                <div class="rank-num">4</div>
-                <div class="rank-name">横浜支店 <span class="status-pill mid"><span class="dot"></span>要観察</span></div>
-              </div>
-              <div class="rank-val good">85.1%</div>
-            </div>
-            <div class="rank-item">
-              <div class="rank-left">
-                <div class="rank-num">5</div>
-                <div class="rank-name">大宮支店 <span class="status-pill good"><span class="dot"></span>健全</span></div>
-              </div>
-              <div class="rank-val good">84.6%</div>
-            </div>
-          </div>
-        </div>
+      $("#kpiResponses").textContent = fmtNum((kPrev.responses||0)+(kCurr.responses||0));
+      $("#kpiResponsesCurr").textContent = fmtNum(kCurr.responses||0);
+      $("#kpiResponsesPrev").textContent = fmtNum(kPrev.responses||0);
 
-        <div class="rank-col">
-          <div class="rank-col-hd bad">Bad - 下位10拠点 <span style="font-weight:900">（低いほど悪い）</span></div>
-          <div class="rank-list">
-            <div class="rank-item">
-              <div class="rank-left">
-                <div class="rank-num bad">1</div>
-                <div class="rank-name">札幌支店 <span class="status-pill bad"><span class="dot"></span>要改善</span></div>
-              </div>
-              <div class="rank-val bad">58.3%</div>
-            </div>
-            <div class="rank-item">
-              <div class="rank-left">
-                <div class="rank-num bad">2</div>
-                <div class="rank-name">青森営業所 <span class="status-pill bad"><span class="dot"></span>要改善</span></div>
-              </div>
-              <div class="rank-val bad">61.2%</div>
-            </div>
-            <div class="rank-item">
-              <div class="rank-left">
-                <div class="rank-num bad">3</div>
-                <div class="rank-name">秋田センター <span class="status-pill bad"><span class="dot"></span>要改善</span></div>
-              </div>
-              <div class="rank-val bad">63.8%</div>
-            </div>
-            <div class="rank-item">
-              <div class="rank-left">
-                <div class="rank-num">4</div>
-                <div class="rank-name">盛岡支店 <span class="status-pill mid"><span class="dot"></span>要観察</span></div>
-              </div>
-              <div class="rank-val bad">65.4%</div>
-            </div>
-            <div class="rank-item">
-              <div class="rank-left">
-                <div class="rank-num">5</div>
-                <div class="rank-name">山形営業所 <span class="status-pill mid"><span class="dot"></span>要観察</span></div>
-              </div>
-              <div class="rank-val bad">66.9%</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      $("#kpiNext").textContent = fmtPct(currentMonthMode2==="prev"?kPrev.nextRate:kCurr.nextRate);
+      $("#kpiNextCurr").textContent = fmtPct(kCurr.nextRate);
+      $("#kpiNextPrev").textContent = fmtPct(kPrev.nextRate);
 
-    <div class="oshi-wrap">
-      <div class="oshi-hd">
-        <div class="oshi-title">
-          <span>推しリーダー Top5</span>
-          <span class="badge">自動集計</span>
-        </div>
-        <div style="font-size:11px;color:var(--text-secondary);font-weight:900">リーダー別（予約率 × 満足度）Top5</div>
-      </div>
-      <div class="oshi-grid">
+      $("#kpiSat").textContent = (currentMonthMode2==="prev"?kPrev.satAvg:kCurr.satAvg)==null ? "-" : (currentMonthMode2==="prev"?kPrev.satAvg:kCurr.satAvg).toFixed(2);
+      $("#kpiSatCurr").textContent = kCurr.satAvg==null ? "-" : kCurr.satAvg.toFixed(2);
+      $("#kpiSatPrev").textContent = kPrev.satAvg==null ? "-" : kPrev.satAvg.toFixed(2);
+
+      $("#kpiGreet").textContent = fmtPct(currentMonthMode2==="prev"?kPrev.greetNoRate:kCurr.greetNoRate);
+      $("#kpiGreetCurr").textContent = fmtPct(kCurr.greetNoRate);
+      $("#kpiGreetPrev").textContent = fmtPct(kPrev.greetNoRate);
+    }
+
+    function refreshMap(){
+      const st = currentActiveState();
+      if(!mapSvg) return;
+      paintMap(mapSvg, st.byPref, lastMapMetricKey2);
+    }
+
+    /********************
+     * Ranking + Oshi
+     ********************/
+    function refreshOshiLeaders(){
+      const grid = $("#oshiGrid");
+      if(!grid) return;
+
+      const st = currentActiveState();
+      const m = new Map();
+      for(const s0 of st.sites){
+        const s = enrichSite(s0);
+        const leader = s.leaderName || "（未設定）";
+        if(!m.has(leader)){
+          m.set(leader, {
+            leaderName: leader,
+            sites: new Set(),
+            sat_cnt: 0,
+            next_num:0,next_den:0,
+            sat_sum:0,
+            repSite: s.siteNameDisp || s.siteNameNorm || s.siteNameRaw
+          });
+        }
+        const a = m.get(leader);
+        a.sites.add(s.siteNameNorm || s.siteNameRaw || s.siteName);
+        a.sat_cnt += (s.sat_cnt||0);
+        a.next_num += s.next_num; a.next_den += s.next_den;
+        a.sat_sum += s.sat_sum;
+        if(!a.repSite) a.repSite = s.siteNameDisp || s.siteNameNorm || s.siteNameRaw;
+      }
+
+      const arr = Array.from(m.values()).map(a=>{
+        const nextRate = a.next_den>0 ? a.next_num/a.next_den : null;
+        const satAvg = a.sat_cnt>0 ? a.sat_sum/a.sat_cnt : null;
+        const score = (nextRate??0)*1.15 + (satAvg??0)/5;
+        return {
+          display: `${a.leaderName}（${a.repSite}）`,
+          siteCount: a.sites.size,
+          n: a.sat_cnt,
+          nextRate,
+          satAvg,
+          score
+        };
+      }).sort((x,y)=> y.score-x.score).slice(0,5);
+
+      grid.innerHTML = arr.map((x,i)=>`
         <div class="oshi-item">
           <div class="oshi-left">
-            <div class="oshi-rank">1</div>
-            <div>
-              <div class="oshi-name">山田 太郎</div>
-              <div class="oshi-sub">柏サテライトセンター（n=42）</div>
+            <div class="oshi-rank">${i+1}</div>
+            <div style="min-width:0;">
+              <div class="oshi-name">${escapeHtml(x.display)}</div>
+              <div class="oshi-sub">拠点 ${fmtNum(x.siteCount)} / 回答数 ${fmtNum(x.n)}（sat_cnt）</div>
             </div>
           </div>
           <div class="oshi-metrics">
-            <div>予約率<b>92.8%</b></div>
-            <div>満足度<b>4.7</b></div>
+            <div>予約率<b>${fmtPct(x.nextRate)}</b></div>
+            <div>満足度<b>${x.satAvg==null?"-":x.satAvg.toFixed(2)}</b></div>
           </div>
         </div>
-        <div class="oshi-item">
-          <div class="oshi-left">
-            <div class="oshi-rank">2</div>
-            <div>
-              <div class="oshi-name">佐藤 花子</div>
-              <div class="oshi-sub">渋谷支店（n=58）</div>
+      `).join("") || `<div style="padding:12px;color:var(--text-secondary);font-size:12px;">—</div>`;
+    }
+
+    function refreshRankingScreen(){
+      const goodList = $("#rankGoodList");
+      const badList  = $("#rankBadList");
+      if(!goodList || !badList) return;
+
+      const metric = rankMetricKey;
+      const label  = metric==="next" ? "次回予約率" : metric==="sat" ? "満足度" : "挨拶なし率";
+      $("#rankMetricLabel").textContent = label;
+      $("#rankMonthLabel").textContent  = (currentMonthMode2==="prev" ? "先月" : "今月");
+
+      const st = currentActiveState();
+      const arr = buildSiteAgg(st.sites);
+
+      const getVal = (x)=> metric==="next" ? x.nextRate : metric==="sat" ? x.satAvg : x.greetNoRate;
+      const fmtVal = (v)=> metric==="sat" ? (v==null?"-":v.toFixed(2)) : fmtPct(v);
+      const higherIsBetter = metric!=="greet";
+
+      $("#rankGoodHint").textContent = metric==="greet" ? "（低いほど良い）" : "（高いほど良い）";
+      $("#rankBadHint").textContent  = metric==="greet" ? "（高いほど悪い）" : "（低いほど悪い）";
+
+      const valid = arr.filter(x=> getVal(x)!=null);
+      valid.sort((a,b)=>{
+        const av = getVal(a), bv = getVal(b);
+        return higherIsBetter ? (bv-av) : (av-bv);
+      });
+
+      const goodArr = valid.slice(0,10);
+      const badArr = valid.slice().reverse().slice(0,10);
+
+      const mkItem = (x,i,kind)=>{
+        const v = fmtVal(getVal(x));
+        const numCls = kind==="good" ? "good" : "bad";
+        const valCls = kind==="good" ? "good" : "bad";
+        return `
+          <div class="rank-item">
+            <div class="rank-left">
+              <div class="rank-num ${numCls}">${i+1}</div>
+              <div class="rank-name">${escapeHtml(x.siteDisp)}</div>
+            </div>
+            <div class="rank-val ${valCls}">${escapeHtml(v)}</div>
+          </div>
+        `;
+      };
+
+      goodList.innerHTML = goodArr.map((x,i)=> mkItem(x,i,"good")).join("") || `<div style="color:var(--text-secondary);font-size:12px;padding:10px;">—</div>`;
+      badList.innerHTML  = badArr.map((x,i)=> mkItem(x,i,"bad")).join("") || `<div style="color:var(--text-secondary);font-size:12px;padding:10px;">—</div>`;
+      refreshOshiLeaders();
+    }
+
+    /********************
+     * Refresh orchestration
+     ********************/
+    function refreshAll(){
+      refreshKPIs();
+      refreshMap();
+      renderAIishSummary();
+      renderVoiceMiningFromComments();
+      refreshRankingScreen();
+    }
+
+    function applyDummyDataAll(){
+      generateDummyStates();
+
+      const st = currentActiveState();
+      const totalSites = st.sites.length;
+      const mappedTotal = mappedSiteCountTotal();
+      if(totalSites !== mappedTotal){
+        console.warn("SITE COUNT MISMATCH", { totalSites, mappedTotal });
+      }
+
+      refreshAll();
+    }
+
+    function setMonth(mode){
+      currentMonthMode2 = mode;
+      $("#btnMonthCurr").classList.toggle("active", mode==="curr");
+      $("#btnMonthPrev").classList.toggle("active", mode==="prev");
+      hidePopup();
+      refreshAll();
+    }
+
+    function setMetric(metricKey){
+      currentMetricKey2 = metricKey;
+
+
+      $$("#overall-metric-tabs .sub-tab").forEach(t=> t.classList.toggle("active", t.dataset.metric===metricKey));
+
+      const isMapMetric = (metricKey==="next" || metricKey==="sat" || metricKey==="greet");
+      if(isMapMetric) lastMapMetricKey2 = metricKey;
+
+      $("#metric-map").style.display = (isMapMetric) ? "block" : "none";
+      $("#metric-rank").classList.toggle("active", metricKey==="rank");
+
+      const labelMap = { next:"次回予約率", sat:"満足度", greet:"挨拶なし率" };
+      $("#mapMetricLabel").textContent = labelMap[lastMapMetricKey2] || "次回予約率";
+
+      hidePopup();
+      refreshAll();
+    }
+
+    function setRankMetric(key){
+      rankMetricKey = key;
+
+      $$("[data-rankmetric]").forEach(b=> b.classList.toggle("active", b.dataset.rankmetric===key));
+      refreshRankingScreen();
+    }
+
+    async function initMapOnce(){
+      const base = await loadJapanSvg2($("#mapWrap"));
+      if(!base) return;
+      mapSvg = base;
+      wireMapEvents(mapSvg);
+    }
+
+    /********************
+     * ================
+     * Tabs 2/3/4 (RESTORED TO ORIGINAL STRUCTURE)
+     * - UI/DOMは原文通り
+     * - JSは原文のモック挙動を維持
+     * ================
+     ********************/
+    const regions = {
+      '北海道・東北': ['札幌支店','仙台支店','盛岡支店','秋田支店','山形支店','福島支店','青森支店','旭川支店'],
+      '関東': ['新宿支店','渋谷支店','池袋支店','品川支店','横浜支店','大宮支店','千葉支店','立川支店','町田支店','柏支店'],
+      '中部': ['名古屋支店','静岡支店','浜松支店','金沢支店','新潟支店','長野支店','岐阜支店','富山支店'],
+      '近畿': ['大阪支店','京都支店','神戸支店','奈良支店','和歌山支店','姫路支店','堺支店'],
+      '中国・四国': ['広島支店','岡山支店','松山支店','高松支店','徳島支店','下関支店','高知支店'],
+      '九州・沖縄': ['福岡支店','北九州支店','熊本支店','鹿児島支店','長崎支店','大分支店','那覇支店']
+    };
+
+    const alerts = [
+      {branch:'渋谷支店',text:'田中さん（現場リーダー）から「態度が悪い」と高圧的に叱責された。他スタッフの前で怒鳴られた。',date:'2026/02/08'},
+      {branch:'新宿支店',text:'山本さん（現場リーダー）から業務と関係のない雑用を押し付けられている。断ると不機嫌な態度。',date:'2026/02/07'},
+      {branch:'大阪支店',text:'休憩時間が実質取れていない。6時間以上連続勤務で休憩なしは法律的にも問題では。',date:'2026/02/07'},
+      {branch:'名古屋支店',text:'シフトを提出しても毎回大幅に変更される。学業との両立が困難。',date:'2026/02/06'},
+      {branch:'横浜支店',text:'佐藤さん（現場リーダー）に小突かれた。身体的な接触は絶対にやめてほしい。',date:'2026/02/05'},
+    ];
+
+    const highEvals = [
+      {branch:'新宿支店',text:'鈴木太郎さん - 前向きな姿勢が素晴らしい。お客様対応も丁寧で他アルバイトのお手本。社員登用を強く推薦。',date:'参加24回 / 評価4.9'},
+      {branch:'渋谷支店',text:'佐藤花子さん - 参加回数は少ないが飲み込みが早い。新人への教え方も上手でリーダー候補。',date:'参加8回 / 評価4.8'},
+      {branch:'大阪支店',text:'高橋健一さん - 常に周囲への気配りができチームの雰囲気を良くしている。急なシフト変更にも快く対応。',date:'参加31回 / 評価4.7'},
+      {branch:'福岡支店',text:'田中美咲さん - 接客スキルが非常に高くお客様からの指名も多い。売上貢献度も高い。',date:'参加18回 / 評価4.8'},
+    ];
+
+    const silentAlerts = [
+      { name:'中村 翔太', branch:'渋谷支店', risk:'high', riskScore:87,
+        signals:['回答文字数 -72%','次回予約なし','回答速度 3倍高速化'],
+        detail:'直近3回のアンケートで回答文字数が平均142字→40字に急減。前回まで毎回次回予約を入れていたが、今週は未登録。評価スコア自体は3.8と平均的だが、行動パターンに明確な変化。',
+        bars:[85,78,72,68,45,40], barLabel:'回答文字数推移（6週）'
+      },
+    ];
+
+    const compatData = [
+      { leader:'田中 誠', leaderRole:'現場リーダー', branch:'渋谷支店',
+        staff:'中村 翔太', staffRole:'アルバイト（8ヶ月）',
+        verdict:'mismatch', verdictText:'相性不一致',
+        evalWith:'2.8', evalWithout:'4.3', turnoverWith:'38%', turnoverWithout:'12%',
+        note:'田中リーダーのシフト時のみ中村さんの評価が大幅に低下。他リーダー（鈴木・高橋）の下では一貫して高評価。指導スタイル（厳格型）と特性（自律型）のミスマッチが推測。相性起因と判定。'
+      },
+    ];
+
+    const actionItems = [
+      {id:1,type:'urgent',typeLabel:'離脱アラート',body:'中村翔太さんへの面談を実施してください',target:'渋谷支店 / 田中リーダーからの叱責報告',assignee:'渋谷支店長 鈴木',due:'2026/02/11',overdue:true,done:false,memo:''},
+    ];
+
+    function initMainTabs(){
+
+      $$(".main-tab").forEach(tab=>{
+        tab.addEventListener("click", ()=>{
+
+          $$(".main-tab").forEach(t=>t.classList.remove("active"));
+          tab.classList.add("active");
+
+
+          $$(".tab-content").forEach(c=>c.classList.remove("active"));
+          const target = $("#tab-"+tab.dataset.tab);
+          if(target) target.classList.add("active");
+
+          // 拠点タブに入ったらチャート更新（原文の挙動）
+          if(tab.dataset.tab==="branch"){ updateBranchChart(); }
+        });
+      });
+    }
+
+    function initMetricTabs(){
+
+      $$("#overall-metric-tabs .sub-tab").forEach(tab=>{
+        tab.addEventListener("click", ()=> setMetric(tab.dataset.metric));
+      });
+    }
+
+    function initRankMetricSwitch(){
+
+      $$("[data-rankmetric]").forEach(btn=>{
+        btn.addEventListener("click", ()=> setRankMetric(btn.dataset.rankmetric));
+      });
+    }
+
+    function initPeriodTabs(){
+
+      $$(".period-tab").forEach(tab=>{
+        tab.addEventListener("click", ()=>{
+          const host = tab.closest(".period-tabs");
+          host.querySelectorAll(".period-tab").forEach(t=>t.classList.remove("active"));
+          tab.classList.add("active");
+        });
+      });
+    }
+
+    function initBranchSubTabs(){
+
+      $$("#branch-subtabs .sub-tab-rect").forEach(tab=>{
+        tab.addEventListener("click", ()=>{
+
+          $$("#branch-subtabs .sub-tab-rect").forEach(t=>t.classList.remove("active"));
+          tab.classList.add("active");
+          const sub = tab.dataset.sub;
+
+          $("#branchChartPanel").style.display = (sub === "b-textmining") ? "none" : "block";
+          $("#branchTextMining").style.display = (sub === "b-textmining") ? "block" : "none";
+
+          if(sub !== "b-textmining"){
+            const titles = {'b-reservation':'次回予約率','b-interview':'面接評価','b-leader':'リーダー評価','b-baito':'アルバイト評価'};
+            $("#branchChartTitle").textContent = (titles[sub]||'') + ' 推移';
+            updateBranchChart();
+          }
+        });
+      });
+    }
+
+    function initStaffSubTabs(){
+
+      $$("#staff-subtabs .sub-tab-rect").forEach(tab=>{
+        tab.addEventListener("click", ()=>{
+
+          $$("#staff-subtabs .sub-tab-rect").forEach(t=>t.classList.remove("active"));
+          tab.classList.add("active");
+
+
+          $$(".staff-sub-content").forEach(c=> c.style.display="none");
+          const t = $("#staff-sub-"+tab.dataset.sub);
+          if(t) t.style.display="block";
+        });
+      });
+    }
+
+    function initFilterChips(){
+
+      $$("[data-filter]").forEach(chip=>{
+        chip.addEventListener("click", ()=>{
+          chip.closest(".filter-row").querySelectorAll(".filter-chip").forEach(c=>c.classList.remove("active"));
+          chip.classList.add("active");
+          renderSilentAlerts(chip.dataset.filter);
+        });
+      });
+
+
+      $$("[data-afilter]").forEach(chip=>{
+        chip.addEventListener("click", ()=>{
+          chip.closest(".filter-row").querySelectorAll(".filter-chip").forEach(c=>c.classList.remove("active"));
+          chip.classList.add("active");
+          renderActions();
+        });
+      });
+
+
+      $$("[data-tfilter]").forEach(chip=>{
+        chip.addEventListener("click", ()=>{
+          chip.closest(".filter-row").querySelectorAll(".filter-chip").forEach(c=>c.classList.remove("active"));
+          chip.classList.add("active");
+          renderActions();
+        });
+      });
+    }
+
+    function renderBranchSelectors(){
+      const ids = ["branchSelector","staffBranchSelector"];
+      ids.forEach(cid=>{
+        const c = $("#"+cid);
+        if(!c) return;
+        c.innerHTML = "";
+        Object.entries(regions).forEach(([region, branches])=>{
+          const g = document.createElement("div");
+          g.className = "region-group";
+          g.innerHTML = `<div class="region-label">${region}</div>`;
+          const grid = document.createElement("div");
+          grid.className = "branch-grid";
+          branches.forEach(b=>{
+            const l = document.createElement("label");
+            l.className = "branch-check";
+            l.innerHTML = `<input type="checkbox" value="${b}" data-container="${cid}"> ${b}`;
+            const inp = l.querySelector("input");
+            inp.addEventListener("change", ()=>{
+              l.classList.toggle("selected", inp.checked);
+              if(cid==="branchSelector"){ updateBranchChart(); }
+            });
+            grid.appendChild(l);
+          });
+          g.appendChild(grid);
+          c.appendChild(g);
+        });
+      });
+
+      ["新宿支店","渋谷支店"].forEach(n=>{
+        const cb = document.querySelector(`#branchSelector input[value="${n}"]`);
+        if(cb){
+          cb.checked = true;
+          cb.closest(".branch-check").classList.add("selected");
+        }
+      });
+    }
+
+    let branchChartInstance = null;
+    function loadChartJs(){
+      return new Promise((resolve)=>{
+        if(window.Chart) return resolve();
+        const s = document.createElement("script");
+        s.src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js";
+        s.onload = ()=> resolve();
+        document.head.appendChild(s);
+      });
+    }
+
+    async function updateBranchChart(){
+      if(!$("#branchChart")) return;
+      await loadChartJs();
+      if(typeof Chart === "undefined") return;
+
+      const ctx = $("#branchChart").getContext("2d");
+      if(branchChartInstance) branchChartInstance.destroy();
+
+      const selected = [...document.querySelectorAll('#branchSelector input:checked')].map(cb => cb.value);
+      const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+      const colors = ['#1a2f8b','#ff2d78','#00c48c','#ffa502','#6c5ce7','#00b894'];
+
+      const datasets = selected.map((name,i) => ({
+        label: name,
+        data: months.map(() => Math.round((40 + Math.random()*50)*10)/10),
+        borderColor: colors[i%colors.length],
+        backgroundColor: colors[i%colors.length]+'15',
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        tension: 0.3,
+        fill: false,
+      }));
+
+      branchChartInstance = new Chart(ctx, {
+        type:'line',
+        data:{labels:months,datasets},
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{
+            legend:{position:'top',labels:{font:{family:"'Noto Sans JP'",size:12},usePointStyle:true,padding:20}},
+            tooltip:{backgroundColor:'#1a1a2e',cornerRadius:8,padding:12}
+          },
+          scales:{
+            y:{min:0,max:100,ticks:{callback:v=>v+'%',font:{family:"'IBM Plex Sans'",size:11}},grid:{color:'#f3f4f6'}},
+            x:{ticks:{font:{family:"'Noto Sans JP'",size:11}},grid:{display:false}}
+          },
+          interaction:{intersect:false,mode:'index'}
+        }
+      });
+    }
+
+    function renderAlerts(){
+      const el = $("#alertList");
+      if(!el) return;
+      el.innerHTML = alerts.map(a =>
+        `<div class="alert-card">
+          <div class="alert-branch">${escapeHtml(a.branch)}</div>
+          <div class="alert-text">${escapeHtml(a.text)}</div>
+          <div class="alert-meta">${escapeHtml(a.date)}</div>
+        </div>`
+      ).join("");
+    }
+
+    function renderHighEvals(){
+      const el = $("#highEvalList");
+      if(!el) return;
+      el.innerHTML = highEvals.map(a =>
+        `<div class="alert-card good">
+          <div class="alert-branch">${escapeHtml(a.branch)}</div>
+          <div class="alert-text">${escapeHtml(a.text)}</div>
+          <div class="alert-meta">${escapeHtml(a.date)}</div>
+        </div>`
+      ).join("");
+    }
+
+    function renderSilentAlerts(filter='all'){
+      const list = silentAlerts.filter(s => filter==='all' || s.risk===filter);
+      const el = $("#silentList");
+      if(!el) return;
+      el.innerHTML = list.map(s=>`
+        <div class="alert-card warn">
+          <div class="alert-branch">${escapeHtml(s.branch)}</div>
+          <div class="alert-text">${escapeHtml(s.name)} / ${escapeHtml(s.detail)}</div>
+          <div class="alert-meta">RISK ${escapeHtml(String(s.riskScore))}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderCompatCards(){
+      const el = $("#compatList");
+      if(!el) return;
+      el.innerHTML = compatData.map(c=>`
+        <div class="alert-card purple">
+          <div class="alert-branch">${escapeHtml(c.branch)}</div>
+          <div class="alert-text">${escapeHtml(c.leader)} ⇄ ${escapeHtml(c.staff)} / ${escapeHtml(c.note)}</div>
+          <div class="alert-meta">${escapeHtml(c.verdictText)}</div>
+        </div>
+      `).join('');
+    }
+
+    function updateActionBadges(){
+      const pending = actionItems.filter(a=>!a.done).length;
+      $("#actionsBadge").textContent = String(pending);
+      $("#notifBadge").textContent = String(pending);
+      $("#notifBell").title = `未対応アクション: ${pending}件`;
+    }
+
+    function renderActionStats(){
+      const el = $("#actionStats");
+      if(!el) return;
+
+      const total = actionItems.length;
+      const done = actionItems.filter(a=>a.done).length;
+      const pending = total - done;
+      const overdue = actionItems.filter(a=>!a.done && a.overdue).length;
+
+      const pct = total>0 ? Math.round((done/total)*100) : 0;
+
+      el.innerHTML = `
+        <div class="action-stat-item">
+          <div class="asi-label">総タスク</div>
+          <div class="asi-value">${fmtNum(total)}</div>
+          <div class="asi-bar"><div class="asi-bar-fill" style="width:${clamp(100,0,100)}%;background:#cbd5e1;"></div></div>
+        </div>
+        <div class="action-stat-item">
+          <div class="asi-label">未対応</div>
+          <div class="asi-value">${fmtNum(pending)}</div>
+          <div class="asi-bar"><div class="asi-bar-fill" style="width:${clamp(total?pending/total*100:0,0,100)}%;background:#ff4757;"></div></div>
+        </div>
+        <div class="action-stat-item">
+          <div class="asi-label">対応済</div>
+          <div class="asi-value">${fmtNum(done)} (${pct}%)</div>
+          <div class="asi-bar"><div class="asi-bar-fill" style="width:${clamp(pct,0,100)}%;background:#00c48c;"></div></div>
+        </div>
+        <div class="action-stat-item">
+          <div class="asi-label">期限超過</div>
+          <div class="asi-value">${fmtNum(overdue)}</div>
+          <div class="asi-bar"><div class="asi-bar-fill" style="width:${clamp(total?overdue/total*100:0,0,100)}%;background:#ffa502;"></div></div>
+        </div>
+      `;
+    }
+
+    function renderActions(){
+      const list = $("#actionList");
+      if(!list) return;
+
+      const statusFilter = document.querySelector("[data-afilter].active")?.dataset?.afilter ?? "all";
+      const typeFilter   = document.querySelector("[data-tfilter].active")?.dataset?.tfilter ?? "all";
+
+      const filtered = actionItems.filter(a=>{
+        const okStatus =
+          statusFilter==="all" ||
+          (statusFilter==="pending" && !a.done) ||
+          (statusFilter==="done" && a.done);
+        const okType = (typeFilter==="all") || (a.type===typeFilter);
+        return okStatus && okType;
+      });
+
+      list.innerHTML = filtered.map(a=>`
+        <div class="action-card ${a.done?'completed':''}" data-action-id="${a.id}">
+          <div class="action-right">
+            <div class="action-assignee">${escapeHtml(a.assignee)}</div>
+            <div class="action-due ${a.overdue&&!a.done?'overdue':''}">期限: ${escapeHtml(a.due)}</div>
+          </div>
+          <div class="action-top">
+            <div class="action-check ${a.done?'checked':''}" data-action-check="${a.id}" title="完了切替"></div>
+            <div class="action-info">
+              <div class="action-type ${escapeHtml(a.type)}">${escapeHtml(a.typeLabel)}</div>
+              <div class="action-body">${escapeHtml(a.body)}</div>
+              <div class="action-target">${escapeHtml(a.target)}</div>
             </div>
           </div>
-          <div class="oshi-metrics">
-            <div>予約率<b>91.4%</b></div>
-            <div>満足度<b>4.6</b></div>
-          </div>
-        </div>
-        <div class="oshi-item">
-          <div class="oshi-left">
-            <div class="oshi-rank">3</div>
-            <div>
-              <div class="oshi-name">鈴木 一郎</div>
-              <div class="oshi-sub">新宿支店（n=51）</div>
-            </div>
-          </div>
-          <div class="oshi-metrics">
-            <div>予約率<b>89.2%</b></div>
-            <div>満足度<b>4.5</b></div>
-          </div>
-        </div>
-        <div class="oshi-item">
-          <div class="oshi-left">
-            <div class="oshi-rank">4</div>
-            <div>
-              <div class="oshi-name">田中 美咲</div>
-              <div class="oshi-sub">横浜支店（n=46）</div>
-            </div>
-          </div>
-          <div class="oshi-metrics">
-            <div>予約率<b>87.9%</b></div>
-            <div>満足度<b>4.4</b></div>
-          </div>
-        </div>
-        <div class="oshi-item">
-          <div class="oshi-left">
-            <div class="oshi-rank">5</div>
-            <div>
-              <div class="oshi-name">高橋 健太</div>
-              <div class="oshi-sub">大宮支店（n=39）</div>
-            </div>
-          </div>
-          <div class="oshi-metrics">
-            <div>予約率<b>86.3%</b></div>
-            <div>満足度<b>4.3</b></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<!-- TAB 2: 拠点 (旧art.htmlレイアウト) -->
-<div class="tab-content" id="tab-branch">
-  <div class="period-row">
-    <div class="period-tabs">
-      <div class="period-tab" data-bperiod="daily">日別</div>
-      <div class="period-tab active" data-bperiod="weekly">週別</div>
-      <div class="period-tab" data-bperiod="monthly">月別</div>
-      <div class="period-tab" data-bperiod="yearly">年別</div>
-    </div>
-  </div>
-
-  <div class="sub-tabs-rect" id="branch-subtabs">
-    <div class="sub-tab-rect active" data-bsub="retention">次回予約率</div>
-    <div class="sub-tab-rect" data-bsub="interview">面接評価</div>
-    <div class="sub-tab-rect" data-bsub="leader">リーダー評価</div>
-    <div class="sub-tab-rect" data-bsub="baito">アルバイト評価</div>
-    <div class="sub-tab-rect" data-bsub="textmining">テキストマイニング</div>
-  </div>
-
-  <div class="location-select-panel">
-    <h3>拠点選択 <span class="badge">複数選択で比較可能</span></h3>
-    <div class="region-group">
-      <div class="region-label">関東エリア</div>
-      <div class="branch-grid">
-        <div class="branch-check selected">
-          <input type="checkbox" checked> 渋谷支店
-        </div>
-        <div class="branch-check">
-          <input type="checkbox"> 新宿支店
-        </div>
-        <div class="branch-check">
-          <input type="checkbox"> 横浜支店
-        </div>
-        <div class="branch-check">
-          <input type="checkbox"> 大宮支店
-        </div>
-      </div>
-    </div>
-    <div class="region-group">
-      <div class="region-label">関西エリア</div>
-      <div class="branch-grid">
-        <div class="branch-check">
-          <input type="checkbox"> 大阪支店
-        </div>
-        <div class="branch-check">
-          <input type="checkbox"> 京都支店
-        </div>
-        <div class="branch-check">
-          <input type="checkbox"> 神戸支店
-        </div>
-      </div>
-    </div>
-    <div class="region-group">
-      <div class="region-label">北海道・東北エリア</div>
-      <div class="branch-grid">
-        <div class="branch-check">
-          <input type="checkbox"> 札幌支店
-        </div>
-        <div class="branch-check">
-          <input type="checkbox"> 仙台支店
-        </div>
-        <div class="branch-check">
-          <input type="checkbox"> 青森営業所
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="chart-panel">
-    <h3>次回予約率の推移（選択拠点）</h3>
-    <div class="chart-area">
-      <canvas id="branchChart"></canvas>
-    </div>
-  </div>
-
-  <div class="panel" style="margin-top:20px">
-    <h3>拠点別アラート <span class="badge red">要対応</span></h3>
-    <div class="alert-list">
-      <div class="alert-card">
-        <div class="alert-branch">札幌支店</div>
-        <div class="alert-text">次回予約率が <strong>58.3%</strong> に低下。前週比 -12.4pt と大幅悪化。冬季交通事情による欠勤増加が影響か。</div>
-        <div class="alert-meta">検知日時: 2026-02-09 14:32 | 担当: 北海道ブロック長</div>
-      </div>
-      <div class="alert-card warn">
-        <div class="alert-branch">青森営業所</div>
-        <div class="alert-text">リーダー評価が <strong>3.2/5.0</strong> に低下。「指示が分かりにくい」とのコメント増加。</div>
-        <div class="alert-meta">検知日時: 2026-02-08 10:15 | 担当: 東北ブロック長</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- TAB 3: アルバイト (旧art.htmlレイアウト) -->
-<div class="tab-content" id="tab-staff">
-  <div class="period-row">
-    <div class="period-tabs">
-      <div class="period-tab" data-speriod="daily">日別</div>
-      <div class="period-tab active" data-speriod="weekly">週別</div>
-      <div class="period-tab" data-speriod="monthly">月別</div>
-      <div class="period-tab" data-speriod="yearly">年別</div>
-    </div>
-  </div>
-
-  <div class="sub-tabs-rect" id="staff-subtabs">
-    <div class="sub-tab-rect active" data-ssub="alert">離脱アラート</div>
-    <div class="sub-tab-rect warn" data-ssub="silent">サイレント不満検知<span class="dot-new"></span></div>
-    <div class="sub-tab-rect purple" data-ssub="compat">相性分析<span class="dot-new"></span></div>
-    <div class="sub-tab-rect highlight" data-ssub="praise">高評価アルバイト</div>
-    <div class="sub-tab-rect" data-ssub="tm">テキストマイニング</div>
-  </div>
-
-  <div id="staff-sub-alert" class="staff-sub-content">
-    <div class="panel">
-      <h3>離脱アラート <span class="badge red">要対応</span></h3>
-      <div class="text" style="margin-bottom:14px">アンケートから各拠点でのトラブルやクレームを抽出</div>
-    </div>
-    <div class="alert-list">
-      <div class="alert-card">
-        <div class="alert-branch">新宿支店</div>
-        <div class="alert-text">
-          <strong>田中 健太</strong>さんが3回連続で次回予約を見送り。「シフトが合わない」とのコメント。離脱リスク<strong>高</strong>。
-        </div>
-        <div class="alert-meta">検知日時: 2026-02-09 16:42 | 優先度: 高 | 担当リーダー: 山田 太郎</div>
-      </div>
-      <div class="alert-card">
-        <div class="alert-branch">渋谷支店</div>
-        <div class="alert-text">
-          <strong>佐藤 花子</strong>さんが面接評価2.0を記録。「リーダーの態度が悪い」との具体的指摘あり。
-        </div>
-        <div class="alert-meta">検知日時: 2026-02-08 11:20 | 優先度: 高 | 担当リーダー: 鈴木 一郎</div>
-      </div>
-    </div>
-  </div>
-
-  <div id="staff-sub-silent" class="staff-sub-content" style="display:none">
-    <div class="panel">
-      <h3>サイレント不満検知 <span class="badge orange">行動変容検知</span></h3>
-      <div class="text" style="margin-bottom:14px">
-        アンケート評価は「普通」だが、予約率・出勤率・コメント長などの<strong>行動パターン</strong>から離脱リスクを検知。
-      </div>
-    </div>
-    <div class="alert-list">
-      <div class="silent-card">
-        <div class="risk-meter">
-          <div class="risk-circle high">76</div>
-          <div class="risk-label">HIGH RISK</div>
-        </div>
-        <div class="silent-header">
-          <div class="person-name">山田 太郎</div>
-          <div class="person-branch">新宿支店</div>
-        </div>
-        <div class="signal-tags">
-          <div class="signal-tag red">予約率急降下</div>
-          <div class="signal-tag orange">コメント文字数↓</div>
-          <div class="signal-tag orange">出勤率微減</div>
-        </div>
-        <div class="silent-detail">
-          直近4週間で次回予約率が <strong>92% → 68%</strong> に低下。アンケートコメントも「特になし」が増加し、文字数が平均80字→20字に激減。表面的には「問題なし」だが、<strong>関与度の低下</strong>が顕著。
-        </div>
-        <div class="sparkline-row">
-          <div class="spark-item">
-            <div class="spark-label">予約率推移</div>
-            <div class="mini-bar-chart">
-              <div class="mini-bar" style="height:100%;background:#00c48c"></div>
-              <div class="mini-bar" style="height:95%;background:#00c48c"></div>
-              <div class="mini-bar" style="height:88%;background:#ffa502"></div>
-              <div class="mini-bar" style="height:68%;background:#ff4757"></div>
-            </div>
-          </div>
-          <div class="spark-item">
-            <div class="spark-label">コメント文字数</div>
-            <div class="mini-bar-chart">
-              <div class="mini-bar" style="height:90%;background:#00c48c"></div>
-              <div class="mini-bar" style="height:75%;background:#ffa502"></div>
-              <div class="mini-bar" style="height:50%;background:#ffa502"></div>
-              <div class="mini-bar" style="height:25%;background:#ff4757"></div>
+          <div class="action-memo-toggle" data-memo-toggle="${a.id}">📝 メモ ▾</div>
+          <div class="action-memo" id="memo-${a.id}">
+            <textarea placeholder="面談メモ、対応内容を記録...">${escapeHtml(a.memo||"")}</textarea>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+              <button class="memo-save" data-memo-save="${a.id}">保存</button>
+              <span class="memo-saved" id="saved-${a.id}">✓ 保存しました</span>
             </div>
           </div>
         </div>
-      </div>
+      `).join("");
 
-      <div class="silent-card">
-        <div class="risk-meter">
-          <div class="risk-circle mid">58</div>
-          <div class="risk-label">MID RISK</div>
-        </div>
-        <div class="silent-header">
-          <div class="person-name">佐藤 花子</div>
-          <div class="person-branch">渋谷支店</div>
-        </div>
-        <div class="signal-tags">
-          <div class="signal-tag orange">評価固定化</div>
-          <div class="signal-tag orange">スキップ増加</div>
-        </div>
-        <div class="silent-detail">
-          アンケート評価が常に「3」で固定。コメントも定型的。予約時の「次回でいいです」発言が3回連続。<strong>無関心モード</strong>に移行している可能性あり。
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div id="staff-sub-compat" class="staff-sub-content" style="display:none">
-    <div class="panel">
-      <h3>相性分析（リーダー × アルバイト） <span class="badge purple">自動検出</span></h3>
-      <div class="text" style="margin-bottom:14px">
-        同じアルバイトでも、リーダーによって評価・継続率が大きく異なるペアを自動検出。相性不一致の早期発見で離脱を防止。
-      </div>
-    </div>
-    <div class="alert-list">
-      <div class="compat-card">
-        <div class="compat-header">
-          <div class="compat-pair">
-            <div class="compat-person">
-              <div class="compat-avatar leader">山</div>
-              <div class="compat-person-info">
-                <div class="cp-name">山田リーダー</div>
-                <div class="cp-role">新宿支店</div>
-              </div>
-            </div>
-            <div class="compat-arrow">×</div>
-            <div class="compat-person">
-              <div class="compat-avatar staff">田</div>
-              <div class="compat-person-info">
-                <div class="cp-name">田中さん</div>
-                <div class="cp-role">アルバイト</div>
-              </div>
-            </div>
-          </div>
-          <div class="compat-verdict mismatch">⚠️ 相性不一致</div>
-        </div>
-        <div class="compat-evidence">
-          <div class="compat-stat">
-            <div class="cs-label">このペアの継続率</div>
-            <div class="cs-value bad">42%</div>
-            <div class="cs-compare">（全体平均: 78%）</div>
-          </div>
-          <div class="compat-stat">
-            <div class="cs-label">このペアの満足度</div>
-            <div class="cs-value bad">2.8</div>
-            <div class="cs-compare">（全体平均: 4.2）</div>
-          </div>
-        </div>
-        <div class="compat-note">
-          <strong>💡 検出理由:</strong> 田中さんは他リーダー時は満足度4.5・継続率90%だが、山田リーダー担当時のみ大幅低下。「指示が細かすぎる」「急かされる感じがする」とのコメントあり。<br>
-          <strong>推奨アクション:</strong> リーダー変更、もしくは山田リーダーへのコミュニケーション研修実施。
-        </div>
-      </div>
+      $$("[data-action-check]").forEach(el=>{
+        el.addEventListener("click", ()=>{
+          const id = Number(el.getAttribute("data-action-check"));
+          const item = actionItems.find(a=>a.id===id);
+          if(item){
+            item.done = !item.done;
+            renderActions();
+            renderActionStats();
+            updateActionBadges();
+          }
+        });
+      });
 
-      <div class="compat-card">
-        <div class="compat-header">
-          <div class="compat-pair">
-            <div class="compat-person">
-              <div class="compat-avatar leader">佐</div>
-              <div class="compat-person-info">
-                <div class="cp-name">佐藤リーダー</div>
-                <div class="cp-role">渋谷支店</div>
-              </div>
-            </div>
-            <div class="compat-arrow">×</div>
-            <div class="compat-person">
-              <div class="compat-avatar staff">鈴</div>
-              <div class="compat-person-info">
-                <div class="cp-name">鈴木さん</div>
-                <div class="cp-role">アルバイト</div>
-              </div>
-            </div>
-          </div>
-          <div class="compat-verdict caution">⚠️ 要観察</div>
-        </div>
-        <div class="compat-evidence">
-          <div class="compat-stat">
-            <div class="cs-label">このペアの継続率</div>
-            <div class="cs-value bad">65%</div>
-            <div class="cs-compare">（全体平均: 78%）</div>
-          </div>
-          <div class="compat-stat">
-            <div class="cs-label">このペアの満足度</div>
-            <div class="cs-value bad">3.5</div>
-            <div class="cs-compare">（全体平均: 4.2）</div>
-          </div>
-        </div>
-        <div class="compat-note">
-          <strong>💡 検出理由:</strong> 鈴木さんは他リーダー時は問題なしだが、佐藤リーダー時のみやや低下。まだ深刻ではないが継続観察推奨。
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div id="staff-sub-praise" class="staff-sub-content" style="display:none">
-    <div class="panel">
-      <h3>高評価アルバイト <span class="badge green">フォロー推奨</span></h3>
-      <div class="text" style="margin-bottom:14px">継続率・満足度が高いアルバイトをリストアップ。積極的なフォローで長期定着を促進。</div>
-    </div>
-    <div class="alert-list">
-      <div class="alert-card good">
-        <div class="alert-branch">渋谷支店</div>
-        <div class="alert-text">
-          <strong>山田 太郎</strong>さん: 継続率 <strong>95%</strong>、満足度 <strong>4.8/5.0</strong>。「リーダーのサポートが素晴らしい」とコメント多数。
-        </div>
-        <div class="alert-meta">勤務開始: 2025-08-01 | 継続期間: 6ヶ月 | 担当リーダー: 佐藤 花子</div>
-      </div>
-      <div class="alert-card good">
-        <div class="alert-branch">新宿支店</div>
-        <div class="alert-text">
-          <strong>佐藤 花子</strong>さん: 継続率 <strong>92%</strong>、満足度 <strong>4.7/5.0</strong>。「シフトの融通が利く」「働きやすい環境」と高評価。
-        </div>
-        <div class="alert-meta">勤務開始: 2025-09-15 | 継続期間: 5ヶ月 | 担当リーダー: 鈴木 一郎</div>
-      </div>
-    </div>
-  </div>
-</div>
+      $$("[data-memo-toggle]").forEach(el=>{
+        el.addEventListener("click", ()=>{
+          const id = Number(el.getAttribute("data-memo-toggle"));
+          const memo = $("#memo-"+id);
+          if(memo) memo.classList.toggle("open");
+        });
+      });
 
-<!-- TAB 4: アクション管理 (旧art.htmlレイアウト) -->
-<div class="tab-content" id="tab-actions">
-  <div class="panel" style="margin-bottom:20px">
-    <h3>アクション管理 <span class="badge">自動生成タスク</span></h3>
-    <div class="text">
-      アラート・検知結果から自動生成されたタスク。面談実施チェックとメモで「見て終わり」を防ぎます。
-    </div>
-  </div>
 
-  <div class="filter-row">
-    <div><strong>ステータス:</strong></div>
-    <div class="filter-chip active">すべて</div>
-    <div class="filter-chip">未対応</div>
-    <div class="filter-chip">対応済</div>
-    <div style="width:1px;height:20px;background:var(--border);margin:0 4px"></div>
-    <div><strong>種別:</strong></div>
-    <div class="filter-chip active">すべて</div>
-    <div class="filter-chip">離脱アラート</div>
-    <div class="filter-chip">サイレント不満</div>
-    <div class="filter-chip">相性不一致</div>
-    <div class="filter-chip">高評価フォロー</div>
-  </div>
+      $$("[data-memo-save]").forEach(el=>{
+        el.addEventListener("click", ()=>{
+          const id = Number(el.getAttribute("data-memo-save"));
+          const item = actionItems.find(a=>a.id===id);
+          const textarea = document.querySelector(`#memo-${id} textarea`);
+          if(item && textarea){
+            item.memo = textarea.value;
+            const saved = $("#saved-"+id);
+            if(saved){
+              saved.classList.add("show");
+              setTimeout(()=> saved.classList.remove("show"), 2000);
+            }
+          }
+        });
+      });
 
-  <div class="action-stats">
-    <div class="action-stat-item">
-      <div class="asi-label">全タスク</div>
-      <div class="asi-value">24</div>
-      <div class="asi-bar"><div class="asi-bar-fill" style="width:100%;background:var(--primary)"></div></div>
-    </div>
-    <div class="action-stat-item">
-      <div class="asi-label">未対応</div>
-      <div class="asi-value" style="color:var(--accent-red)">8</div>
-      <div class="asi-bar"><div class="asi-bar-fill" style="width:33%;background:var(--accent-red)"></div></div>
-    </div>
-    <div class="action-stat-item">
-      <div class="asi-label">対応中</div>
-      <div class="asi-value" style="color:var(--accent-orange)">6</div>
-      <div class="asi-bar"><div class="asi-bar-fill" style="width:25%;background:var(--accent-orange)"></div></div>
-    </div>
-    <div class="action-stat-item">
-      <div class="asi-label">完了</div>
-      <div class="asi-value" style="color:var(--accent-green)">10</div>
-      <div class="asi-bar"><div class="asi-bar-fill" style="width:42%;background:var(--accent-green)"></div></div>
-    </div>
-  </div>
+      updateActionBadges();
+    }
 
-  <div class="alert-list">
-    <div class="action-card">
-      <div class="action-right">
-        <div class="action-assignee">山田リーダー</div>
-        <div class="action-due overdue">期限: 2026-02-08</div>
-      </div>
-      <div class="action-top">
-        <div class="action-check"></div>
-        <div class="action-info">
-          <div class="action-type urgent">離脱アラート</div>
-          <div class="action-body">田中 健太さんの面談実施（次回予約見送り3回連続）</div>
-          <div class="action-target">新宿支店 | 優先度: 高</div>
-          <div class="action-memo-toggle">📝 面談メモを記録</div>
-          <div class="action-memo">
-            <textarea placeholder="面談内容、対応結果などを記録してください..."></textarea>
-            <button class="memo-save">保存</button>
-            <span class="memo-saved">✓ 保存しました</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    /********************
+     * Boot
+     ********************/
+    document.addEventListener("DOMContentLoaded", async ()=>{
+      const now = new Date();
+      $("#todayLabel").textContent =
+        now.getFullYear()+"年"+String(now.getMonth()+1).padStart(2,"0")+"月"+String(now.getDate()).padStart(2,"0")+"日";
 
-    <div class="action-card">
-      <div class="action-right">
-        <div class="action-assignee">佐藤リーダー</div>
-        <div class="action-due">期限: 2026-02-12</div>
-      </div>
-      <div class="action-top">
-        <div class="action-check"></div>
-        <div class="action-info">
-          <div class="action-type follow">サイレント不満</div>
-          <div class="action-body">山田 太郎さんの状況確認（予約率急降下・コメント激減）</div>
-          <div class="action-target">新宿支店 | リスクスコア: 76</div>
-          <div class="action-memo-toggle">📝 面談メモを記録</div>
-          <div class="action-memo">
-            <textarea placeholder="面談内容、対応結果などを記録してください..."></textarea>
-            <button class="memo-save">保存</button>
-            <span class="memo-saved">✓ 保存しました</span>
-          </div>
-        </div>
-      </div>
-    </div>
+      initMainTabs();
+      initMetricTabs();
+      initRankMetricSwitch();
+      initPeriodTabs();
+      initBranchSubTabs();
+      initStaffSubTabs();
+      initFilterChips();
 
-    <div class="action-card">
-      <div class="action-right">
-        <div class="action-assignee">鈴木リーダー</div>
-        <div class="action-due">期限: 2026-02-15</div>
-      </div>
-      <div class="action-top">
-        <div class="action-check"></div>
-        <div class="action-info">
-          <div class="action-type compat">相性不一致</div>
-          <div class="action-body">山田リーダー×田中さんペアの調整（継続率42%、満足度2.8）</div>
-          <div class="action-target">新宿支店 | リーダー変更 or 研修実施</div>
-          <div class="action-memo-toggle">📝 対応メモを記録</div>
-          <div class="action-memo">
-            <textarea placeholder="対応内容、結果などを記録してください..."></textarea>
-            <button class="memo-save">保存</button>
-            <span class="memo-saved">✓ 保存しました</span>
-          </div>
-        </div>
-      </div>
-    </div>
+      $("#btnMonthCurr").addEventListener("click", ()=> setMonth("curr"));
+      $("#btnMonthPrev").addEventListener("click", ()=> setMonth("prev"));
 
-    <div class="action-card completed">
-      <div class="action-right">
-        <div class="action-assignee">田中リーダー</div>
-        <div class="action-due">期限: 2026-02-05</div>
-      </div>
-      <div class="action-top">
-        <div class="action-check checked"></div>
-        <div class="action-info">
-          <div class="action-type praise">高評価フォロー</div>
-          <div class="action-body">山田 太郎さんへの感謝メッセージ送信（継続率95%、満足度4.8）</div>
-          <div class="action-target">渋谷支店</div>
-          <div class="action-memo-toggle">📝 対応メモを確認</div>
-          <div class="action-memo">
-            <textarea readonly>2026-02-05に感謝メッセージを送信。本人も喜んでおり、今後も継続意欲高い。</textarea>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+      $("#headerDummyBtn").addEventListener("click", ()=>{
+        applyDummyDataAll();
+        showToast("ダミー（今月/先月 各3000回答）を反映しました（拠点数は全表示で一致）");
+      });
 
-</div>
+      $("#prefPopupClose")?.addEventListener("click", hidePopup);
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script>
-// ═══ グローバル変数 ═══
-const prefData = {
-  "北海道": { rate: 58.3, sites: ["札幌支店(58.3%)", "函館営業所(61.2%)"], status: "bad" },
-  "青森県": { rate: 61.2, sites: ["青森営業所(61.2%)"], status: "bad" },
-  "岩手県": { rate: 65.4, sites: ["盛岡支店(65.4%)"], status: "mid" },
-  "宮城県": { rate: 72.8, sites: ["仙台支店(72.8%)"], status: "mid" },
-  "秋田県": { rate: 63.8, sites: ["秋田センター(63.8%)"], status: "bad" },
-  "山形県": { rate: 66.9, sites: ["山形営業所(66.9%)"], status: "mid" },
-  "福島県": { rate: 70.1, sites: ["福島支店(70.1%)"], status: "mid" },
-  "茨城県": { rate: 76.5, sites: ["水戸支店(76.5%)"], status: "good" },
-  "栃木県": { rate: 78.2, sites: ["宇都宮支店(78.2%)"], status: "good" },
-  "群馬県": { rate: 75.3, sites: ["高崎支店(75.3%)"], status: "good" },
-  "埼玉県": { rate: 84.6, sites: ["大宮支店(84.6%)", "川越支店(82.1%)"], status: "good" },
-  "千葉県": { rate: 91.3, sites: ["柏サテライトセンター(91.3%)", "千葉支店(79.8%)"], status: "good" },
-  "東京都": { rate: 87.2, sites: ["新宿支店(87.2%)", "渋谷支店(89.7%)", "池袋支店(85.3%)"], status: "good" },
-  "神奈川県": { rate: 85.1, sites: ["横浜支店(85.1%)", "川崎支店(83.4%)"], status: "good" },
-  "新潟県": { rate: 71.5, sites: ["新潟支店(71.5%)"], status: "mid" },
-  "富山県": { rate: 73.2, sites: ["富山営業所(73.2%)"], status: "mid" },
-  "石川県": { rate: 74.8, sites: ["金沢支店(74.8%)"], status: "mid" },
-  "福井県": { rate: 72.1, sites: ["福井営業所(72.1%)"], status: "mid" },
-  "山梨県": { rate: 76.9, sites: ["甲府支店(76.9%)"], status: "good" },
-  "長野県": { rate: 75.5, sites: ["長野支店(75.5%)"], status: "good" },
-  "岐阜県": { rate: 77.3, sites: ["岐阜支店(77.3%)"], status: "good" },
-  "静岡県": { rate: 79.6, sites: ["静岡支店(79.6%)", "浜松支店(78.2%)"], status: "good" },
-  "愛知県": { rate: 81.4, sites: ["名古屋支店(81.4%)", "豊田営業所(80.1%)"], status: "good" },
-  "三重県": { rate: 76.7, sites: ["四日市支店(76.7%)"], status: "good" },
-  "滋賀県": { rate: 78.9, sites: ["大津支店(78.9%)"], status: "good" },
-  "京都府": { rate: 82.3, sites: ["京都支店(82.3%)"], status: "good" },
-  "大阪府": { rate: 80.5, sites: ["大阪支店(80.5%)", "堺支店(79.1%)"], status: "good" },
-  "兵庫県": { rate: 81.8, sites: ["神戸支店(81.8%)", "姫路営業所(78.6%)"], status: "good" },
-  "奈良県": { rate: 77.4, sites: ["奈良支店(77.4%)"], status: "good" },
-  "和歌山県": { rate: 74.2, sites: ["和歌山営業所(74.2%)"], status: "mid" },
-  "鳥取県": { rate: 70.8, sites: ["鳥取営業所(70.8%)"], status: "mid" },
-  "島根県": { rate: 69.3, sites: ["松江営業所(69.3%)"], status: "mid" },
-  "岡山県": { rate: 78.1, sites: ["岡山支店(78.1%)"], status: "good" },
-  "広島県": { rate: 79.9, sites: ["広島支店(79.9%)"], status: "good" },
-  "山口県": { rate: 75.6, sites: ["山口営業所(75.6%)"], status: "good" },
-  "徳島県": { rate: 72.9, sites: ["徳島営業所(72.9%)"], status: "mid" },
-  "香川県": { rate: 76.2, sites: ["高松支店(76.2%)"], status: "good" },
-  "愛媛県": { rate: 74.5, sites: ["松山支店(74.5%)"], status: "mid" },
-  "高知県": { rate: 71.3, sites: ["高知営業所(71.3%)"], status: "mid" },
-  "福岡県": { rate: 80.7, sites: ["福岡支店(80.7%)", "北九州支店(78.9%)"], status: "good" },
-  "佐賀県": { rate: 73.4, sites: ["佐賀営業所(73.4%)"], status: "mid" },
-  "長崎県": { rate: 72.6, sites: ["長崎支店(72.6%)"], status: "mid" },
-  "熊本県": { rate: 76.8, sites: ["熊本支店(76.8%)"], status: "good" },
-  "大分県": { rate: 74.9, sites: ["大分営業所(74.9%)"], status: "mid" },
-  "宮崎県": { rate: 73.1, sites: ["宮崎営業所(73.1%)"], status: "mid" },
-  "鹿児島県": { rate: 75.2, sites: ["鹿児島支店(75.2%)"], status: "good" },
-  "沖縄県": { rate: 77.5, sites: ["那覇支店(77.5%)"], status: "good" }
-};
+      // Tabs 2/3/4 initial render
+      renderBranchSelectors();
+      renderAlerts();
+      renderHighEvals();
+      renderSilentAlerts("all");
+      renderCompatCards();
+      renderActionStats();
+      renderActions();
 
-// ═══ メインタブ切り替え ═══
-const mainTabs = document.querySelectorAll('.main-tab');
-const tabContents = document.querySelectorAll('.tab-content');
-mainTabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    mainTabs.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    const target = tab.getAttribute('data-tab');
-    tabContents.forEach(c => {
-      c.classList.remove('active');
-      if (c.id === 'tab-' + target) c.classList.add('active');
+      await initMapOnce();
+
+      setMetric("next");
+      setMonth("curr");
+      setRankMetric("next");
+
+      applyDummyDataAll();
+      updateActionBadges();
     });
-  });
-});
 
-// ═══ 全体傾向：サブタブ ═══
-const overallSubTabs = document.querySelectorAll('#overall-subtabs .sub-tab');
-overallSubTabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    overallSubTabs.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    const sub = tab.getAttribute('data-sub');
-    document.querySelectorAll('.overall-sub-content').forEach(c => c.style.display = 'none');
-    const targetEl = document.getElementById('overall-sub-' + sub);
-    if (targetEl) targetEl.style.display = 'block';
-    document.querySelectorAll('.rank-screen').forEach(r => r.classList.remove('active'));
-    if (sub === 'ranking') {
-      document.querySelector('.rank-screen').classList.add('active');
-    }
-  });
-});
-
-// ═══ 日本地図レンダリング（japan.svgを使用想定） ═══
-function renderJapanMap(containerId) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  // 実際はjapan.svgをfetchして挿入し、各都道府県pathにクラスとイベントを付与
-  container.innerHTML = `
-    <svg viewBox="0 0 800 900" style="width:340px;height:380px">
-      <text x="400" y="450" text-anchor="middle" font-size="14" fill="#999">日本地図（japan.svg使用想定）</text>
-      <text x="400" y="480" text-anchor="middle" font-size="12" fill="#aaa">クリックで都道府県詳細表示</text>
-    </svg>
-  `;
-}
-renderJapanMap('japanMap');
-
-// ポップアップ表示（モック）
-const mapContainer = document.getElementById('mapContainer');
-const prefPopup = document.getElementById('prefPopup');
-if (mapContainer && prefPopup) {
-  mapContainer.addEventListener('click', (e) => {
-    const prefName = "東京都"; // 実際はSVG pathから取得
-    const data = prefData[prefName];
-    if (!data) return;
-    let sitesHtml = data.sites.map(s => `<div class="siteRow">${s}</div>`).join('');
-    let statusLabel = '';
-    if (data.status === 'good') statusLabel = '<span class="status-pill good"><span class="dot"></span>健全</span>';
-    else if (data.status === 'mid') statusLabel = '<span class="status-pill mid"><span class="dot"></span>要観察</span>';
-    else statusLabel = '<span class="status-pill bad"><span class="dot"></span>要改善</span>';
-    prefPopup.innerHTML = `
-      <h4>${prefName} ${statusLabel}</h4>
-      <div class="kv"><span><b>次回予約率：</b>${data.rate}%</span> <span><b>拠点数：</b>${data.sites.length}</span></div>
-      <div class="popupSite">${sitesHtml}</div>
-      <div class="moreRow"><button class="btn">詳細を見る</button></div>
-    `;
-    prefPopup.style.display = 'block';
-    prefPopup.style.left = e.clientX + 10 + 'px';
-    prefPopup.style.top = e.clientY + 10 + 'px';
-  });
-  document.addEventListener('click', (e) => {
-    if (!mapContainer.contains(e.target)) prefPopup.style.display = 'none';
-  });
-}
-
-// ═══ 拠点タブ ═══
-const branchPeriodTabs = document.querySelectorAll('[data-bperiod]');
-branchPeriodTabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    branchPeriodTabs.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-  });
-});
-const branchSubTabs = document.querySelectorAll('#branch-subtabs .sub-tab-rect');
-branchSubTabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    branchSubTabs.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-  });
-});
-const branchChecks = document.querySelectorAll('.branch-check');
-branchChecks.forEach(check => {
-  check.addEventListener('click', () => {
-    const input = check.querySelector('input[type="checkbox"]');
-    input.checked = !input.checked;
-    check.classList.toggle('selected', input.checked);
-  });
-});
-
-// Chart.js サンプル
-const branchChartEl = document.getElementById('branchChart');
-if (branchChartEl) {
-  new Chart(branchChartEl, {
-    type: 'line',
-    data: {
-      labels: ['1週目', '2週目', '3週目', '4週目'],
-      datasets: [{
-        label: '渋谷支店',
-        data: [82, 85, 87, 89],
-        borderColor: '#1a2f8b',
-        backgroundColor: 'rgba(26,47,139,0.1)',
-        tension: 0.4
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: true, position: 'top' } }
-    }
-  });
-}
-
-// ═══ アルバイトタブ ═══
-const staffPeriodTabs = document.querySelectorAll('[data-speriod]');
-staffPeriodTabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    staffPeriodTabs.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-  });
-});
-const staffSubTabs = document.querySelectorAll('#staff-subtabs .sub-tab-rect');
-staffSubTabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    staffSubTabs.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    const sub = tab.getAttribute('data-ssub');
-    document.querySelectorAll('.staff-sub-content').forEach(c => c.style.display = 'none');
-    const targetEl = document.getElementById('staff-sub-' + sub);
-    if (targetEl) targetEl.style.display = 'block';
-  });
-});
-
-// ═══ アクション管理タブ ═══
-const actionChecks = document.querySelectorAll('.action-check');
-actionChecks.forEach(check => {
-  check.addEventListener('click', () => {
-    check.classList.toggle('checked');
-    const card = check.closest('.action-card');
-    card.classList.toggle('completed', check.classList.contains('checked'));
-  });
-});
-const memoToggles = document.querySelectorAll('.action-memo-toggle');
-memoToggles.forEach(toggle => {
-  toggle.addEventListener('click', () => {
-    const memo = toggle.nextElementSibling;
-    if (memo && memo.classList.contains('action-memo')) {
-      memo.classList.toggle('open');
-    }
-  });
-});
-const memoSaves = document.querySelectorAll('.memo-save');
-memoSaves.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const saved = btn.nextElementSibling;
-    if (saved && saved.classList.contains('memo-saved')) {
-      saved.classList.add('show');
-      setTimeout(() => saved.classList.remove('show'), 2000);
-    }
-  });
-});
-
-// フィルタチップ
-const filterChips = document.querySelectorAll('.filter-chip');
-filterChips.forEach(chip => {
-  chip.addEventListener('click', () => {
-    const group = chip.parentElement;
-    const siblings = Array.from(group.querySelectorAll('.filter-chip'));
-    const isInGroup = siblings.includes(chip);
-    if (isInGroup && !chip.textContent.includes('すべて')) {
-      siblings.forEach(s => s.classList.remove('active'));
-      chip.classList.add('active');
-    } else if (chip.textContent.includes('すべて')) {
-      siblings.forEach(s => s.classList.remove('active'));
-      chip.classList.add('active');
-    }
-  });
-});
-</script>
-
+    /*
+      PowerShellで開く（推奨：ローカルサーバ経由）
+      1) index.html と japan.svg を同じフォルダに置く
+      2) PowerShell:
+         cd "C:\path\to\folder"
+         python -m http.server 8000
+      3) ブラウザ:
+         http://localhost:8000/index.html
+      ※ file:// 直開きだと fetch("./japan.svg") が失敗するブラウザがあります
+    */
+  </script>
 </body>
 </html>
