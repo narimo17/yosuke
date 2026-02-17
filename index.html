@@ -799,7 +799,7 @@
 
     .filter-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
     .filter-chip {
-      padding: 6px 14px; font-size: 12px; border-radius: 20px; border: 1.5px solid var(--border);
+      padding: 4px 10px; font-size: 11px; border-radius: 16px; border: 1.5px solid var(--border);
       cursor: pointer; transition: var(--transition); user-select: none; font-weight: 800; color: var(--text-secondary);
       background: #fff;
     }
@@ -1572,7 +1572,7 @@
           </div>
         </div>
         <div style="margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-          <span style="font-size:12px;color:var(--text-secondary);font-weight:900;"></span>
+          <span style="font-size:12px;color:var(--text-secondary);font-weight:900;">※ここは（Chart.jsで推移を表示）</span>
         </div>
       </div>
 
@@ -1600,7 +1600,7 @@
         <div class="panel">
           <h3>テキストマイニング <span class="badge">AI分析</span></h3>
           <div class="text">
-            <p><b>【全体傾向】</b>選択拠点の自由記述をAI風に要約します（）。</p>
+            <p><b>【全体傾向】</b>選択拠点の自由記述をAI風に要約します。</p>
             <p>・Good：研修/チームワーク/シフト相談しやすい</p>
             <p>・Bad：繁忙期の人手不足/備品老朽化/マニュアルが古い</p>
           </div>
@@ -1622,9 +1622,9 @@
       </div>
 
       <div class="sub-tabs-rect" id="staff-subtabs">
-        <div class="sub-tab-rect active" data-sub="s-alert">離脱アラート</div>
-        <div class="sub-tab-rect warn" data-sub="s-silent">サイレント不満検知 <span class="new-badge">NEW</span></div>
-        <div class="sub-tab-rect purple" data-sub="s-compat">相性分析 <span class="new-badge">NEW</span></div>
+        <div class="sub-tab-rect highlight active" data-sub="s-alert">離脱アラート</div>
+        <div class="sub-tab-rect warn" data-sub="s-silent">サイレント不満検知 <span class="dot-new"></span></div>
+        <div class="sub-tab-rect purple" data-sub="s-compat">相性分析 <span class="dot-new"></span></div>
         <div class="sub-tab-rect" data-sub="s-higheval">高評価アルバイト</div>
         <div class="sub-tab-rect" data-sub="s-textmining">テキストマイニング</div>
       </div>
@@ -1637,51 +1637,53 @@
       <div id="staff-sub-s-alert" class="staff-sub-content">
         <div class="panel">
           <h3>離脱アラート <span class="badge red">要対応</span></h3>
-          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;font-weight:800;">各拠点でのトラブル・クレームをアンケートから抽出</p>
-          <div id="alertList"></div>
+          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;font-weight:800;">アンケートから各拠点でのトラブルやクレームを抽出</p>
+          <div class="alert-list" id="alertList"></div>
         </div>
       </div>
 
       <div id="staff-sub-s-silent" class="staff-sub-content" style="display:none">
         <div class="panel">
-          <h3>サイレント不満検知 <span class="badge orange">AI分析</span></h3>
-          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;font-weight:800;">回答パターンの変化から離職リスクを早期検知</p>
-          <div class="filter-chips" style="margin-bottom:16px;">
-            <div class="chip active" data-filter="all">全体</div>
-            <div class="chip" data-filter="high">高リスク</div>
-            <div class="chip" data-filter="mid">中リスク</div>
+          <h3>サイレント不満検知 <span class="badge orange">行動変容AI解析</span></h3>
+          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;font-weight:800;">
+            数値評価は低くないが、<b>回答文字数の急減</b>・<b>次回予約の未登録</b>・<b>回答速度の変化</b>など行動パターンの異変をAIで検知し、顕在化前の離脱リスクをアラートします。
+          </p>
+          <div class="filter-row" style="margin-top:12px">
+            <span style="font-size:12px;font-weight:900;color:var(--text-secondary)">リスクレベル:</span>
+            <div class="filter-chip active" data-filter="all">すべて</div>
+            <div class="filter-chip" data-filter="high" style="border-color:#ff4757;color:#ff4757">高リスク</div>
+            <div class="filter-chip" data-filter="mid" style="border-color:#ffa502;color:#ffa502">中リスク</div>
           </div>
-          <div id="silentList"></div>
+          <div class="alert-list" id="silentList" style="margin-top:16px"></div>
         </div>
       </div>
 
       <div id="staff-sub-s-compat" class="staff-sub-content" style="display:none">
         <div class="panel">
-          <h3>リーダー×アルバイト 相性分析 <span class="badge purple">AI予測</span></h3>
-          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;font-weight:800;">リーダーとアルバイトの組合せを定量分析</p>
-          <div id="compatList"></div>
+          <h3>リーダー×アルバイト 相性分析 <span class="badge purple">パターン自動抽出</span></h3>
+          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;font-weight:800;">
+            特定リーダーの下でのみ評価が低下・離脱率が上昇するパターンをAIで自動検出。<b>相性</b>か<b>資質</b>かを判別します。
+          </p>
+          <div class="alert-list" id="compatList"></div>
         </div>
       </div>
 
       <div id="staff-sub-s-higheval" class="staff-sub-content" style="display:none">
         <div class="panel">
-          <h3>高評価アルバイト <span class="badge green">優秀</span></h3>
-          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;font-weight:800;">評価の高いアルバイトをリストアップ</p>
-          <div id="highEvalList"></div>
+          <h3>高評価アルバイト <span class="badge green">社員化・昇給候補</span></h3>
+          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;font-weight:800;">高評価なアルバイトを拠点ごとに抽出</p>
+          <div class="alert-list" id="highEvalList"></div>
         </div>
       </div>
 
       <div id="staff-sub-s-textmining" class="staff-sub-content" style="display:none">
         <div class="panel">
-          <h3>テキストマイニング <span class="badge blue">分析</span></h3>
-          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;font-weight:800;">アンケート自由回答から頻出キーワードを抽出</p>
-          <div style="padding:40px;text-align:center;color:var(--text-secondary);">
-            <p>📊 テキストマイニング機能</p>
-            <p style="font-size:12px;margin-top:8px;">アンケート回答からキーワード分析を実施</p>
+          <h3>テキストマイニング <span class="badge">AI分析</span></h3>
+          <div class="text">
+            <p><b>【全体傾向】</b>参加回数が増えるほどGood割合が上昇、初期（1〜5回）での離脱防止が最重要。</p>
+            <p><b>Good：</b>「段取りが分かった」「任される仕事が増えた」「同僚と連携できる」</p>
+            <p><b>Bad：</b>「初回説明が不十分」「聞きづらい雰囲気」「急なシフト変更」</p>
           </div>
-        </div>
-      </div>
-
         </div>
       </div>
     </div>
@@ -1692,7 +1694,7 @@
     <div class="tab-content" id="tab-actions">
       <h2 style="font-size:18px;font-weight:1000;margin-bottom:4px">アクション管理</h2>
       <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;font-weight:800;">
-        アラート・検知結果から自動生成されたタスク（）。面談実施チェックとメモで「見て終わり」を防ぎます。
+        アラート・検知結果から自動生成されたタスク。面談実施チェックとメモで「見て終わり」を防ぎます。
       </p>
 
       <div class="action-stats" id="actionStats"></div>
@@ -1724,51 +1726,6 @@
 
 
   <script>
-    // Global variable for branch filtering
-    let currentStaffBranch = null;
-
-
-    // Sample data for 5 new metrics
-    const reservationRateData = [
-      {branch:"渋谷支店", staff:"田中 誠", rate:85, trend:[78,82,85,87,85], status:"good"},
-      {branch:"新宿支店", staff:"佐藤 健太", rate:45, trend:[65,58,52,48,45], status:"bad"},
-      {branch:"池袋支店", staff:"鈴木 美咲", rate:92, trend:[88,90,91,92,92], status:"good"},
-      {branch:"渋谷支店", staff:"高橋 拓也", rate:38, trend:[55,48,42,40,38], status:"bad"},
-      {branch:"大阪支店", staff:"伊藤 大輝", rate:76, trend:[72,74,75,76,76], status:"good"}
-    ];
-    
-    const satisfactionData = [
-      {branch:"渋谷支店", staff:"田中 誠", score:4.2, trend:[3.8,4.0,4.1,4.2,4.2], status:"good"},
-      {branch:"新宿支店", staff:"佐藤 健太", score:2.8, trend:[3.5,3.2,3.0,2.9,2.8], status:"bad"},
-      {branch:"池袋支店", staff:"鈴木 美咲", score:4.7, trend:[4.5,4.6,4.6,4.7,4.7], status:"good"},
-      {branch:"渋谷支店", staff:"高橋 拓也", score:2.5, trend:[3.0,2.8,2.7,2.6,2.5], status:"bad"},
-      {branch:"大阪支店", staff:"伊藤 大輝", score:3.9, trend:[3.7,3.8,3.8,3.9,3.9], status:"good"}
-    ];
-    
-    const greetingRateData = [
-      {branch:"渋谷支店", staff:"田中 誠", rate:5, trend:[8,7,6,5,5], status:"good"},
-      {branch:"新宿支店", staff:"佐藤 健太", rate:32, trend:[15,20,25,30,32], status:"bad"},
-      {branch:"池袋支店", staff:"鈴木 美咲", rate:2, trend:[3,3,2,2,2], status:"good"},
-      {branch:"渋谷支店", staff:"高橋 拓也", rate:28, trend:[18,22,25,27,28], status:"bad"},
-      {branch:"大阪支店", staff:"伊藤 大輝", rate:12, trend:[10,11,11,12,12], status:"warning"}
-    ];
-    
-    const leaderEvalData = [
-      {branch:"渋谷支店", leader:"山田 太郎", score:4.5, trend:[4.3,4.4,4.4,4.5,4.5], staff_count:8},
-      {branch:"新宿支店", leader:"中村 次郎", score:3.2, trend:[3.8,3.6,3.4,3.3,3.2], staff_count:6},
-      {branch:"池袋支店", leader:"佐々木 花子", score:4.8, trend:[4.6,4.7,4.7,4.8,4.8], staff_count:10},
-      {branch:"大阪支店", leader:"田辺 健", score:4.1, trend:[4.0,4.0,4.1,4.1,4.1], staff_count:7}
-    ];
-    
-    const staffEvalData = [
-      {branch:"渋谷支店", staff:"田中 誠", score:4.3, trend:[4.0,4.1,4.2,4.3,4.3], status:"good"},
-      {branch:"新宿支店", staff:"佐藤 健太", score:2.9, trend:[3.5,3.3,3.1,3.0,2.9], status:"bad"},
-      {branch:"池袋支店", staff:"鈴木 美咲", score:4.6, trend:[4.4,4.5,4.5,4.6,4.6], status:"good"},
-      {branch:"渋谷支店", staff:"高橋 拓也", score:2.7, trend:[3.2,3.0,2.9,2.8,2.7], status:"bad"},
-      {branch:"大阪支店", staff:"伊藤 大輝", score:4.0, trend:[3.8,3.9,3.9,4.0,4.0], status:"good"}
-    ];
-
-
     /********************
      * Helpers
      ********************/
@@ -2951,219 +2908,18 @@
       });
     }
 
-    // Render functions for new metric tabs
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-
-    function renderReservationRate(){
-      const el = $("#reservationList");
-      if(!el) return;
-      
-      let filtered = reservationRateData;
-      if(currentStaffBranch) {
-        filtered = reservationRateData.filter(d => d.branch === currentStaffBranch);
-      }
-      
-      if(filtered.length === 0) {
-        el.innerHTML = '<p style="padding:20px;color:var(--text-secondary);text-align:center;">データがありません</p>';
-        return;
-      }
-      
-      let cards = filtered.map(d => {
-        const statusColor = d.status === 'good' ? 'green' : d.status === 'bad' ? 'red' : 'orange';
-        const trendStr = d.trend.map(v => v+'%').join(' → ');
-        return `
-          <div class="alert-card" style="border-left:4px solid var(--${statusColor})">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-              <div>
-                <strong>${d.staff}</strong>
-                <span style="margin-left:8px;font-size:11px;color:var(--text-secondary)">${d.branch}</span>
-              </div>
-              <div style="font-size:20px;font-weight:bold;color:var(--${statusColor})">${d.rate}%</div>
-            </div>
-            <div style="font-size:11px;color:var(--text-secondary)">
-              推移: ${trendStr}
-            </div>
-          </div>
-        `;
-      }).join('');
-      
-      el.innerHTML = cards;
-    }
-    
-    function renderSatisfaction(){
-      const el = $("#satisfactionList");
-      if(!el) return;
-      
-      let filtered = satisfactionData;
-      if(currentStaffBranch) {
-        filtered = satisfactionData.filter(d => d.branch === currentStaffBranch);
-      }
-      
-      if(filtered.length === 0) {
-        el.innerHTML = '<p style="padding:20px;color:var(--text-secondary);text-align:center;">データがありません</p>';
-        return;
-      }
-      
-      let cards = filtered.map(d => {
-        const statusColor = d.status === 'good' ? 'green' : d.status === 'bad' ? 'red' : 'orange';
-        const trendStr = d.trend.join(' → ');
-        const stars = '★'.repeat(Math.round(d.score)) + '☆'.repeat(5 - Math.round(d.score));
-        return `
-          <div class="alert-card" style="border-left:4px solid var(--${statusColor})">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-              <div>
-                <strong>${d.staff}</strong>
-                <span style="margin-left:8px;font-size:11px;color:var(--text-secondary)">${d.branch}</span>
-              </div>
-              <div style="font-size:20px;font-weight:bold;color:var(--${statusColor})">${d.score}</div>
-            </div>
-            <div style="font-size:14px;color:#FFD700;margin-bottom:4px;">${stars}</div>
-            <div style="font-size:11px;color:var(--text-secondary)">
-              推移: ${trendStr}
-            </div>
-          </div>
-        `;
-      }).join('');
-      
-      el.innerHTML = cards;
-    }
-    
-    function renderGreetingRate(){
-      const el = $("#greetingList");
-      if(!el) return;
-      
-      let filtered = greetingRateData;
-      if(currentStaffBranch) {
-        filtered = greetingRateData.filter(d => d.branch === currentStaffBranch);
-      }
-      
-      if(filtered.length === 0) {
-        el.innerHTML = '<p style="padding:20px;color:var(--text-secondary);text-align:center;">データがありません</p>';
-        return;
-      }
-      
-      let cards = filtered.map(d => {
-        const statusColor = d.status === 'good' ? 'green' : d.status === 'bad' ? 'red' : 'orange';
-        const trendStr = d.trend.map(v => v+'%').join(' → ');
-        return `
-          <div class="alert-card" style="border-left:4px solid var(--${statusColor})">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-              <div>
-                <strong>${d.staff}</strong>
-                <span style="margin-left:8px;font-size:11px;color:var(--text-secondary)">${d.branch}</span>
-              </div>
-              <div style="font-size:20px;font-weight:bold;color:var(--${statusColor})">${d.rate}%</div>
-            </div>
-            <div style="font-size:11px;color:var(--text-secondary)">
-              推移: ${trendStr}
-            </div>
-          </div>
-        `;
-      }).join('');
-      
-      el.innerHTML = cards;
-    }
-    
-    function renderLeaderEval(){
-      const el = $("#leaderEvalList");
-      if(!el) return;
-      
-      let filtered = leaderEvalData;
-      if(currentStaffBranch) {
-        filtered = leaderEvalData.filter(d => d.branch === currentStaffBranch);
-      }
-      
-      if(filtered.length === 0) {
-        el.innerHTML = '<p style="padding:20px;color:var(--text-secondary);text-align:center;">データがありません</p>';
-        return;
-      }
-      
-      let cards = filtered.map(d => {
-        const trendStr = d.trend.join(' → ');
-        const statusColor = d.score >= 4.0 ? 'green' : d.score >= 3.0 ? 'orange' : 'red';
-        return `
-          <div class="alert-card" style="border-left:4px solid var(--${statusColor})">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-              <div>
-                <strong>${d.leader}</strong>
-                <span style="margin-left:8px;font-size:11px;color:var(--text-secondary)">${d.branch}</span>
-              </div>
-              <div style="font-size:20px;font-weight:bold;color:var(--${statusColor})">${d.score}</div>
-            </div>
-            <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;">
-              担当アルバイト: ${d.staff_count}名
-            </div>
-            <div style="font-size:11px;color:var(--text-secondary)">
-              推移: ${trendStr}
-            </div>
-          </div>
-        `;
-      }).join('');
-      
-      el.innerHTML = cards;
-    }
-    
-    function renderStaffEval(){
-      const el = $("#staffEvalList");
-      if(!el) return;
-      
-      let filtered = staffEvalData;
-      if(currentStaffBranch) {
-        filtered = staffEvalData.filter(d => d.branch === currentStaffBranch);
-      }
-      
-      if(filtered.length === 0) {
-        el.innerHTML = '<p style="padding:20px;color:var(--text-secondary);text-align:center;">データがありません</p>';
-        return;
-      }
-      
-      let cards = filtered.map(d => {
-        const statusColor = d.status === 'good' ? 'green' : d.status === 'bad' ? 'red' : 'orange';
-        const trendStr = d.trend.join(' → ');
-        return `
-          <div class="alert-card" style="border-left:4px solid var(--${statusColor})">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-              <div>
-                <strong>${d.staff}</strong>
-                <span style="margin-left:8px;font-size:11px;color:var(--text-secondary)">${d.branch}</span>
-              </div>
-              <div style="font-size:20px;font-weight:bold;color:var(--${statusColor})">${d.score}</div>
-            </div>
-            <div style="font-size:11px;color:var(--text-secondary)">
-              推移: ${trendStr}
-            </div>
-          </div>
-        `;
-      }).join('');
-      
-      el.innerHTML = cards;
-    }
-
     function initStaffSubTabs(){
+
       $$("#staff-subtabs .sub-tab-rect").forEach(tab=>{
         tab.addEventListener("click", ()=>{
+
           $$("#staff-subtabs .sub-tab-rect").forEach(t=>t.classList.remove("active"));
           tab.classList.add("active");
+
+
           $$(".staff-sub-content").forEach(c=> c.style.display="none");
           const t = $("#staff-sub-"+tab.dataset.sub);
           if(t) t.style.display="block";
-          
-          // Call render functions for new tabs
-          const sub = tab.dataset.sub;
-          if(sub === 's-reservation') renderReservationRate();
-          else if(sub === 's-satisfaction') renderSatisfaction();
-          else if(sub === 's-greeting') renderGreetingRate();
-          else if(sub === 's-leader') renderLeaderEval();
-          else if(sub === 's-staff') renderStaffEval();
         });
       });
     }
@@ -3216,18 +2972,7 @@
             const inp = l.querySelector("input");
             inp.addEventListener("change", ()=>{
               l.classList.toggle("selected", inp.checked);
-              if(cid==="branchSelector"){ 
-                updateBranchChart(); 
-              } else if(cid==="staffBranchSelector") {
-                // Update filter when staff branch changes
-                const checked = document.querySelectorAll('#staffBranchSelector input:checked');
-                currentStaffBranch = (checked.length === 1) ? checked[0].value : null;
-                // Re-render lists
-                renderAlerts();
-                renderHighEvals();
-                renderSilentAlerts('all');
-                renderCompatCards();
-              }
+              if(cid==="branchSelector"){ updateBranchChart(); }
             });
             grid.appendChild(l);
           });
@@ -3302,8 +3047,7 @@
     function renderAlerts(){
       const el = $("#alertList");
       if(!el) return;
-      const list = currentStaffBranch ? alerts.filter(a => a.branch === currentStaffBranch) : alerts;
-      el.innerHTML = list.map(a =>
+      el.innerHTML = alerts.map(a =>
         `<div class="alert-card">
           <div class="alert-branch">${escapeHtml(a.branch)}</div>
           <div class="alert-text">${escapeHtml(a.text)}</div>
@@ -3315,8 +3059,7 @@
     function renderHighEvals(){
       const el = $("#highEvalList");
       if(!el) return;
-      const list = currentStaffBranch ? highEvals.filter(a => a.branch === currentStaffBranch) : highEvals;
-      el.innerHTML = list.map(a =>
+      el.innerHTML = highEvals.map(a =>
         `<div class="alert-card good">
           <div class="alert-branch">${escapeHtml(a.branch)}</div>
           <div class="alert-text">${escapeHtml(a.text)}</div>
@@ -3326,8 +3069,7 @@
     }
 
     function renderSilentAlerts(filter='all'){
-      let list = silentAlerts.filter(s => filter==='all' || s.risk===filter);
-      if (currentStaffBranch) list = list.filter(s => s.branch === currentStaffBranch);
+      const list = silentAlerts.filter(s => filter==='all' || s.risk===filter);
       const el = $("#silentList");
       if(!el) return;
       el.innerHTML = list.map(s=>`
@@ -3342,8 +3084,7 @@
     function renderCompatCards(){
       const el = $("#compatList");
       if(!el) return;
-      const list = currentStaffBranch ? compatData.filter(c => c.branch === currentStaffBranch) : compatData;
-      el.innerHTML = list.map(c=>`
+      el.innerHTML = compatData.map(c=>`
         <div class="alert-card purple">
           <div class="alert-branch">${escapeHtml(c.branch)}</div>
           <div class="alert-text">${escapeHtml(c.leader)} ⇄ ${escapeHtml(c.staff)} / ${escapeHtml(c.note)}</div>
