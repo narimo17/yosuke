@@ -799,7 +799,7 @@
 
     .filter-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
     .filter-chip {
-      padding: 4px 10px; font-size: 11px; border-radius: 16px; border: 1.5px solid var(--border);
+      padding: 6px 14px; font-size: 12px; border-radius: 20px; border: 1.5px solid var(--border);
       cursor: pointer; transition: var(--transition); user-select: none; font-weight: 800; color: var(--text-secondary);
       background: #fff;
     }
@@ -1596,11 +1596,20 @@
         </div>
       </div>
 
+
+      <!-- 極端に低い指標 -->
+      <div id="criticalMetricPanel" style="display:none; margin-top:20px;">
+        <div class="panel" style="border-left:4px solid var(--accent-red); background:#fff8f8;">
+          <h3 style="color:var(--accent-red); font-size:15px; margin-bottom:8px;">⚠️ 要注意指標</h3>
+          <div id="criticalMetricContent"></div>
+        </div>
+      </div>
+
       <div id="branchTextMining" style="display:none">
         <div class="panel">
           <h3>テキストマイニング <span class="badge">AI分析</span></h3>
           <div class="text">
-            <p><b>【全体傾向】</b>選択拠点の自由記述をAI風に要約します。</p>
+            <p><b>【全体傾向】</b>選択拠点の自由記述をAI風に要約します（）。</p>
             <p>・Good：研修/チームワーク/シフト相談しやすい</p>
             <p>・Bad：繁忙期の人手不足/備品老朽化/マニュアルが古い</p>
           </div>
@@ -1637,7 +1646,7 @@
       <div id="staff-sub-s-alert" class="staff-sub-content">
         <div class="panel">
           <h3>離脱アラート <span class="badge red">要対応</span></h3>
-          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;font-weight:800;">アンケートから各拠点でのトラブルやクレームを抽出</p>
+          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;font-weight:800;">アンケートから各拠点でのトラブルやクレームを抽出（）</p>
           <div class="alert-list" id="alertList"></div>
         </div>
       </div>
@@ -1646,7 +1655,7 @@
         <div class="panel">
           <h3>サイレント不満検知 <span class="badge orange">行動変容AI解析</span></h3>
           <p style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;font-weight:800;">
-            数値評価は低くないが、<b>回答文字数の急減</b>・<b>次回予約の未登録</b>・<b>回答速度の変化</b>など行動パターンの異変をAIで検知し、顕在化前の離脱リスクをアラートします。
+            数値評価は低くないが、<b>回答文字数の急減</b>・<b>次回予約の未登録</b>・<b>回答速度の変化</b>など行動パターンの異変をAIで検知し、顕在化前の離脱リスクをアラートします（）。
           </p>
           <div class="filter-row" style="margin-top:12px">
             <span style="font-size:12px;font-weight:900;color:var(--text-secondary)">リスクレベル:</span>
@@ -1662,7 +1671,7 @@
         <div class="panel">
           <h3>リーダー×アルバイト 相性分析 <span class="badge purple">パターン自動抽出</span></h3>
           <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;font-weight:800;">
-            特定リーダーの下でのみ評価が低下・離脱率が上昇するパターンをAIで自動検出。<b>相性</b>か<b>資質</b>かを判別します。
+            特定リーダーの下でのみ評価が低下・離脱率が上昇するパターンをAIで自動検出（）。<b>相性</b>か<b>資質</b>かを判別します。
           </p>
           <div class="alert-list" id="compatList"></div>
         </div>
@@ -1671,7 +1680,7 @@
       <div id="staff-sub-s-higheval" class="staff-sub-content" style="display:none">
         <div class="panel">
           <h3>高評価アルバイト <span class="badge green">社員化・昇給候補</span></h3>
-          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;font-weight:800;">高評価なアルバイトを拠点ごとに抽出</p>
+          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;font-weight:800;">高評価なアルバイトを拠点ごとに抽出（）</p>
           <div class="alert-list" id="highEvalList"></div>
         </div>
       </div>
@@ -1680,7 +1689,7 @@
         <div class="panel">
           <h3>テキストマイニング <span class="badge">AI分析</span></h3>
           <div class="text">
-            <p><b>【全体傾向】</b>参加回数が増えるほどGood割合が上昇、初期（1〜5回）での離脱防止が最重要。</p>
+            <p><b>【全体傾向】</b>参加回数が増えるほどGood割合が上昇、初期（1〜5回）での離脱防止が最重要（）。</p>
             <p><b>Good：</b>「段取りが分かった」「任される仕事が増えた」「同僚と連携できる」</p>
             <p><b>Bad：</b>「初回説明が不十分」「聞きづらい雰囲気」「急なシフト変更」</p>
           </div>
@@ -1694,7 +1703,7 @@
     <div class="tab-content" id="tab-actions">
       <h2 style="font-size:18px;font-weight:1000;margin-bottom:4px">アクション管理</h2>
       <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;font-weight:800;">
-        アラート・検知結果から自動生成されたタスク。面談実施チェックとメモで「見て終わり」を防ぎます。
+        アラート・検知結果から自動生成されたタスク（）。面談実施チェックとメモで「見て終わり」を防ぎます。
       </p>
 
       <div class="action-stats" id="actionStats"></div>
@@ -1726,6 +1735,142 @@
 
 
   <script>
+
+    // 拠点別指標データ
+    const branchMetrics = {
+      '大通公園サテ': {nextReservation: 82.8, satisfaction: 3.8, noGreeting: 7.2, leaderEval: 4.2, staffEval: 4.1},
+      '札幌支店': {nextReservation: 83.5, satisfaction: 4.5, noGreeting: 5.7, leaderEval: 4.3, staffEval: 3.5},
+      '新さっぽろサテ': {nextReservation: 74.4, satisfaction: 4.2, noGreeting: 5.2, leaderEval: 4.2, staffEval: 4.0},
+      '清田支店': {nextReservation: 80.9, satisfaction: 4.0, noGreeting: 9.7, leaderEval: 4.6, staffEval: 3.5},
+      '仙台東口サテ': {nextReservation: 86.1, satisfaction: 4.4, noGreeting: 7.7, leaderEval: 4.1, staffEval: 4.3},
+      '仙台南支店': {nextReservation: 76.7, satisfaction: 3.9, noGreeting: 5.8, leaderEval: 4.7, staffEval: 4.0},
+      '宇都宮サテ': {nextReservation: 86.1, satisfaction: 4.4, noGreeting: 9.3, leaderEval: 4.8, staffEval: 3.8},
+      '栃木支店': {nextReservation: 81.0, satisfaction: 4.5, noGreeting: 9.9, leaderEval: 4.7, staffEval: 4.0},
+      '土浦サテ': {nextReservation: 84.1, satisfaction: 3.8, noGreeting: 6.8, leaderEval: 4.2, staffEval: 3.6},
+      'つくば支店': {nextReservation: 74.7, satisfaction: 3.9, noGreeting: 7.2, leaderEval: 4.5, staffEval: 3.8},
+      '大宮サテ': {nextReservation: 77.4, satisfaction: 4.0, noGreeting: 7.1, leaderEval: 4.7, staffEval: 4.0},
+      'さいたま支店': {nextReservation: 82.2, satisfaction: 3.9, noGreeting: 10.8, leaderEval: 4.1, staffEval: 3.8},
+      '熊谷サテ': {nextReservation: 89.8, satisfaction: 4.3, noGreeting: 9.5, leaderEval: 4.5, staffEval: 4.2},
+      '熊谷支店': {nextReservation: 85.5, satisfaction: 4.0, noGreeting: 5.3, leaderEval: 4.3, staffEval: 3.7},
+      '所沢サテ': {nextReservation: 74.2, satisfaction: 4.6, noGreeting: 12.0, leaderEval: 4.3, staffEval: 4.0},
+      '所沢支店': {nextReservation: 77.9, satisfaction: 4.5, noGreeting: 8.7, leaderEval: 4.2, staffEval: 3.7},
+      '川越サテ': {nextReservation: 81.2, satisfaction: 4.0, noGreeting: 9.7, leaderEval: 4.7, staffEval: 3.8},
+      '川越支店': {nextReservation: 74.4, satisfaction: 4.6, noGreeting: 9.1, leaderEval: 4.1, staffEval: 3.5},
+      '船橋サテ': {nextReservation: 72.2, satisfaction: 4.3, noGreeting: 11.3, leaderEval: 4.3, staffEval: 3.6},
+      '千葉支店': {nextReservation: 77.6, satisfaction: 4.6, noGreeting: 9.2, leaderEval: 4.8, staffEval: 4.2},
+      '津田沼サテ': {nextReservation: 70.2, satisfaction: 4.4, noGreeting: 10.5, leaderEval: 4.4, staffEval: 3.7},
+      '八千代支店': {nextReservation: 82.8, satisfaction: 3.9, noGreeting: 8.5, leaderEval: 4.4, staffEval: 4.3},
+      '柏サテ': {nextReservation: 87.5, satisfaction: 4.0, noGreeting: 9.0, leaderEval: 4.1, staffEval: 4.2},
+      '柏支店': {nextReservation: 87.4, satisfaction: 4.0, noGreeting: 10.1, leaderEval: 4.5, staffEval: 3.6},
+      '新松戸サテ': {nextReservation: 85.3, satisfaction: 4.2, noGreeting: 11.2, leaderEval: 4.4, staffEval: 3.5},
+      '松戸支店': {nextReservation: 76.5, satisfaction: 3.8, noGreeting: 12.4, leaderEval: 4.7, staffEval: 4.2},
+      '千葉サテ': {nextReservation: 76.2, satisfaction: 3.8, noGreeting: 12.0, leaderEval: 4.8, staffEval: 3.6},
+      '千葉南支店': {nextReservation: 79.7, satisfaction: 3.9, noGreeting: 11.1, leaderEval: 4.6, staffEval: 3.6},
+      '新宿サテ': {nextReservation: 79.5, satisfaction: 4.2, noGreeting: 7.1, leaderEval: 4.7, staffEval: 3.8},
+      '東京北支店': {nextReservation: 74.2, satisfaction: 4.2, noGreeting: 10.8, leaderEval: 4.2, staffEval: 3.7},
+      '池袋サテ': {nextReservation: 89.9, satisfaction: 4.3, noGreeting: 8.5, leaderEval: 4.4, staffEval: 3.6},
+      '練馬支店': {nextReservation: 74.5, satisfaction: 4.1, noGreeting: 9.7, leaderEval: 4.2, staffEval: 3.7},
+      '赤羽サテ': {nextReservation: 71.4, satisfaction: 4.3, noGreeting: 6.8, leaderEval: 4.7, staffEval: 4.2},
+      '京北支店': {nextReservation: 71.4, satisfaction: 4.0, noGreeting: 10.4, leaderEval: 4.2, staffEval: 3.6},
+      '高田馬場サテ': {nextReservation: 88.7, satisfaction: 4.3, noGreeting: 8.8, leaderEval: 4.6, staffEval: 4.1},
+      '新宿支店': {nextReservation: 82.1, satisfaction: 4.3, noGreeting: 6.2, leaderEval: 4.6, staffEval: 4.1},
+      '下北沢サテ': {nextReservation: 73.8, satisfaction: 3.9, noGreeting: 8.4, leaderEval: 4.3, staffEval: 3.9},
+      '世田谷支店': {nextReservation: 84.6, satisfaction: 4.3, noGreeting: 12.9, leaderEval: 4.1, staffEval: 3.8},
+      '立川サテ': {nextReservation: 76.8, satisfaction: 4.5, noGreeting: 7.0, leaderEval: 4.2, staffEval: 3.9},
+      '国立支店': {nextReservation: 78.4, satisfaction: 4.0, noGreeting: 7.0, leaderEval: 4.7, staffEval: 3.9},
+      '八王子サテ': {nextReservation: 87.2, satisfaction: 4.2, noGreeting: 5.4, leaderEval: 4.8, staffEval: 4.2},
+      '八王子支店': {nextReservation: 89.4, satisfaction: 4.5, noGreeting: 11.8, leaderEval: 4.1, staffEval: 3.9},
+      '登戸サテ': {nextReservation: 74.3, satisfaction: 4.1, noGreeting: 5.5, leaderEval: 4.3, staffEval: 4.3},
+      '多摩支店': {nextReservation: 75.3, satisfaction: 4.4, noGreeting: 8.6, leaderEval: 4.3, staffEval: 4.3},
+      '拝島サテ': {nextReservation: 89.9, satisfaction: 4.2, noGreeting: 10.7, leaderEval: 4.1, staffEval: 3.7},
+      '東大和支店': {nextReservation: 89.4, satisfaction: 4.3, noGreeting: 9.3, leaderEval: 4.6, staffEval: 3.5},
+      '吉祥寺サテ': {nextReservation: 81.7, satisfaction: 4.2, noGreeting: 11.8, leaderEval: 4.1, staffEval: 4.3},
+      '西東京支店': {nextReservation: 71.6, satisfaction: 3.9, noGreeting: 9.8, leaderEval: 4.5, staffEval: 3.7},
+      '渋谷サテ': {nextReservation: 72.4, satisfaction: 4.5, noGreeting: 7.0, leaderEval: 4.5, staffEval: 4.0},
+      '自由が丘サテ': {nextReservation: 78.4, satisfaction: 4.3, noGreeting: 9.2, leaderEval: 4.7, staffEval: 3.7},
+      '東京支店': {nextReservation: 84.3, satisfaction: 4.0, noGreeting: 8.2, leaderEval: 4.5, staffEval: 3.7},
+      '五反田サテ': {nextReservation: 76.3, satisfaction: 4.4, noGreeting: 5.6, leaderEval: 4.4, staffEval: 4.3},
+      '港支店': {nextReservation: 58.3, satisfaction: 3.7, noGreeting: 14.2, leaderEval: 3.9, staffEval: 3.3},
+      '川崎サテ': {nextReservation: 89.9, satisfaction: 3.9, noGreeting: 6.7, leaderEval: 4.2, staffEval: 4.2},
+      '蒲田サテ': {nextReservation: 87.6, satisfaction: 4.5, noGreeting: 8.0, leaderEval: 4.1, staffEval: 4.2},
+      '東京南支店': {nextReservation: 84.1, satisfaction: 4.3, noGreeting: 12.9, leaderEval: 4.5, staffEval: 3.5},
+      '溝の口サテ': {nextReservation: 86.3, satisfaction: 4.0, noGreeting: 10.3, leaderEval: 4.8, staffEval: 3.6},
+      '目黒支店': {nextReservation: 72.3, satisfaction: 3.9, noGreeting: 9.4, leaderEval: 4.2, staffEval: 4.0},
+      '錦糸町サテ': {nextReservation: 84.4, satisfaction: 4.0, noGreeting: 10.1, leaderEval: 4.2, staffEval: 3.9},
+      '墨田支店': {nextReservation: 88.1, satisfaction: 4.5, noGreeting: 5.7, leaderEval: 4.3, staffEval: 3.7},
+      '秋葉原サテ': {nextReservation: 70.1, satisfaction: 4.4, noGreeting: 10.1, leaderEval: 4.2, staffEval: 4.1},
+      '江東支店': {nextReservation: 81.0, satisfaction: 4.1, noGreeting: 5.1, leaderEval: 4.1, staffEval: 4.2},
+      '北千住サテ': {nextReservation: 88.1, satisfaction: 4.2, noGreeting: 11.7, leaderEval: 4.5, staffEval: 3.6},
+      '足立支店': {nextReservation: 72.5, satisfaction: 4.0, noGreeting: 12.2, leaderEval: 4.6, staffEval: 4.2},
+      '葛西サテ': {nextReservation: 88.0, satisfaction: 4.0, noGreeting: 7.0, leaderEval: 4.1, staffEval: 4.1},
+      '葛西支店': {nextReservation: 87.7, satisfaction: 4.1, noGreeting: 10.0, leaderEval: 4.1, staffEval: 4.2},
+      '町田サテ': {nextReservation: 87.3, satisfaction: 4.6, noGreeting: 11.5, leaderEval: 4.7, staffEval: 3.5},
+      '川崎支店': {nextReservation: 84.7, satisfaction: 4.1, noGreeting: 12.4, leaderEval: 4.6, staffEval: 4.2},
+      '藤沢サテ': {nextReservation: 86.2, satisfaction: 4.0, noGreeting: 11.3, leaderEval: 4.1, staffEval: 4.2},
+      '湘南支店': {nextReservation: 87.2, satisfaction: 4.0, noGreeting: 11.5, leaderEval: 4.4, staffEval: 3.7},
+      '厚木サテ': {nextReservation: 85.9, satisfaction: 4.0, noGreeting: 5.2, leaderEval: 4.2, staffEval: 3.8},
+      '厚木支店': {nextReservation: 87.3, satisfaction: 4.6, noGreeting: 7.2, leaderEval: 4.5, staffEval: 3.8},
+      '平塚サテ': {nextReservation: 89.6, satisfaction: 4.2, noGreeting: 12.5, leaderEval: 4.1, staffEval: 4.3},
+      '小田原支店': {nextReservation: 73.6, satisfaction: 4.6, noGreeting: 7.1, leaderEval: 4.1, staffEval: 3.8},
+      '上大岡サテ': {nextReservation: 84.6, satisfaction: 4.1, noGreeting: 9.8, leaderEval: 4.4, staffEval: 3.8},
+      '横浜南支店': {nextReservation: 81.5, satisfaction: 4.0, noGreeting: 10.7, leaderEval: 4.0, staffEval: 4.2},
+      '横浜サテ': {nextReservation: 80.8, satisfaction: 4.4, noGreeting: 10.9, leaderEval: 4.5, staffEval: 3.8},
+      '新横浜支店': {nextReservation: 71.4, satisfaction: 4.3, noGreeting: 7.6, leaderEval: 4.3, staffEval: 4.2},
+      '横浜支店': {nextReservation: 84.4, satisfaction: 4.0, noGreeting: 7.5, leaderEval: 4.3, staffEval: 3.8},
+      '横浜都筑支店': {nextReservation: 75.9, satisfaction: 3.9, noGreeting: 8.4, leaderEval: 4.8, staffEval: 4.0},
+      '横須賀サテ': {nextReservation: 88.1, satisfaction: 4.3, noGreeting: 7.4, leaderEval: 4.4, staffEval: 3.5},
+      '横須賀支店': {nextReservation: 75.7, satisfaction: 4.1, noGreeting: 9.6, leaderEval: 4.5, staffEval: 3.9},
+      '静岡サテ': {nextReservation: 78.8, satisfaction: 4.0, noGreeting: 8.8, leaderEval: 4.7, staffEval: 4.1},
+      '静岡支店': {nextReservation: 73.4, satisfaction: 3.9, noGreeting: 9.1, leaderEval: 4.5, staffEval: 3.8},
+      '浜松サテ': {nextReservation: 86.4, satisfaction: 4.4, noGreeting: 10.4, leaderEval: 4.2, staffEval: 3.7},
+      '浜松支店': {nextReservation: 70.5, satisfaction: 4.0, noGreeting: 8.8, leaderEval: 4.7, staffEval: 3.6},
+      '名駅サテ': {nextReservation: 78.3, satisfaction: 4.3, noGreeting: 6.6, leaderEval: 4.6, staffEval: 3.9},
+      '名古屋支店': {nextReservation: 74.9, satisfaction: 4.3, noGreeting: 5.0, leaderEval: 4.6, staffEval: 4.1},
+      '大曽根サテ': {nextReservation: 72.1, satisfaction: 4.1, noGreeting: 6.4, leaderEval: 4.8, staffEval: 3.9},
+      '名東支店': {nextReservation: 71.0, satisfaction: 4.0, noGreeting: 11.8, leaderEval: 4.4, staffEval: 4.1},
+      '天白支店': {nextReservation: 83.4, satisfaction: 4.6, noGreeting: 9.8, leaderEval: 4.8, staffEval: 4.2},
+      '一宮サテ': {nextReservation: 82.3, satisfaction: 4.4, noGreeting: 9.0, leaderEval: 4.7, staffEval: 3.9},
+      '北名古屋支店': {nextReservation: 87.9, satisfaction: 4.4, noGreeting: 8.8, leaderEval: 4.2, staffEval: 3.7},
+      '京橋サテ': {nextReservation: 82.8, satisfaction: 4.4, noGreeting: 9.2, leaderEval: 4.5, staffEval: 3.7},
+      '大阪中央支店': {nextReservation: 71.5, satisfaction: 4.0, noGreeting: 7.2, leaderEval: 4.3, staffEval: 3.9},
+      '難波サテ': {nextReservation: 72.8, satisfaction: 4.0, noGreeting: 10.6, leaderEval: 4.6, staffEval: 3.6},
+      '西大阪支店': {nextReservation: 78.2, satisfaction: 4.2, noGreeting: 8.3, leaderEval: 4.2, staffEval: 3.8},
+      '十三サテ': {nextReservation: 88.1, satisfaction: 4.3, noGreeting: 10.6, leaderEval: 4.7, staffEval: 4.1},
+      '大阪支店': {nextReservation: 77.6, satisfaction: 3.8, noGreeting: 7.8, leaderEval: 4.6, staffEval: 4.2},
+      '梅田サテ': {nextReservation: 89.1, satisfaction: 4.1, noGreeting: 11.0, leaderEval: 4.4, staffEval: 4.0},
+      '吹田支店': {nextReservation: 74.4, satisfaction: 4.0, noGreeting: 8.5, leaderEval: 4.0, staffEval: 3.8},
+      '北大阪支店': {nextReservation: 83.6, satisfaction: 4.1, noGreeting: 6.3, leaderEval: 4.4, staffEval: 3.6},
+      '伊丹サテ': {nextReservation: 82.4, satisfaction: 3.8, noGreeting: 8.2, leaderEval: 4.5, staffEval: 3.5},
+      '三宮サテ': {nextReservation: 82.9, satisfaction: 3.9, noGreeting: 8.7, leaderEval: 4.0, staffEval: 3.8},
+      '神戸東支店': {nextReservation: 74.2, satisfaction: 4.1, noGreeting: 11.1, leaderEval: 4.3, staffEval: 4.1},
+      '神戸支店': {nextReservation: 86.6, satisfaction: 4.0, noGreeting: 5.7, leaderEval: 4.0, staffEval: 3.9},
+      '西宮北口サテ': {nextReservation: 90.0, satisfaction: 4.1, noGreeting: 10.2, leaderEval: 4.6, staffEval: 4.0},
+      '西宮支店': {nextReservation: 85.1, satisfaction: 4.6, noGreeting: 6.6, leaderEval: 4.0, staffEval: 3.6},
+      '姫路サテ': {nextReservation: 72.5, satisfaction: 4.3, noGreeting: 9.5, leaderEval: 4.2, staffEval: 4.1},
+      '姫路支店': {nextReservation: 85.3, satisfaction: 3.9, noGreeting: 9.9, leaderEval: 4.6, staffEval: 3.6},
+      '京都駅前サテ': {nextReservation: 86.4, satisfaction: 4.6, noGreeting: 5.9, leaderEval: 4.0, staffEval: 3.7},
+      '京都北支店': {nextReservation: 83.5, satisfaction: 4.6, noGreeting: 8.2, leaderEval: 4.6, staffEval: 3.6},
+      '広島駅前サテ': {nextReservation: 83.8, satisfaction: 4.3, noGreeting: 5.8, leaderEval: 4.6, staffEval: 4.2},
+      '広島南支店': {nextReservation: 82.0, satisfaction: 3.9, noGreeting: 12.9, leaderEval: 4.6, staffEval: 3.8},
+      '瓦町サテ': {nextReservation: 78.6, satisfaction: 4.1, noGreeting: 9.0, leaderEval: 4.3, staffEval: 4.2},
+      '高松支店': {nextReservation: 86.4, satisfaction: 3.9, noGreeting: 12.7, leaderEval: 4.5, staffEval: 4.2},
+      '福岡中央サテ': {nextReservation: 84.1, satisfaction: 4.1, noGreeting: 10.9, leaderEval: 4.8, staffEval: 3.7},
+      '福岡支店': {nextReservation: 86.2, satisfaction: 4.2, noGreeting: 8.9, leaderEval: 4.3, staffEval: 4.1},
+      '大橋サテ': {nextReservation: 75.4, satisfaction: 4.5, noGreeting: 11.6, leaderEval: 4.1, staffEval: 4.2},
+      '福岡南支店': {nextReservation: 74.9, satisfaction: 4.2, noGreeting: 9.9, leaderEval: 4.3, staffEval: 3.5},
+      '金沢鼓門サテ': {nextReservation: 87.0, satisfaction: 3.9, noGreeting: 6.7, leaderEval: 4.6, staffEval: 3.8},
+      '金沢支店': {nextReservation: 87.6, satisfaction: 4.4, noGreeting: 7.2, leaderEval: 4.0, staffEval: 4.3},
+    };
+
+    // 全体平均データ
+    const globalAvg = {
+      nextReservation: 76.5,
+      satisfaction: 4.2,
+      noGreeting: 8.4,
+      leaderEval: 4.4,
+      staffEval: 3.9
+    };
+
     /********************
      * Helpers
      ********************/
@@ -1779,10 +1924,10 @@
         .replace(/ｻﾃﾗｲﾄ/g, "サテライト")
         .replace(/センタ/g, "センター");
 
-      if (s.includes("サテライト") && !s.includes("サテライトセンター")){
-        s = s.replace(/サテライト$/, "サテライトセンター");
+      if (s.includes("サテライト") && !s.includes("サテ")){
+        s = s.replace(/サテライト$/, "サテ");
       }
-      s = s.replace(/サテライトセンタ$/, "サテライトセンター");
+      s = s.replace(/サテライトセンタ$/, "サテ");
       return s;
     }
     function normalizeSiteNameForDisplay(rawName){
@@ -1796,44 +1941,44 @@
      *  (user-posted)
      ********************/
     const siteToPrefCode = new Map([
-      ["大通公園サテライトセンター", 1],["札幌支店", 1],["新さっぽろサテライトセンター", 1],["清田支店", 1],
-      ["仙台東口サテライトセンター", 4],["仙台南支店", 4],
-      ["土浦サテライトセンター", 8],["つくば支店", 8],
-      ["宇都宮サテライトセンター", 9],["栃木支店", 9],
-      ["大宮サテライトセンター", 11],["さいたま支店", 11],["熊谷サテライトセンター", 11],["熊谷支店", 11],
-      ["所沢サテライトセンター", 11],["所沢支店", 11],["川越サテライトセンター", 11],["川越支店", 11],
-      ["船橋サテライトセンター", 12],["千葉支店", 12],["津田沼サテライトセンター", 12],["八千代支店", 12],
-      ["柏サテライトセンター", 12],["柏支店", 12],["新松戸サテライトセンター", 12],["松戸支店", 12],
-      ["千葉サテライトセンター", 12],["千葉南支店", 12],
-      ["新宿サテライトセンター", 13],["東京北支店", 13],["池袋サテライトセンター", 13],["練馬支店", 13],
-      ["赤羽サテライトセンター", 13],["京北支店", 13],["高田馬場サテライトセンター", 13],["新宿支店", 13],
-      ["下北沢サテライトセンター", 13],["世田谷支店", 13],["立川サテライトセンター", 13],["国立支店", 13],
-      ["八王子サテライトセンター", 13],["八王子支店", 13],
-      ["多摩支店", 13],["拝島サテライトセンター", 13],["東大和支店", 13],["吉祥寺サテライトセンター", 13],
-      ["西東京支店", 13],["渋谷サテライトセンター", 13],["自由が丘サテライトセンター", 13],
-      ["五反田サテライトセンター", 13],["港支店", 13],["蒲田サテライトセンター", 13],["東京南支店", 13],
-      ["目黒支店", 13],["錦糸町サテライトセンター", 13],["墨田支店", 13],["秋葉原サテライトセンター", 13],
-      ["江東支店", 13],["北千住サテライトセンター", 13],["足立支店", 13],["葛西サテライトセンター", 13],["葛西支店", 13],
-      ["町田サテライトセンター", 13],
+      ["大通公園サテ", 1],["札幌支店", 1],["新さっぽろサテ", 1],["清田支店", 1],
+      ["仙台東口サテ", 4],["仙台南支店", 4],
+      ["土浦サテ", 8],["つくば支店", 8],
+      ["宇都宮サテ", 9],["栃木支店", 9],
+      ["大宮サテ", 11],["さいたま支店", 11],["熊谷サテ", 11],["熊谷支店", 11],
+      ["所沢サテ", 11],["所沢支店", 11],["川越サテ", 11],["川越支店", 11],
+      ["船橋サテ", 12],["千葉支店", 12],["津田沼サテ", 12],["八千代支店", 12],
+      ["柏サテ", 12],["柏支店", 12],["新松戸サテ", 12],["松戸支店", 12],
+      ["千葉サテ", 12],["千葉南支店", 12],
+      ["新宿サテ", 13],["東京北支店", 13],["池袋サテ", 13],["練馬支店", 13],
+      ["赤羽サテ", 13],["京北支店", 13],["高田馬場サテ", 13],["新宿支店", 13],
+      ["下北沢サテ", 13],["世田谷支店", 13],["立川サテ", 13],["国立支店", 13],
+      ["八王子サテ", 13],["八王子支店", 13],
+      ["多摩支店", 13],["拝島サテ", 13],["東大和支店", 13],["吉祥寺サテ", 13],
+      ["西東京支店", 13],["渋谷サテ", 13],["自由が丘サテ", 13],
+      ["五反田サテ", 13],["港支店", 13],["蒲田サテ", 13],["東京南支店", 13],
+      ["目黒支店", 13],["錦糸町サテ", 13],["墨田支店", 13],["秋葉原サテ", 13],
+      ["江東支店", 13],["北千住サテ", 13],["足立支店", 13],["葛西サテ", 13],["葛西支店", 13],
+      ["町田サテ", 13],
 
-      ["登戸サテライトセンター", 14],["東京支店", 14],["川崎サテライトセンター", 14],["川崎支店", 14],
-      ["溝の口サテライトセンター", 14],["横浜支店", 14],["藤沢サテライトセンター", 14],["湘南支店", 14],
-      ["厚木サテライトセンター", 14],["厚木支店", 14],["平塚サテライトセンター", 14],["小田原支店", 14],
-      ["上大岡サテライトセンター", 14],["横浜南支店", 14],["横浜サテライトセンター", 14],["新横浜支店", 14],
-      ["横浜都筑支店", 14],["横須賀サテライトセンター", 14],["横須賀支店", 14],
+      ["登戸サテ", 14],["東京支店", 14],["川崎サテ", 14],["川崎支店", 14],
+      ["溝の口サテ", 14],["横浜支店", 14],["藤沢サテ", 14],["湘南支店", 14],
+      ["厚木サテ", 14],["厚木支店", 14],["平塚サテ", 14],["小田原支店", 14],
+      ["上大岡サテ", 14],["横浜南支店", 14],["横浜サテ", 14],["新横浜支店", 14],
+      ["横浜都筑支店", 14],["横須賀サテ", 14],["横須賀支店", 14],
 
-      ["金沢鼓門サテライトセンター", 17],["金沢支店", 17],
-      ["静岡サテライトセンター", 22],["静岡支店", 22],["浜松サテライトセンター", 22],["浜松支店", 22],
-      ["名駅サテライトセンター", 23],["名古屋支店", 23],["大曽根サテライトセンター", 23],["名東支店", 23],
-      ["天白支店", 23],["一宮サテライトセンター", 23],["北名古屋支店", 23],
-      ["京都駅前サテライトセンター", 26],["京都北支店", 26],
-      ["京橋サテライトセンター", 27],["大阪中央支店", 27],["難波サテライトセンター", 27],["西大阪支店", 27],
-      ["北大阪支店", 27],["十三サテライトセンター", 27],["大阪支店", 27],["梅田サテライトセンター", 27],["吹田支店", 27],
-      ["伊丹サテライトセンター", 28],["三宮サテライトセンター", 28],["神戸東支店", 28],["神戸支店", 28],
-      ["西宮北口サテライトセンター", 28],["西宮支店", 28],["姫路サテライトセンター", 28],["姫路支店", 28],
-      ["広島駅前サテライトセンター", 34],["広島南支店", 34],
-      ["瓦町サテライトセンター", 37],["高松支店", 37],
-      ["福岡中央サテライトセンター", 40],["福岡支店", 40],["大橋サテライトセンター", 40],["福岡南支店", 40],
+      ["金沢鼓門サテ", 17],["金沢支店", 17],
+      ["静岡サテ", 22],["静岡支店", 22],["浜松サテ", 22],["浜松支店", 22],
+      ["名駅サテ", 23],["名古屋支店", 23],["大曽根サテ", 23],["名東支店", 23],
+      ["天白支店", 23],["一宮サテ", 23],["北名古屋支店", 23],
+      ["京都駅前サテ", 26],["京都北支店", 26],
+      ["京橋サテ", 27],["大阪中央支店", 27],["難波サテ", 27],["西大阪支店", 27],
+      ["北大阪支店", 27],["十三サテ", 27],["大阪支店", 27],["梅田サテ", 27],["吹田支店", 27],
+      ["伊丹サテ", 28],["三宮サテ", 28],["神戸東支店", 28],["神戸支店", 28],
+      ["西宮北口サテ", 28],["西宮支店", 28],["姫路サテ", 28],["姫路支店", 28],
+      ["広島駅前サテ", 34],["広島南支店", 34],
+      ["瓦町サテ", 37],["高松支店", 37],
+      ["福岡中央サテ", 40],["福岡支店", 40],["大橋サテ", 40],["福岡南支店", 40],
     ]);
 
     /********************
@@ -2734,14 +2879,7 @@
      * - JSは原文の挙動を維持
      * ================
      ********************/
-    const regions = {
-      '北海道・東北': ['札幌支店','仙台支店','盛岡支店','秋田支店','山形支店','福島支店','青森支店','旭川支店'],
-      '関東': ['新宿支店','渋谷支店','池袋支店','品川支店','横浜支店','大宮支店','千葉支店','立川支店','町田支店','柏支店'],
-      '中部': ['名古屋支店','静岡支店','浜松支店','金沢支店','新潟支店','長野支店','岐阜支店','富山支店'],
-      '近畿': ['大阪支店','京都支店','神戸支店','奈良支店','和歌山支店','姫路支店','堺支店'],
-      '中国・四国': ['広島支店','岡山支店','松山支店','高松支店','徳島支店','下関支店','高知支店'],
-      '九州・沖縄': ['福岡支店','北九州支店','熊本支店','鹿児島支店','長崎支店','大分支店','那覇支店']
-    };
+    const regions = {"北海道・東北": {"北海道": ["大通公園サテ", "札幌支店", "新さっぽろサテ", "清田支店"], "宮城県": ["仙台東口サテ", "仙台南支店"]}, "関東": {"栃木県": ["宇都宮サテ", "栃木支店"], "茨城県": ["土浦サテ", "つくば支店"], "埼玉県": ["大宮サテ", "さいたま支店", "熊谷サテ", "熊谷支店", "所沢サテ", "所沢支店", "川越サテ", "川越支店"], "千葉県": ["船橋サテ", "千葉支店", "津田沼サテ", "八千代支店", "柏サテ", "柏支店", "新松戸サテ", "松戸支店", "千葉サテ", "千葉南支店"], "東京都": ["新宿サテ", "東京北支店", "池袋サテ", "練馬支店", "赤羽サテ", "京北支店", "高田馬場サテ", "新宿支店", "下北沢サテ", "世田谷支店", "立川サテ", "国立支店", "八王子サテ", "八王子支店", "登戸サテ", "多摩支店", "拝島サテ", "東大和支店", "吉祥寺サテ", "西東京支店", "渋谷サテ", "自由が丘サテ", "東京支店", "五反田サテ", "港支店", "川崎サテ", "蒲田サテ", "東京南支店", "溝の口サテ", "目黒支店", "錦糸町サテ", "墨田支店", "秋葉原サテ", "江東支店", "北千住サテ", "足立支店", "葛西サテ", "葛西支店", "町田サテ"], "神奈川県": ["川崎支店", "藤沢サテ", "湘南支店", "厚木サテ", "厚木支店", "平塚サテ", "小田原支店", "上大岡サテ", "横浜南支店", "横浜サテ", "新横浜支店", "横浜支店", "横浜都筑支店", "横須賀サテ", "横須賀支店"]}, "東海": {"静岡県": ["静岡サテ", "静岡支店", "浜松サテ", "浜松支店"], "愛知県": ["名駅サテ", "名古屋支店", "大曽根サテ", "名東支店", "天白支店", "一宮サテ", "北名古屋支店"]}, "関西": {"大阪府": ["京橋サテ", "大阪中央支店", "難波サテ", "西大阪支店", "十三サテ", "大阪支店", "梅田サテ", "吹田支店", "北大阪支店"], "兵庫県": ["伊丹サテ", "三宮サテ", "神戸東支店", "神戸支店", "西宮北口サテ", "西宮支店", "姫路サテ", "姫路支店"], "京都府": ["京都駅前サテ", "京都北支店"]}, "中国・四国": {"広島県": ["広島駅前サテ", "広島南支店"], "香川県": ["瓦町サテ", "高松支店"]}, "九州・沖縄": {"福岡県": ["福岡中央サテ", "福岡支店", "大橋サテ", "福岡南支店"]}, "北陸": {"石川県": ["金沢鼓門サテ", "金沢支店"]}};
 
     const alerts = [
       {branch:'渋谷支店',text:'田中さん（現場リーダー）から「態度が悪い」と高圧的に叱責された。他スタッフの前で怒鳴られた。',date:'2026/02/08'},
@@ -2959,36 +3097,49 @@
         const c = $("#"+cid);
         if(!c) return;
         c.innerHTML = "";
-        Object.entries(regions).forEach(([region, branches])=>{
-          const g = document.createElement("div");
-          g.className = "region-group";
-          g.innerHTML = `<div class="region-label">${region}</div>`;
+        
+        // regions は area -> prefecture -> branches の3階層
+        Object.entries(regions).forEach(([area, prefectures])=>{
+          const areaGroup = document.createElement("div");
+          areaGroup.className = "region-group";
+          areaGroup.innerHTML = `<div class="region-label" style="font-size:15px;font-weight:900;color:var(--primary);margin-bottom:8px;">${area}</div>`;
+          
           const grid = document.createElement("div");
           grid.className = "branch-grid";
-          branches.forEach(b=>{
-            const l = document.createElement("label");
-            l.className = "branch-check";
-            l.innerHTML = `<input type="checkbox" value="${b}" data-container="${cid}"> ${b}`;
-            const inp = l.querySelector("input");
-            inp.addEventListener("change", ()=>{
-              l.classList.toggle("selected", inp.checked);
-              if(cid==="branchSelector"){ updateBranchChart(); }
+          
+          // 都道府県ごとに改行せず、全拠点を横並び
+          Object.entries(prefectures).forEach(([prefecture, branches])=>{
+            branches.forEach(b=>{
+              const l = document.createElement("label");
+              l.className = "branch-check";
+              l.innerHTML = `<input type="checkbox" value="${b}" data-container="${cid}"> ${b}`;
+              const inp = l.querySelector("input");
+              inp.addEventListener("change", ()=>{
+                l.classList.toggle("selected", inp.checked);
+                if(cid==="branchSelector"){ updateBranchChart(); }
+              });
+              grid.appendChild(l);
             });
-            grid.appendChild(l);
           });
-          g.appendChild(grid);
-          c.appendChild(g);
+          
+          areaGroup.appendChild(grid);
+          c.appendChild(areaGroup);
         });
       });
 
-      ["新宿支店","渋谷支店"].forEach(n=>{
+      // デフォルトで新宿支店と渋谷サテを選択
+      ["新宿支店","渋谷サテ"].forEach(n=>{
         const cb = document.querySelector(`#branchSelector input[value="${n}"]`);
         if(cb){
           cb.checked = true;
           cb.closest(".branch-check").classList.add("selected");
         }
       });
+      
+      // 初期グラフ描画
+      updateBranchChart();
     }
+
 
     let branchChartInstance = null;
     function loadChartJs(){
@@ -3042,6 +3193,34 @@
           interaction:{intersect:false,mode:'index'}
         }
       });
+      updateCriticalMetric();
+    }
+
+    function updateCriticalMetric(){
+      const panel = $("#criticalMetricPanel");
+      const content = $("#criticalMetricContent");
+      if(!panel || !content) return;
+      const selected = [...document.querySelectorAll('#branchSelector input:checked')].map(cb => cb.value);
+      if(selected.length !== 1){ panel.style.display = 'none'; return; }
+      const branchName = selected[0];
+      const metrics = branchMetrics[branchName];
+      if(!metrics){ panel.style.display = 'none'; return; }
+      const diffs = [
+        {name: '次回予約率', value: metrics.nextReservation, avg: globalAvg.nextReservation, diff: metrics.nextReservation - globalAvg.nextReservation, unit: '%', reverse: false},
+        {name: '満足度', value: metrics.satisfaction, avg: globalAvg.satisfaction, diff: metrics.satisfaction - globalAvg.satisfaction, unit: '', reverse: false},
+        {name: '挨拶なし率', value: metrics.noGreeting, avg: globalAvg.noGreeting, diff: metrics.noGreeting - globalAvg.noGreeting, unit: '%', reverse: true},
+        {name: 'リーダー評価', value: metrics.leaderEval, avg: globalAvg.leaderEval, diff: metrics.leaderEval - globalAvg.leaderEval, unit: '', reverse: false},
+        {name: 'アルバイト評価', value: metrics.staffEval, avg: globalAvg.staffEval, diff: metrics.staffEval - globalAvg.staffEval, unit: '', reverse: false}
+      ];
+      const problems = diffs.filter(d => {
+        if(d.reverse) return d.diff >= (d.avg * 0.2);
+        else return d.unit === '%' ? d.diff <= -20 : d.diff <= -(d.avg * 0.2);
+      });
+      if(problems.length === 0){ panel.style.display = 'none'; return; }
+      problems.sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff));
+      const critical = problems[0];
+      content.innerHTML = `<div style="display:flex; align-items:center; gap:16px; padding:8px 0;"><div style="flex:1;"><div style="font-size:13px; font-weight:900; color:var(--text-primary); margin-bottom:4px;">${escapeHtml(critical.name)}</div><div style="font-size:12px; color:var(--text-secondary);">現在値: <b style="color:var(--accent-red);">${critical.value.toFixed(1)}${critical.unit}</b> / 全体平均: ${critical.avg.toFixed(1)}${critical.unit}</div></div><div style="font-size:28px; font-weight:900; color:var(--accent-red); font-family:'IBM Plex Sans';">${critical.reverse ? '+' : ''}${critical.diff.toFixed(1)}${critical.unit}</div></div><div style="font-size:11px; color:var(--text-secondary); margin-top:8px; padding-top:8px; border-top:1px solid #fee;">全体平均より <b style="color:var(--accent-red);">${critical.reverse ? '+' : ''}${critical.diff.toFixed(1)}${critical.unit}</b> ${critical.reverse ? '高い' : '低い'}</div>`;
+      panel.style.display = 'block';
     }
 
     function renderAlerts(){
